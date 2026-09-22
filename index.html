@@ -1,0 +1,1329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Aviary">
+<meta name="theme-color" content="#FFF8EC">
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Havi's Aviary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Grandstander:wght@600;800&display=swap">
+<style>
+:root{
+  --sky1:#9FD6EE; --sky2:#FFF0D4; --paper:#FFF8EC; --card:#FFFFFF; --ink:#1F3047; --ink2:#53637A;
+  --line:#EADCC4; --leaf:#3D8C58; --leaf2:#2A6A41; --sun:#FFB836; --sun-d:#D08A10; --cheek:#EE7A36;
+  --rose:#D6336C; --focus:#2F7FD0;
+  --display:'Grandstander','Chalkboard SE','Comic Sans MS',system-ui,sans-serif;
+  --body:'Atkinson Hyperlegible','Trebuchet MS',system-ui,sans-serif;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+#app{max-width:560px;margin:0 auto;padding-inline:16px;padding-block:6px 120px}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);font-weight:800;margin:0;text-wrap:balance;line-height:1.1}
+p{margin:0}
+.fine{font-size:14px;color:var(--ink2)}
+.eyebrow{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--leaf2);font-weight:700}
+
+/* headers */
+.hero{padding-block:14px 16px;display:grid;gap:8px}
+.hero-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.hero h1{font-size:clamp(40px,12vw,58px);letter-spacing:-.01em}
+.hero h1 em{font-style:normal;color:var(--cheek)}
+.lede{color:var(--ink2);max-width:36ch}
+.top{display:flex;align-items:center;gap:12px;padding-block:8px 12px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--paper);z-index:6}
+.top .ttl{flex:1;min-width:0}
+.top h1{font-size:clamp(26px,7.4vw,34px);overflow-wrap:anywhere}
+.top .sub{font-size:14px;color:var(--ink2)}
+.icon-btn{flex:0 0 auto;width:50px;height:50px;border-radius:17px;border:2px solid var(--line);background:var(--card);display:grid;place-items:center;box-shadow:0 3px 0 var(--line)}
+.icon-btn svg{width:24px;height:24px}
+.icon-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+
+/* aviary grid */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (min-width:540px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.card{border:0;padding:0;background:var(--card);border-radius:24px;overflow:hidden;text-align:left;display:flex;flex-direction:column;box-shadow:0 4px 0 var(--line),0 14px 26px -18px rgba(31,48,71,.45)}
+.card:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.thumb{position:relative;aspect-ratio:4/5;overflow:hidden;background:linear-gradient(180deg,var(--sky1),#CFEAF3 60%,var(--sky2))}
+.thumb svg{position:absolute;inset:0;width:100%;height:100%}
+.card .meta{padding:10px 12px 13px;display:grid;gap:1px}
+.card b{font-family:var(--display);font-size:21px;line-height:1.1;overflow-wrap:anywhere}
+.card .meta span{font-size:14px;color:var(--ink2)}
+.card .knows{color:var(--leaf2)!important;font-weight:700}
+.card.new{background:transparent;border:3px dashed var(--line);box-shadow:none}
+.card.new .thumb{background:transparent}
+
+/* stage */
+.stage{position:relative;height:min(52vh,500px);min-height:300px;border-radius:30px;overflow:hidden;background:linear-gradient(180deg,var(--sky1) 0%,#CFEAF3 55%,var(--sky2) 100%);box-shadow:inset 0 -40px 60px -50px rgba(42,106,65,.6)}
+.stage.small{height:min(40vh,360px);min-height:260px}
+.stage > svg, .stage > .layer > svg{position:absolute;inset:0;width:100%;height:100%}
+.stage .layer{position:absolute;inset:0}
+.stage .bird-svg{touch-action:none}
+.sunspot{position:absolute;right:-18%;top:-22%;width:70%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,248,222,.95),rgba(255,231,168,.45) 42%,rgba(255,231,168,0) 70%);pointer-events:none}
+.bird-svg .ov{pointer-events:none}
+.flash{animation:flash .5s ease 2}
+@keyframes flash{50%{opacity:.35}}
+.bubble{position:absolute;max-width:64%;padding:10px 15px 11px;border-radius:22px;font-family:var(--display);font-weight:800;font-size:clamp(19px,5.4vw,25px);line-height:1.15;box-shadow:0 8px 20px -10px rgba(0,0,0,.45);z-index:3;overflow-wrap:anywhere;pointer-events:none}
+.bubble.bird{right:12px;top:14px;background:#fff;color:var(--ink);border-bottom-left-radius:6px}
+.bubble.kid{left:12px;bottom:14px;background:var(--ink);color:#fff;border-bottom-right-radius:6px}
+.bubble small{display:block;font-family:var(--body);font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.65;margin-bottom:2px}
+.pop{animation:pop .38s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.55);opacity:0}to{transform:none;opacity:1}}
+.love{position:absolute;left:12px;top:14px;background:rgba(255,255,255,.88);border-radius:999px;padding:5px 12px 6px;font-weight:700;color:var(--rose);font-size:16px;z-index:2}
+.hint{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:rgba(31,48,71,.72);color:#fff;border-radius:999px;padding:6px 14px;font-size:14px;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis;z-index:2;transition:opacity .5s}
+.heart{position:absolute;color:var(--rose);font-size:26px;pointer-events:none;z-index:4;animation:floatUp 1.4s ease-out forwards}
+@keyframes floatUp{from{transform:translate(-50%,0) scale(.6);opacity:0}15%{opacity:1}to{transform:translate(calc(-50% + var(--dx)),-110px) scale(1.2);opacity:0}}
+
+/* tabs & panels */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:#F2E7D2;padding:6px;border-radius:22px;margin-block:14px 14px}
+.tabs button{border:0;background:transparent;border-radius:16px;padding:12px 4px;font-family:var(--display);font-weight:800;font-size:18px;color:var(--ink2)}
+.tabs button[aria-selected="true"]{background:var(--card);color:var(--ink);box-shadow:0 3px 0 var(--line)}
+.panel{display:grid;gap:16px}
+.panel h3{font-size:21px;margin-top:4px}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.tile{border:0;border-radius:24px;padding:14px 14px 15px;min-height:112px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:8px;text-align:left;font-family:var(--display);font-weight:800;font-size:20px;line-height:1.1;color:var(--ink);box-shadow:0 4px 0 rgba(31,48,71,.14)}
+.tile:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(31,48,71,.14)}
+.tile svg{width:40px;height:40px}
+.tile small{display:block;font-family:var(--body);font-weight:400;font-size:14px;color:var(--ink2);margin-top:3px}
+.t1{background:#FFE6A8}.t2{background:#FFD6C4}.t3{background:#D3EBFA}.t4{background:#D8EFD0}
+.fact{background:#E6F3DF;border-radius:22px;padding:14px 16px 12px;display:grid;gap:6px}
+.fact p{font-size:18px}
+.stars{display:flex;gap:18px;flex-wrap:wrap;font-size:15px;color:var(--ink2)}
+.stars b{color:var(--sun-d);letter-spacing:2px}
+.linkbtn{border:0;background:none;padding:4px 0;color:var(--leaf2);font-weight:700;justify-self:start;text-decoration:underline;text-underline-offset:3px}
+
+.btn{border:2px solid var(--line);border-radius:18px;padding:13px 16px;font-family:var(--display);font-weight:800;font-size:19px;background:var(--card);box-shadow:0 4px 0 var(--line);display:inline-flex;align-items:center;justify-content:center;gap:8px;line-height:1.1}
+.btn svg{width:22px;height:22px}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.btn.go{background:var(--sun);border-color:#EAA320;box-shadow:0 4px 0 var(--sun-d)}
+.btn.go:active{box-shadow:0 1px 0 var(--sun-d)}
+.btn.danger{color:#B3261E;width:100%}
+.btn.big{font-size:22px;padding:16px 18px;width:100%}
+.btn[disabled]{opacity:.5}
+.btn.rec{background:#E4413B;border-color:#B3261E;color:#fff;box-shadow:0 4px 0 #8E1C16;animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{filter:brightness(1.15)}}
+#micBtn{-webkit-touch-callout:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:9px 14px;font-weight:700;font-size:16px;box-shadow:0 2px 0 var(--line);display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff;box-shadow:none}
+.chip i{width:14px;height:14px;border-radius:50%;display:inline-block;box-shadow:0 0 0 1.5px rgba(255,255,255,.9),0 0 0 2.5px rgba(31,48,71,.18)}
+.chip i + i{margin-left:-9px}
+
+/* teach */
+.lesson{background:var(--card);border-radius:26px;padding:16px;box-shadow:0 4px 0 var(--line);display:grid;gap:12px}
+.lesson .phrase{font-family:var(--display);font-weight:800;font-size:clamp(26px,7.5vw,34px);line-height:1.1;overflow-wrap:anywhere}
+.dots{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.dot{width:18px;height:18px;border-radius:50%;background:#EFE4CE}
+.dot.on{background:var(--leaf)}
+.dots .lbl{font-size:14px;color:var(--ink2);margin-left:4px}
+.lesson .row{display:flex;gap:10px}
+.lesson .row .btn.big{flex:1}
+.custom{display:flex;gap:8px}
+.custom input,.namerow input,.sheet input{flex:1;min-width:0;font:inherit;font-size:18px;padding:12px 14px;border-radius:16px;border:2px solid var(--line);background:#fff;color:var(--ink)}
+.known{display:flex;flex-wrap:wrap;gap:8px}
+.word{display:inline-flex;align-items:stretch;border-radius:16px;background:#FFF1CF;border:2px solid #F3D78F;overflow:hidden}
+.word button{border:0;background:none;padding:9px 12px;font-weight:700;font-size:16px;display:inline-flex;align-items:center;gap:6px}
+.word button svg{width:16px;height:16px}
+.word .x{padding:9px 10px;color:var(--ink2);border-left:2px solid #F3D78F}
+.word.learning{background:#F5F0E6;border-color:var(--line)}
+.word.learning .x{border-color:var(--line)}
+.note{background:#FFF1CF;border-radius:22px;padding:16px;font-size:18px}
+.empty{color:var(--ink2);font-size:15px}
+
+/* xylophone */
+.xylo{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;align-items:center;height:168px;padding:12px 10px;background:linear-gradient(#7A4E32,#5E3B25);border-radius:22px;box-shadow:inset 0 3px 0 rgba(255,255,255,.12)}
+.key{border:0;border-radius:11px;height:var(--h);background:var(--c);box-shadow:inset 0 -7px 0 rgba(0,0,0,.18),inset 0 5px 0 rgba(255,255,255,.25),0 3px 0 rgba(0,0,0,.3);position:relative;min-width:0}
+.key::before,.key::after{content:'';position:absolute;left:50%;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.75);transform:translateX(-50%)}
+.key::before{top:9px}.key::after{bottom:11px}
+.key.hit,.key:active{transform:translateY(3px);filter:brightness(1.18)}
+.melody{display:flex;flex-wrap:wrap;gap:6px;min-height:48px;align-items:center;padding:10px 12px;border:2px dashed var(--line);border-radius:18px;background:#fff}
+.nd{width:20px;height:20px;border-radius:50%}
+.nd.long{width:34px;border-radius:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px}
+.row3 .btn{padding-inline:8px;font-size:17px}
+
+/* designer */
+.sec{padding-block:16px 4px;display:grid;gap:10px}
+.sec h2{font-size:23px}
+.scroller{display:flex;gap:10px;overflow-x:auto;margin-inline:-16px;padding:2px 16px 8px;scroll-snap-type:x proximity;scrollbar-width:none}
+.scroller::-webkit-scrollbar{display:none}
+.sp{flex:0 0 auto;width:100px;border:2px solid var(--line);border-radius:22px;background:linear-gradient(var(--sky1),var(--sky2));padding:0 0 8px;overflow:hidden;scroll-snap-align:start;display:grid;gap:2px;justify-items:center}
+.sp svg{width:100%;height:86px;display:block}
+.sp span{font-weight:700;font-size:14px}
+.sp[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 3px var(--sun)}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:9px}
+.sw{aspect-ratio:1;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--line);padding:0;min-width:0}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink);transform:scale(1.08)}
+.sw.none{background:repeating-linear-gradient(45deg,#fff 0 5px,#EEE 5px 10px)}
+.namerow{display:flex;gap:8px}
+.bar{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(255,248,236,.95);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:2px solid var(--line);z-index:10}
+.bar .inner{max-width:528px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* sheet, toast, confetti */
+.sheet-back{position:fixed;inset:0;background:rgba(31,48,71,.4);z-index:30}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--paper);border-radius:28px 28px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));display:grid;gap:14px;max-width:560px;margin:0 auto;box-shadow:0 -10px 40px -10px rgba(0,0,0,.3)}
+.sheet h2{font-size:26px}
+.sheet label{font-weight:700}
+.sheet .srow{display:flex;justify-content:space-between;align-items:center;gap:12px}
+#toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:18px;font-weight:700;z-index:40;max-width:calc(100% - 32px);text-align:center;box-shadow:0 10px 30px -10px rgba(0,0,0,.5)}
+#toast.win{background:var(--leaf2);font-family:var(--display);font-size:21px}
+.feather{position:fixed;top:-40px;width:22px;height:40px;pointer-events:none;z-index:45;animation:fall linear forwards}
+@keyframes fall{to{transform:translate(var(--dx),110vh) rotate(var(--r))}}
+.loading{display:grid;place-items:center;gap:10px;min-height:60vh;text-align:center;color:var(--ink2)}
+.loading b{font-family:var(--display);font-size:28px;color:var(--ink)}
+@media (prefers-reduced-motion: reduce){.pop,.flash,.heart{animation:none}.feather{display:none}}
+</style>
+</head>
+<body>
+
+
+<div id="app"><div class="loading"><b>Opening the aviary…</b><span>Waking up the birds</span></div></div>
+<div id="sheet" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- small helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const uid = () => 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const clone = o => JSON.parse(JSON.stringify(o));
+const lerp = (a, b, t) => a + (b - a) * t;
+const DEG = Math.PI / 180;
+const P = (x, y) => ({x, y});
+const add = (a, b) => P(a.x + b.x, a.y + b.y);
+const mul = (a, k) => P(a.x * k, a.y * k);
+const lp = (a, b, t) => P(lerp(a.x, b.x, t), lerp(a.y, b.y, t));
+const f1 = n => Math.round(n * 10) / 10;
+const pt = p => f1(p.x) + ',' + f1(p.y);
+const rot = (p, c, deg) => { const a = deg * DEG, dx = p.x - c.x, dy = p.y - c.y; return P(c.x + dx * Math.cos(a) - dy * Math.sin(a), c.y + dx * Math.sin(a) + dy * Math.cos(a)); };
+function hex2rgb(h) { h = String(h).replace('#', ''); if (h.length === 3) h = h.split('').map(c => c + c).join(''); const n = parseInt(h, 16) || 0; return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+function rgb2hex(r, g, b) { return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join(''); }
+function mix(a, b, t) { const A = hex2rgb(a), B = hex2rgb(b); return rgb2hex(lerp(A[0], B[0], t), lerp(A[1], B[1], t), lerp(A[2], B[2], t)); }
+const light = (c, t) => mix(c, '#ffffff', t), dark = (c, t) => mix(c, '#000000', t);
+function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rng(seed) { let a = seed || 1; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const hasClaude = !!(window.claude && typeof window.claude.use === 'function');
+const MIC = !hasClaude && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
+/* ---------- the birds ---------- */
+const SPECIES = {
+  cockatiel: {
+    label: 'Cockatiel', talk: 2, sing: 5,
+    body: {rx: 40, ry: 62}, headR: 30, tail: {len: 140, w: 22, tip: 'point'}, beak: {type: 'hook', s: .78},
+    crest: 'tiel', face: {dx: .35, dy: .2, rx: .85, ry: .85}, cheek: 'tiel', wingPatch: 'band', patch: null, scale: 1, tex: .1,
+    voice: {pitch: 1.9, rate: 1.1}, call: 'tiel', needs: {word: 5, tune: 2}, whistleBase: 1046.5,
+    parts: ['body','head','face','crest','cheek','belly','wing','wingPatch','wingTip','tail','beak','iris','feet'],
+    looks: {
+      normal: {label: 'Normal grey', colors: {body:'#8F8D8A', belly:'#9A9894', head:'#A09C94', face:'#F6D94B', crest:'#E8CF5C', cheek:'#F0873A', wing:'#86837F', wingPatch:'#F5F2EA', wingTip:'#57544F', tail:'#6E6B67', tailTip:'#55524E', beak:'#9C958F', feet:'#B8A8A0'}},
+      lutino: {label: 'Lutino', colors: {body:'#F6EFD8', belly:'#F8F2DE', head:'#FAF1CF', face:'#FBE36A', crest:'#F9E27A', cheek:'#F28A3A', wing:'#F3EBD2', wingPatch:'#FFFDF7', wingTip:'#EDE3C4', tail:'#F1E8C9', tailTip:'#EBDDB5', beak:'#EBDCC2', feet:'#F1C9BC', iris:'#7A1F24'}},
+      pearl: {label: 'Pearl', pattern: 'pearl', pc: '#F2DC8A', colors: {body:'#8F8D8A', belly:'#9A9894', head:'#A09C94', face:'#F6D94B', crest:'#E8CF5C', cheek:'#F0873A', wing:'#86837F', wingPatch:'#F5F2EA', wingTip:'#57544F', tail:'#6E6B67', tailTip:'#55524E', beak:'#9C958F', feet:'#B8A8A0'}},
+      pied: {label: 'Pied', pattern: 'pied', pc: '#F6F0DA', colors: {body:'#8F8D8A', belly:'#9A9894', head:'#A09C94', face:'#F6D94B', crest:'#E8CF5C', cheek:'#F0873A', wing:'#86837F', wingPatch:'#F5F2EA', wingTip:'#57544F', tail:'#6E6B67', tailTip:'#55524E', beak:'#9C958F', feet:'#B8A8A0'}},
+      whiteface: {label: 'Whiteface', colors: {body:'#8C8C8C', belly:'#979797', head:'#9A9A9A', face:'#F4F4F2', crest:'#DCDCDA', cheek:'#EFEFED', wing:'#848484', wingPatch:'#F5F5F3', wingTip:'#555555', tail:'#6B6B6B', tailTip:'#525252', beak:'#9C958F', feet:'#B5ABA6'}}
+    },
+    facts: ['Cockatiels come from Australia, where they fly around in big flocks.', 'A cockatiel’s crest shows its mood: straight up means curious or excited, flat means scared or grumpy.', 'Cockatiels are the smallest members of the cockatoo family.', 'Boy cockatiels are usually the big whistlers and talkers.', 'Cockatiels love head scratches — they lower their heads and close their eyes when they want one.', 'With good care, a cockatiel can live 15 to 25 years.']
+  },
+  budgie: {
+    label: 'Budgie', talk: 5, sing: 3,
+    body: {rx: 35, ry: 50}, headR: 26, tail: {len: 115, w: 12, tip: 'point'}, beak: {type: 'budgie', s: .62},
+    crest: null, face: {dx: .45, dy: .05, rx: .85, ry: 1.1}, cheek: 'budgie', wingPatch: null, patch: null, scale: .95, tex: .08,
+    voice: {pitch: 2, rate: 1.35}, call: 'budgie', needs: {word: 3, tune: 3}, whistleBase: 1174.7,
+    parts: ['body','head','face','cheek','cere','wing','wingTip','tail','beak','iris','feet'],
+    looks: {
+      green: {label: 'Wild green', pattern: 'bars', pc: '#1F1F1F', colors: {body:'#79BF45', belly:'#86C94D', head:'#F2DE52', face:'#F6E35A', cheek:'#6A52C0', cere:'#4F74D1', wing:'#E9D65C', wingTip:'#3F4F2E', tail:'#2D5E9E', tailTip:'#243F6E', beak:'#E9D6A6', feet:'#A2A6C4'}},
+      sky: {label: 'Sky blue', pattern: 'bars', pc: '#1F1F1F', colors: {body:'#7FC6E6', belly:'#8CCDEA', head:'#F4F6F7', face:'#FFFFFF', cheek:'#6A52C0', cere:'#4F74D1', wing:'#EEF1F4', wingTip:'#34495E', tail:'#233C7A', tailTip:'#1B2E5E', beak:'#E9D6A6', feet:'#A2A6C4'}},
+      violet: {label: 'Violet', pattern: 'bars', pc: '#1F1F1F', colors: {body:'#8C6BD6', belly:'#9878DC', head:'#F4F4F6', face:'#FFFFFF', cheek:'#5B3FB0', cere:'#4F74D1', wing:'#EEEDF4', wingTip:'#3B2F6A', tail:'#3B2F7A', tailTip:'#2A2160', beak:'#E9D6A6', feet:'#A2A6C4'}},
+      lutino: {label: 'Lutino yellow', colors: {body:'#F5E04A', belly:'#F7E766', head:'#F8E86A', face:'#FBEE8C', cheek:'#EEEAF6', cere:'#D9A58E', wing:'#F4E36A', wingTip:'#EEDB55', tail:'#EFD95A', tailTip:'#E6CE45', beak:'#E9D6A6', feet:'#E8C4BE', iris:'#7A1F24'}}
+    },
+    facts: ['Budgies (budgerigars) come from the grasslands of Australia.', 'A budgie named Puck knew more than 1,700 words — a world record!', 'Boy budgies usually have a blue cere — that’s the little bump above the beak.', 'Wild budgies are green and yellow. Blue and violet budgies were bred by people.', 'Budgies can see ultraviolet colors that people can’t see.']
+  },
+  grey: {
+    label: 'African Grey', talk: 5, sing: 4,
+    body: {rx: 50, ry: 70}, headR: 36, tail: {len: 58, w: 34, tip: 'square'}, beak: {type: 'hook', s: 1.15},
+    crest: null, face: null, cheek: null, wingPatch: null, patch: 'grey', scale: 1, tex: .32,
+    voice: {pitch: 1.25, rate: .95}, call: 'grey', needs: {word: 2, tune: 2}, whistleBase: 987.8,
+    parts: ['body','head','face','wing','wingTip','tail','beak','iris','feet'],
+    looks: {
+      congo: {label: 'Congo grey', colors: {body:'#999A9C', belly:'#A2A3A5', head:'#A5A6A8', face:'#ECECEC', wing:'#8C8D8F', wingTip:'#4E4F52', tail:'#D42B2B', tailTip:'#C22525', beak:'#1D1D1F', feet:'#707072', iris:'#F1E6B6'}},
+      timneh: {label: 'Timneh grey', colors: {body:'#707174', belly:'#78797C', head:'#7A7B7E', face:'#E2E2E2', wing:'#636467', wingTip:'#3F4042', tail:'#7C2B2B', tailTip:'#6B2323', beak:'#C49A82', lowerBeak:'#2A2A2A', feet:'#5E5E60', iris:'#EDE3B8'}}
+    },
+    facts: ['African greys are some of the smartest birds in the world.', 'A famous African grey named Alex could name colors and shapes and count objects.', 'Greys copy voices so well that they can sound exactly like a person.', 'African greys come from the rainforests of central Africa.', 'Greys can live 40 to 60 years.']
+  },
+  macaw: {
+    label: 'Macaw', talk: 4, sing: 2,
+    body: {rx: 44, ry: 70}, headR: 34, tail: {len: 150, w: 24, tip: 'point'}, beak: {type: 'hook', s: 1.55},
+    crest: null, face: null, cheek: null, wingPatch: 'coverts', patch: 'macaw', scale: .92, tex: .1,
+    voice: {pitch: 1.1, rate: .9}, call: 'macaw', needs: {word: 3, tune: 4}, whistleBase: 880,
+    parts: ['body','belly','head','face','wing','wingPatch','wingTip','tail','tailTip','beak','lowerBeak','iris'],
+    looks: {
+      scarlet: {label: 'Scarlet', colors: {body:'#D52A1E', belly:'#D8301F', head:'#DC3224', face:'#F6F1EA', wing:'#D52A1E', wingPatch:'#F5C024', wingTip:'#1E5DB3', tail:'#C9271C', tailTip:'#2A68C1', beak:'#EFE5D3', lowerBeak:'#1C1C1C', iris:'#F2E7A6', feet:'#3E3E40'}},
+      bluegold: {label: 'Blue & gold', colors: {body:'#2E7FCE', belly:'#F4B72D', head:'#3A8DD2', face:'#F4F4F2', wing:'#2E7FCE', wingPatch:'#2E86D6', wingTip:'#1D4F98', tail:'#2E7FCE', tailTip:'#1D4F98', beak:'#1E1E20', lowerBeak:'#1E1E20', iris:'#F2E7A6', feet:'#3E3E40'}},
+      hyacinth: {label: 'Hyacinth', patch: 'ring', colors: {body:'#2A3E9C', belly:'#2E44A6', head:'#3148AC', face:'#F4CE2D', wing:'#283B96', wingPatch:'#2C40A0', wingTip:'#1F2F7A', tail:'#283B96', tailTip:'#1F2F7A', beak:'#1C1C1E', lowerBeak:'#1C1C1E', iris:'#2A1C14', feet:'#3E3E40'}}
+    },
+    facts: ['Hyacinth macaws are the longest parrots in the world — about as long as a baseball bat!', 'Scarlet macaws live in the rainforests of Central and South America.', 'A macaw’s beak is strong enough to crack open hard nuts.', 'Macaws can live 50 years or more.', 'Wild macaws eat clay from riverbanks to help their tummies.']
+  },
+  cockatoo: {
+    label: 'Cockatoo', talk: 3, sing: 2,
+    body: {rx: 48, ry: 70}, headR: 37, tail: {len: 70, w: 36, tip: 'square'}, beak: {type: 'hook', s: 1.15},
+    crest: 'too', face: null, cheek: 'too', wingPatch: null, patch: null, scale: 1, tex: .07,
+    voice: {pitch: 1.55, rate: 1.05}, call: 'too', needs: {word: 4, tune: 4}, whistleBase: 987.8,
+    parts: ['body','head','crest','cheek','ring','wing','wingTip','tail','beak','feet'],
+    looks: {
+      sulphur: {label: 'Sulphur-crested', colors: {body:'#F6F6F1', belly:'#F8F8F4', head:'#FAFAF6', crest:'#F4CF30', cheek:'#F5EAA6', ring:'#DCEAF4', wing:'#EFEEE8', wingTip:'#E6E3D8', tail:'#EDEBE3', tailTip:'#E3DFD2', beak:'#2A2A2C', feet:'#58585A', iris:'#161616'}},
+      galah: {label: 'Galah', crestScale: .6, colors: {body:'#9EA3AA', belly:'#E47AA0', head:'#E27A9E', crest:'#F5D2DD', cheek:'#E6809F', ring:'#E7677B', wing:'#A0A5AC', wingTip:'#7B8087', tail:'#8A8F96', tailTip:'#6F747B', beak:'#EAE2D8', feet:'#6A6A6C', iris:'#3B1F16'}},
+      umbrella: {label: 'Umbrella', colors: {body:'#F7F7F3', belly:'#F9F9F6', head:'#FBFBF8', crest:'#FFFFFF', cheek:'#F7F7F3', ring:'#DCE7EF', wing:'#F0EFEA', wingTip:'#E8E6DE', tail:'#EEECE5', tailTip:'#E5E2D8', beak:'#2A2A2C', feet:'#58585A', iris:'#161616'}}
+    },
+    facts: ['Cockatoos raise their big crests when they’re excited or surprised.', 'Snowball, a sulphur-crested cockatoo, became famous for dancing to music.', 'Cockatoos can live more than 60 years.', 'Galahs are pink-and-grey cockatoos from Australia.', 'Cockatoos make a powdery dust that keeps their feathers clean.']
+  },
+  lovebird: {
+    label: 'Lovebird', talk: 1, sing: 2,
+    body: {rx: 38, ry: 48}, headR: 28, tail: {len: 40, w: 26, tip: 'square'}, beak: {type: 'hook', s: 1},
+    crest: null, face: {dx: .35, dy: .25, rx: .85, ry: 1}, cheek: null, wingPatch: null, patch: null, scale: .92, tex: .08,
+    voice: {pitch: 2, rate: 1.3}, call: 'love', needs: {word: 6, tune: 5}, whistleBase: 1318.5,
+    parts: ['body','head','face','belly','wing','wingTip','tail','ring','beak','feet'],
+    looks: {
+      peach: {label: 'Peach-faced', colors: {body:'#6CBD45', belly:'#8DCA54', head:'#6CBD45', face:'#F2866A', wing:'#5DA83C', wingTip:'#3D6D29', tail:'#3E8BD6', tailTip:'#5CA24A', beak:'#F0D3A6', feet:'#9A9A9A', ring:'none'}},
+      fischer: {label: 'Fischer’s', colors: {body:'#62B84A', belly:'#86C95A', head:'#5DAF3F', face:'#F08A2B', wing:'#55A33C', wingTip:'#356A28', tail:'#3E8BD6', tailTip:'#4E9A45', beak:'#E3372C', feet:'#9A9A9A', ring:'#FFFFFF'}},
+      masked: {label: 'Blue masked', colors: {body:'#5AA7D6', belly:'#8FC6E4', head:'#2A2A2C', face:'#1F1F21', wing:'#4B93C4', wingTip:'#2F5F86', tail:'#3B6FAE', tailTip:'#2F5B8F', beak:'#E3372C', feet:'#9A9A9A', ring:'#FFFFFF'}}
+    },
+    facts: ['Lovebirds are small parrots from Africa.', 'They got their name because pairs love to snuggle and groom each other.', 'Lovebirds aren’t big talkers, but they chirp a LOT.', 'Peach-faced lovebirds tuck strips of nest material into their tail feathers to carry them home.']
+  },
+  canary: {
+    label: 'Canary', talk: 0, sing: 5,
+    body: {rx: 34, ry: 46}, headR: 25, tail: {len: 72, w: 18, tip: 'notch'}, beak: {type: 'cone', s: .75},
+    crest: null, face: null, cheek: null, wingPatch: null, patch: null, scale: .88, tex: .07,
+    voice: null, call: 'canary', needs: {word: Infinity, tune: 2}, whistleBase: 1568,
+    parts: ['body','head','belly','wing','wingTip','tail','beak','feet'],
+    looks: {
+      yellow: {label: 'Sunny yellow', colors: {body:'#FAD53A', belly:'#FDE56E', head:'#FBD943', wing:'#F1C52C', wingTip:'#D2A41A', tail:'#E7BC23', tailTip:'#CFA21A', beak:'#EFC6A4', feet:'#E8B9A0'}},
+      red: {label: 'Red factor', colors: {body:'#F2843A', belly:'#F59A56', head:'#F47F33', wing:'#E2702A', wingTip:'#B85A20', tail:'#D8692A', tailTip:'#B85A20', beak:'#EFC6A4', feet:'#E8B9A0'}},
+      white: {label: 'Snow white', colors: {body:'#F8F6EE', belly:'#FBFAF4', head:'#FAF8F1', wing:'#EFECE2', wingTip:'#DDD8C9', tail:'#E9E5D8', tailTip:'#D8D2C2', beak:'#EFC6A4', feet:'#E8B9A0'}}
+    },
+    facts: ['Canaries are finches, not parrots — they sing instead of talk.', 'Boy canaries sing long, fancy songs to show off.', 'Wild canaries come from the Canary Islands and are greenish-yellow.', 'People have kept canaries as pets for about 500 years.']
+  }
+};
+const PART_LABEL = {body:'Body', head:'Head', face:'Face', crest:'Crest', cheek:'Cheeks', belly:'Tummy', wing:'Wings', wingPatch:'Wing patch', wingTip:'Wing tips', tail:'Tail', tailTip:'Tail tip', beak:'Beak', lowerBeak:'Lower beak', iris:'Eyes', ring:'Eye ring', cere:'Nose', feet:'Feet'};
+const LINKS = {body: [['belly', c => light(c, .08)]], tail: [['tailTip', c => dark(c, .15)]], wing: [['wingTip', c => dark(c, .25)], ['wingPatch', c => c]], beak: [['lowerBeak', c => c], ['cere', c => light(c, .1)]], head: [['face', c => c], ['crest', c => c]]};
+const SWATCHES = [['#FAFAF6','White'],['#EDE5D2','Cream'],['#FBE36B','Lemon'],['#FAD53A','Sunflower'],['#F5C024','Gold'],['#F0873A','Orange'],['#F2866A','Peach'],['#E4413B','Red'],['#B01E4A','Ruby'],['#F4A7C3','Pink'],['#E27A9E','Rose'],['#C06BD9','Orchid'],['#7A4FC9','Purple'],['#3E4FB8','Indigo'],['#2E7FCE','Blue'],['#7FC6E6','Sky'],['#2BB3A8','Teal'],['#6CBD45','Green'],['#2E8B4A','Emerald'],['#B9D35A','Lime'],['#A5A6A8','Silver'],['#8F8D8A','Grey'],['#5E5B58','Slate'],['#2A2A2C','Black'],['#8A5A3B','Brown'],['#C49A82','Tan']];
+const PATTERNS = [['plain','Plain'],['pearl','Pearls'],['pied','Patches'],['bars','Stripes'],['rainbow','Rainbow'],['sparkles','Sparkles']];
+const PATTERN_PC = {pearl: '#F2DC8A', pied: '#F6F0DA', bars: '#1F1F1F', sparkles: '#FFFFFF'};
+const ACCS = [['none','Nothing'],['bow','Bow'],['crown','Crown'],['party','Party hat'],['flower','Flower'],['tophat','Top hat']];
+const NAMES = ['Kiwi','Mango','Sunny','Pip','Coco','Peaches','Biscuit','Blueberry','Ziggy','Pickle','Nugget','Maple','Jellybean','Pepper','Sprinkles','Waffles','Luna','Rio','Buttercup','Noodle','Mochi','Tweety','Sky','Clementine','Pistachio','Banjo','Marshmallow','Twix'];
+
+function completeColors(c) {
+  const o = {...c}; const d = (k, v) => { if (!o[k]) o[k] = v; };
+  d('body', '#8F8D8A'); d('belly', light(o.body, .08)); d('head', o.body); d('face', o.head); d('crest', o.head); d('cheek', o.face);
+  d('wing', dark(o.body, .06)); d('wingPatch', o.wing); d('wingTip', dark(o.wing, .25)); d('tail', dark(o.body, .12)); d('tailTip', dark(o.tail, .15));
+  d('beak', '#9C958F'); d('lowerBeak', o.beak); d('cere', light(o.beak, .1)); d('feet', '#B3A7A0'); d('iris', '#1A1411'); d('ring', 'none');
+  return o;
+}
+function newBird(species, lookKey, name) {
+  const sp = SPECIES[species]; const key = lookKey || Object.keys(sp.looks)[0]; const look = sp.looks[key];
+  return {id: uid(), name: name || '', species, look: key, colors: completeColors(look.colors), pattern: look.pattern || 'plain', pc: look.pc || '#1F1F1F', patch: look.patch || null, crestScale: look.crestScale || 1, accessory: 'none', words: [], tunes: [], hearts: 0, created: Date.now()};
+}
+function applyLook(b, key) {
+  const look = SPECIES[b.species].looks[key]; if (!look) return;
+  b.look = key; b.colors = completeColors(look.colors); b.pattern = look.pattern || 'plain'; b.pc = look.pc || PATTERN_PC[b.pattern] || '#1F1F1F'; b.patch = look.patch || null; b.crestScale = look.crestScale || 1;
+}
+
+/* ---------- drawing ---------- */
+const GEOS = {};
+function geo(sp) {
+  const F = P(165, 251), rx = sp.body.rx, ry = sp.body.ry, hr = sp.headR, th = 20 * DEG;
+  const ax = P(Math.sin(th), -Math.cos(th));
+  const B = P(F.x - 8, F.y - ry * .78);
+  const H = P(B.x + ax.x * ry * .92 + 6, B.y + ax.y * ry * .92 - hr * .35);
+  const R = P(B.x - ax.x * ry * .8 - rx * .25, B.y - ax.y * ry * .8);
+  const d = P(-Math.sin(18 * DEG), Math.cos(18 * DEG)), n = P(d.y, -d.x);
+  const T = add(R, mul(d, sp.tail.len));
+  const W = add(R, mul(d, Math.max(30, Math.min(sp.tail.len * .32, 58))));
+  const S = P(H.x - hr * .6, H.y + hr * .85), N = P(H.x - hr * .2, H.y + hr * .8);
+  const M1 = P(B.x + rx * .45, B.y + ry * .15), M2 = P(B.x - rx, B.y - ry * .05);
+  const E = P(H.x + hr * .28, H.y - hr * .12), re = hr * .2;
+  const Bk = P(H.x + hr * .82, H.y + hr * .12), bs = hr * .5 * sp.beak.s;
+  const top = add(B, mul(ax, ry * .85));
+  const hinge = P(Bk.x - bs * .05, Bk.y + bs * .2);
+  return {F, rx, ry, hr, ax, B, H, R, d, n, T, W, S, N, M1, M2, E, re, Bk, bs, top, hinge};
+}
+function quill(L, bend, w) {
+  const N = 10, Lp = [], Rp = [], mid = [];
+  const P1 = {x: bend * .15, y: -L * .6}, P2 = {x: bend, y: -L};
+  for (let k = 0; k <= N; k++) {
+    const t = k / N, mt = 1 - t;
+    const x = 2 * mt * t * P1.x + t * t * P2.x, y = 2 * mt * t * P1.y + t * t * P2.y;
+    let dx = 2 * mt * P1.x + 2 * t * (P2.x - P1.x), dy = 2 * mt * P1.y + 2 * t * (P2.y - P1.y);
+    const len = Math.hypot(dx, dy) || 1; dx /= len; dy /= len;
+    const wt = w * (t < .15 ? .55 + t / .15 * .45 : 1 - Math.pow((t - .15) / .85, 1.8) * .92) / 2;
+    Lp.push([x - dy * wt, y + dx * wt]); Rp.push([x + dy * wt, y - dx * wt]); mid.push([x, y]);
+  }
+  const s = a => f1(a[0]) + ',' + f1(a[1]);
+  return {d: 'M' + Lp.map(s).join(' L') + ' L' + Rp.reverse().map(s).join(' L') + 'Z', r: 'M' + mid.slice(0, 9).map(s).join(' L')};
+}
+const CRESTS = {
+  tiel: (hr, H) => [0, 1, 2, 3, 4].map(i => ({i, x: H.x + hr * (.14 - i * .1), y: H.y - hr * (.8 - i * .035), L: hr * [1.5, 1.65, 1.55, 1.35, 1.1][i], bend: hr * [.42, .4, .33, .25, .15][i], w: hr * [.13, .14, .13, .12, .1][i], laid: [-40, -48, -56, -64, -72][i], raised: [-4, -12, -20, -28, -36][i]})),
+  too: (hr, H) => [0, 1, 2, 3, 4, 5, 6].map(i => ({i, x: H.x + hr * (.3 - i * .09), y: H.y - hr * (.82 - i * .02), L: hr * [.85, 1, 1.12, 1.2, 1.18, 1.05, .9][i] * 1.05, bend: hr * .22, w: hr * .22, laid: [-72, -80, -88, -95, -102, -108, -115][i], raised: [12, -2, -16, -30, -44, -58, -72][i]}))
+};
+function leaf(x, y, L, w, a, fill, op = 1) {
+  return `<g transform="translate(${x} ${y}) rotate(${a})" opacity="${op}"><path d="M0 0 C${w} ${-L * .25} ${w * .9} ${-L * .75} 0 ${-L} C${-w * .9} ${-L * .75} ${-w} ${-L * .25} 0 0Z" fill="${fill}"/><path d="M0 -2 L0 ${-L * .92}" stroke="rgba(255,255,255,.28)" stroke-width="1.6"/></g>`;
+}
+const SCENE = `<svg class="scene" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+${leaf(40, 250, 130, 36, 28, '#9FD0AE', .5)}${leaf(80, 270, 110, 30, -18, '#9FD0AE', .45)}${leaf(360, 200, 120, 32, -30, '#9FD0AE', .45)}
+${leaf(-12, -14, 140, 38, 152, '#3D8C58')}${leaf(44, -24, 118, 32, 172, '#2F7A4A')}${leaf(98, -18, 92, 26, 194, '#4E9E66')}${leaf(-20, 60, 100, 28, 120, '#5AAB70', .9)}
+${leaf(424, 524, 180, 50, -40, '#2F7A4A')}${leaf(380, 540, 160, 42, -14, '#3D8C58')}${leaf(436, 446, 124, 34, -72, '#4E9E66')}${leaf(420, 300, 96, 26, -104, '#5AAB70', .7)}
+</svg>`;
+const SUN = '<div class="sunspot"></div>';
+
+function birdSVG(b, pfx, o = {}) {
+  const sp = SPECIES[b.species]; const c = completeColors(b.colors || {}); const G = geo(sp); GEOS[pfx] = G;
+  const {F, rx, ry, hr, B, H, R, d, n, T, W, S, M1, M2, E, re, Bk, bs} = G;
+  const I = s => pfx + '-' + s, U = s => `url(#${I(s)})`;
+  const defs = [];
+  const rad = (name, col, cx = .62, cy = .3) => defs.push(`<radialGradient id="${I(name)}" cx="${cx}" cy="${cy}" r=".85"><stop offset="0" stop-color="${light(col, .16)}"/><stop offset=".55" stop-color="${col}"/><stop offset="1" stop-color="${dark(col, .2)}"/></radialGradient>`);
+  const soft = (name, col, inner = .55) => defs.push(`<radialGradient id="${I(name)}" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="${col}"/><stop offset="${inner}" stop-color="${col}"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient>`);
+  const lin = (name, a, z, x2 = 0, y2 = 1) => defs.push(`<linearGradient id="${I(name)}" x1="0" y1="0" x2="${x2}" y2="${y2}"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${z}"/></linearGradient>`);
+  rad('body', c.body); rad('head', c.head, .6, .28); soft('belly', c.belly, .5); soft('face', c.face, .62); soft('cheek', c.cheek, .42); rad('iris', c.iris, .4, .35); rad('patch', c.face, .5, .4);
+  lin('wing', light(c.wing, .1), dark(c.wing, .12)); lin('beak', light(c.beak, .2), dark(c.beak, .14)); lin('lbeak', c.lowerBeak, dark(c.lowerBeak, .28));
+  defs.push(`<linearGradient id="${I('crest')}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${c.crest}"/><stop offset="1" stop-color="${dark(c.crest, .14)}"/></linearGradient>`);
+  defs.push(`<linearGradient id="${I('tail')}" gradientUnits="userSpaceOnUse" x1="${f1(R.x)}" y1="${f1(R.y)}" x2="${f1(T.x)}" y2="${f1(T.y)}"><stop offset="0" stop-color="${c.tail}"/><stop offset=".5" stop-color="${c.tail}"/><stop offset="1" stop-color="${c.tailTip}"/></linearGradient>`);
+  defs.push(`<linearGradient id="${I('wood')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A8764F"/><stop offset=".45" stop-color="#8A5A3B"/><stop offset="1" stop-color="#5E3B25"/></linearGradient>`);
+  const pc = b.pc || '#1F1F1F';
+  const texC = sp.tex > .2 ? `rgba(255,255,255,${sp.tex})` : `rgba(0,0,0,${sp.tex})`;
+  defs.push(`<pattern id="${I('fx')}" width="12" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(20)"><path d="M0 9 Q6 2 12 9" fill="none" stroke="${texC}" stroke-width="1"/></pattern>`);
+  defs.push(`<pattern id="${I('fxw')}" width="14" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(24)"><path d="M0 10 Q7 1 14 10" fill="none" stroke="rgba(0,0,0,.16)" stroke-width="1.1"/><path d="M1 8.6 Q7 2.4 13 8.6" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1"/></pattern>`);
+  defs.push(`<pattern id="${I('bars')}" width="10" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(22)"><path d="M-1 6 Q5 -.5 11 6" fill="none" stroke="${pc}" stroke-width="2.2"/></pattern>`);
+  defs.push(`<pattern id="${I('hbars')}" width="7" height="3.6" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)"><path d="M-1 3.6 Q3.5 .6 8 3.6" fill="none" stroke="${pc}" stroke-width="1.2"/></pattern>`);
+  defs.push(`<pattern id="${I('pearl')}" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(20)"><ellipse cx="2.25" cy="2.25" rx="2.4" ry="1.7" fill="${pc}"/><ellipse cx="6.75" cy="6.75" rx="2.4" ry="1.7" fill="${pc}"/></pattern>`);
+  defs.push(`<pattern id="${I('spark')}" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M6 1.5 L7.2 4.8 L10.5 6 L7.2 7.2 L6 10.5 L4.8 7.2 L1.5 6 L4.8 4.8Z" fill="${pc}"/><circle cx="16" cy="15" r="1.2" fill="${pc}"/><circle cx="17" cy="4" r=".9" fill="${pc}" opacity=".8"/><circle cx="5" cy="17" r=".8" fill="${pc}" opacity=".7"/></pattern>`);
+  defs.push(`<linearGradient id="${I('rainbow')}" gradientUnits="userSpaceOnUse" x1="${F.x - 110}" y1="70" x2="${F.x + 50}" y2="360"><stop offset="0" stop-color="#FF5B5B"/><stop offset=".2" stop-color="#FFA23A"/><stop offset=".4" stop-color="#FFE14D"/><stop offset=".6" stop-color="#5ED17A"/><stop offset=".8" stop-color="#4DA8FF"/><stop offset="1" stop-color="#A66BFF"/></linearGradient>`);
+
+  // shapes
+  const bodyEl = `cx="${f1(B.x)}" cy="${f1(B.y)}" rx="${rx}" ry="${ry}" transform="rotate(20 ${f1(B.x)} ${f1(B.y)})"`;
+  const nk = lp(H, G.top, .5), nkRy = Math.hypot(H.x - G.top.x, H.y - G.top.y) / 2 + hr * .3;
+  const neckEl = `cx="${f1(nk.x)}" cy="${f1(nk.y)}" rx="${f1(hr * .95)}" ry="${f1(nkRy)}" transform="rotate(20 ${f1(nk.x)} ${f1(nk.y)})"`;
+  const headEl = `cx="${f1(H.x)}" cy="${f1(H.y)}" rx="${f1(hr * 1.04)}" ry="${hr}"`;
+  const wingD = `M${pt(S)} C${pt(P(S.x + rx * .55, S.y + ry * .25))} ${pt(P(M1.x + 4, M1.y - 10))} ${pt(M1)} C${pt(P(M1.x - 4, M1.y + ry * .45))} ${pt(P(W.x + 16, W.y - 30))} ${pt(W)} C${pt(P(W.x - 8, W.y - 40))} ${pt(P(M2.x - 6, M2.y + ry * .5))} ${pt(M2)} C${pt(P(M2.x + 2, M2.y - ry * .35))} ${pt(P(S.x - rx * .5, S.y - 6))} ${pt(S)}Z`;
+  const tw = sp.tail.w, tl = sp.tail.len, tip = sp.tail.tip;
+  const rl = add(R, mul(n, tw / 2)), rr = add(R, mul(n, -tw / 2));
+  const tipW = tip === 'point' ? 3 : tw * .85;
+  const tL = add(T, mul(n, tipW / 2)), tR = add(T, mul(n, -tipW / 2));
+  const mid = add(R, mul(d, tl * .5)), mL = add(mid, mul(n, tw * .62)), mR = add(mid, mul(n, -tw * .62));
+  const tailEnd = tip === 'notch' ? `L${pt(add(T, mul(d, -tw * .35)))} L${pt(tR)}` : `Q${pt(add(T, mul(d, 4)))} ${pt(tR)}`;
+  const tailD = `M${pt(rl)} Q${pt(mL)} ${pt(tL)} ${tailEnd} Q${pt(mR)} ${pt(rr)}Z`;
+  defs.push(`<clipPath id="${I('cbody')}"><ellipse ${bodyEl}/><ellipse ${neckEl}/></clipPath>`);
+  defs.push(`<clipPath id="${I('chead')}"><ellipse ${headEl}/></clipPath>`);
+  defs.push(`<clipPath id="${I('cwing')}"><path d="${wingD}"/></clipPath>`);
+  defs.push(`<clipPath id="${I('ctail')}"><path d="${tailD}"/></clipPath>`);
+  const CLIP = {body: 'cbody', head: 'chead', wing: 'cwing', tail: 'ctail'};
+  const ov = (part, fill, extra = '') => `<rect class="ov" x="-40" y="-40" width="400" height="480" fill="${fill}" clip-path="${U(CLIP[part])}" ${extra}/>`;
+  const rnd = rng(hash(b.id || 'x'));
+  const blobs = (part, cx, cy, sx, sy, count) => { let s = ''; for (let i = 0; i < count; i++) { const x = cx + (rnd() - .5) * sx * 2, y = cy + (rnd() - .5) * sy * 2, a = rnd() * 180; s += `<ellipse cx="${f1(x)}" cy="${f1(y)}" rx="${f1(6 + rnd() * sx * .5)}" ry="${f1(5 + rnd() * sy * .35)}" transform="rotate(${f1(a)} ${f1(x)} ${f1(y)})" fill="${pc}"/>`; } return `<g class="ov" clip-path="${U(CLIP[part])}">${s}</g>`; };
+  const pat = b.pattern || 'plain';
+  const partPattern = part => {
+    switch (pat) {
+      case 'pearl': return part === 'wing' ? ov('wing', U('pearl')) : part === 'body' ? ov('body', U('pearl'), 'opacity=".45"') : '';
+      case 'bars': return part === 'wing' ? ov('wing', U('bars')) : part === 'head' ? ov('head', U('hbars')) : '';
+      case 'pied': return part === 'body' ? blobs('body', B.x, B.y, rx * .9, ry * .8, 4) : part === 'wing' ? blobs('wing', lp(S, W, .45).x, lp(S, W, .45).y, rx * .6, ry * .6, 3) : part === 'head' ? blobs('head', H.x, H.y, hr * .8, hr * .7, 2) : '';
+      case 'rainbow': return ['body', 'wing', 'tail', 'head'].includes(part) ? ov(part, U('rainbow'), 'opacity=".8"') : '';
+      case 'sparkles': return ['body', 'wing', 'tail', 'head'].includes(part) ? ov(part, U('spark')) : '';
+    }
+    return '';
+  };
+
+  // tail
+  const tailLines = [-.25, 0, .25].map(k => `M${pt(add(R, mul(n, tw * k)))} L${pt(add(T, mul(n, tipW * k)))}`).join(' ');
+  const tailG = `<g data-g="tail"><path data-part="tail" d="${tailD}" fill="${U('tail')}"/><path class="ov" d="${tailLines}" stroke="${dark(c.tail, .28)}" stroke-opacity=".4" stroke-width=".9" fill="none"/>${partPattern('tail')}</g>`;
+
+  // perch
+  const y = F.y;
+  const perch = `<g class="perch"><path d="M-30 ${y + 1} Q160 ${y - 4} 350 ${y + 2} L350 ${y + 19} Q160 ${y + 14} -30 ${y + 18}Z" fill="${U('wood')}"/><path d="M10 ${y + 7} q20 -2 40 1 M90 ${y + 11} q26 -2 50 0 M200 ${y + 6} q24 -2 46 1 M262 ${y + 12} q20 -1 40 0" stroke="#5E3B25" stroke-opacity=".45" stroke-width="1.4" fill="none" stroke-linecap="round"/><ellipse cx="238" cy="${y + 9}" rx="5" ry="3" fill="#5E3B25" opacity=".5"/><path d="M46 ${y + 2} q-8 -18 -2 -36" stroke="#7A4E32" stroke-width="3.5" fill="none" stroke-linecap="round"/>${leaf(44, y - 32, 30, 9, -35, '#4E9E66')}${leaf(45, y - 26, 26, 8, 40, '#3D8C58')}</g>`;
+
+  // body
+  const bodyG = `<g data-g="body"><ellipse data-part="body" ${bodyEl} fill="${U('body')}"/><ellipse data-part="body" ${neckEl} fill="${U('body')}"/><ellipse data-part="belly" cx="${f1(B.x + rx * .35)}" cy="${f1(B.y + ry * .15)}" rx="${f1(rx * .72)}" ry="${f1(ry * .8)}" transform="rotate(20 ${f1(B.x + rx * .35)} ${f1(B.y + ry * .15)})" fill="${U('belly')}" clip-path="${U('cbody')}"/>${ov('body', U('fx'))}${partPattern('body')}</g>`;
+
+  // wing
+  const P1 = lp(M1, W, .3), P2 = lp(M2, W, .36);
+  const primD = `M${pt(add(P1, P(26, -4)))} L${pt(add(W, P(14, 30)))} L${pt(add(P2, P(-28, 4)))} Q${pt(add(lp(P1, P2, .5), P(0, -14)))} ${pt(add(P1, P(26, -4)))}Z`;
+  const primLines = [0, 1, 2, 3, 4].map(k => { const a = add(lp(P2, P1, (k + .5) / 5), P(0, -4)); const e = add(W, P((k - 2) * 2, -2)); return `M${pt(a)} Q${pt(add(lp(a, e, .5), P(-2, 0)))} ${pt(e)}`; }).join(' ');
+  let patchEl = '';
+  if (sp.wingPatch === 'band') { const pc2 = add(lp(S, M1, .62), P(-5, 2)); patchEl = `<ellipse data-part="wingPatch" cx="${f1(pc2.x)}" cy="${f1(pc2.y)}" rx="${f1(rx * .14)}" ry="${f1(ry * .36)}" transform="rotate(24 ${f1(pc2.x)} ${f1(pc2.y)})" fill="${c.wingPatch}"/>`; }
+  if (sp.wingPatch === 'coverts') { const pc2 = lp(S, lp(M1, M2, .5), .72); patchEl = `<ellipse data-part="wingPatch" cx="${f1(pc2.x)}" cy="${f1(pc2.y)}" rx="${f1(rx * .78)}" ry="${f1(ry * .42)}" transform="rotate(20 ${f1(pc2.x)} ${f1(pc2.y)})" fill="${c.wingPatch}"/>`; }
+  const wingG = `<g data-g="wing"><path data-part="wing" d="${wingD}" fill="${U('wing')}"/><g clip-path="${U('cwing')}">${ov('wing', U('fxw'))}${patchEl}<path data-part="wingTip" d="${primD}" fill="${c.wingTip}"/><path class="ov" d="${primLines}" stroke="${dark(c.wingTip, .35)}" stroke-opacity=".5" stroke-width="1" fill="none"/></g>${partPattern('wing')}<path class="ov" d="${wingD}" fill="none" stroke="${dark(c.wing, .3)}" stroke-opacity=".45" stroke-width="1"/></g>`;
+
+  // feet
+  let feet = '';
+  [F.x - 11, F.x + 5].forEach(fx => {
+    feet += `<path d="M${fx + 1},${F.y - 10} L${fx + 2},${F.y - 1}" stroke="${dark(c.feet, .08)}" stroke-width="6" stroke-linecap="round"/>`;
+    feet += `<path d="M${fx - 4},${F.y - 1} Q${fx + 1},${F.y + 2} ${fx + 1},${F.y + 10}" stroke="${dark(c.feet, .06)}" stroke-width="4.5" fill="none" stroke-linecap="round"/>`;
+    feet += `<path d="M${fx - 1},${F.y - 2} Q${fx + 7},${F.y} ${fx + 7},${F.y + 9}" stroke="${c.feet}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+    feet += `<circle cx="${fx + 7}" cy="${F.y + 10.5}" r="1.6" fill="#3A3A3A"/><circle cx="${fx + 1}" cy="${F.y + 11.5}" r="1.5" fill="#3A3A3A"/>`;
+  });
+  const feetG = `<g data-part="feet">${feet}</g>`;
+
+  // head
+  let crest = '';
+  if (sp.crest) {
+    const cs = b.crestScale || 1;
+    const fs = CRESTS[sp.crest](hr, H).reverse();
+    crest = fs.map(f => { const q = quill(f.L * cs, f.bend * cs, f.w); const a0 = lerp(f.laid, f.raised, .3); return `<g data-feather="1" data-part="crest" data-i="${f.i}" data-x="${f1(f.x)}" data-y="${f1(f.y)}" data-laid="${f.laid}" data-raised="${f.raised}" transform="translate(${f1(f.x)} ${f1(f.y)}) rotate(${f1(a0)})"><path d="${q.d}" fill="${U('crest')}" stroke="${dark(c.crest, .12)}" stroke-width=".6" stroke-linejoin="round"/><path class="ov" d="${q.r}" stroke="${dark(c.crest, .22)}" stroke-opacity=".45" stroke-width=".7" fill="none"/></g>`; }).join('');
+  }
+  let face = '';
+  if (sp.face) { const fc = P(H.x + hr * sp.face.dx, H.y + hr * sp.face.dy); face = `<ellipse data-part="face" cx="${f1(fc.x)}" cy="${f1(fc.y)}" rx="${f1(hr * sp.face.rx)}" ry="${f1(hr * sp.face.ry)}" fill="${U('face')}" clip-path="${U('chead')}"/>`; }
+  const patchStyle = b.patch || sp.patch;
+  if (patchStyle === 'grey') { const pc2 = P(H.x + hr * .42, H.y + hr * .02); face += `<ellipse data-part="face" cx="${f1(pc2.x)}" cy="${f1(pc2.y)}" rx="${f1(hr * .42)}" ry="${f1(hr * .3)}" transform="rotate(-8 ${f1(pc2.x)} ${f1(pc2.y)})" fill="${U('patch')}" opacity=".95"/>`; }
+  if (patchStyle === 'macaw') {
+    const pc2 = P(H.x + hr * .4, H.y + hr * .18), prx = hr * .62, pry = hr * .46;
+    let dashes = '';
+    for (let r = 0; r < 3; r++) { const yy = pc2.y - pry * .25 + r * pry * .3; for (let xx = pc2.x - prx * .45 + r * 2; xx < pc2.x + prx * .2; xx += 5.5) dashes += `M${f1(xx)},${f1(yy)} l2.6,1.1 `; }
+    face += `<ellipse data-part="face" cx="${f1(pc2.x)}" cy="${f1(pc2.y)}" rx="${f1(prx)}" ry="${f1(pry)}" transform="rotate(12 ${f1(pc2.x)} ${f1(pc2.y)})" fill="${U('patch')}"/><path class="ov" d="${dashes}" stroke="${dark(c.head, .1)}" stroke-opacity=".75" stroke-width="1.2" stroke-linecap="round"/>`;
+  }
+  if (patchStyle === 'ring') { face += `<circle data-part="face" cx="${f1(E.x)}" cy="${f1(E.y)}" r="${f1(re * 1.75)}" fill="${c.face}"/><ellipse data-part="face" cx="${f1(Bk.x + bs * .05)}" cy="${f1(Bk.y + bs * .55)}" rx="${f1(bs * .38)}" ry="${f1(bs * .17)}" fill="${c.face}"/>`; }
+  let cheek = '';
+  if (sp.cheek === 'tiel') cheek = `<ellipse data-part="cheek" cx="${f1(H.x + hr * .18)}" cy="${f1(H.y + hr * .38)}" rx="${f1(hr * .3)}" ry="${f1(hr * .27)}" fill="${U('cheek')}"/>`;
+  if (sp.cheek === 'too') cheek = `<ellipse data-part="cheek" cx="${f1(H.x + hr * .1)}" cy="${f1(H.y + hr * .3)}" rx="${f1(hr * .32)}" ry="${f1(hr * .28)}" fill="${U('cheek')}" opacity=".7"/>`;
+  if (sp.cheek === 'budgie') {
+    cheek = `<ellipse data-part="cheek" cx="${f1(H.x + hr * .3)}" cy="${f1(H.y + hr * .62)}" rx="${f1(hr * .15)}" ry="${f1(hr * .11)}" transform="rotate(-20 ${f1(H.x + hr * .3)} ${f1(H.y + hr * .62)})" fill="${c.cheek}"/>`;
+    cheek += [.08, .3, .52].map(k => `<circle class="ov" cx="${f1(H.x + hr * k)}" cy="${f1(H.y + hr * .8)}" r="${f1(hr * .07)}" fill="#1B1B1B" clip-path="${U('chead')}"/>`).join('');
+  }
+  const ring = c.ring && c.ring !== 'none' && sp.parts.includes('ring') ? `<circle data-part="ring" cx="${f1(E.x)}" cy="${f1(E.y)}" r="${f1(re * 1.55)}" fill="${c.ring}"/>` : '';
+  const eye = `<g data-g="eye" data-part="iris" transform="translate(${f1(E.x)} ${f1(E.y)})"><circle r="${f1(re)}" fill="${U('iris')}"/><circle r="${f1(re * .55)}" fill="#0A0A0A"/><circle r="${f1(re)}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width=".8"/><circle cx="${f1(-re * .32)}" cy="${f1(-re * .36)}" r="${f1(re * .3)}" fill="#fff" opacity=".92"/><circle cx="${f1(re * .34)}" cy="${f1(re * .3)}" r="${f1(re * .12)}" fill="#fff" opacity=".55"/></g><path data-g="happy" class="ov" d="M${f1(E.x - re)},${f1(E.y + re * .2)} Q${f1(E.x)},${f1(E.y - re * 1.1)} ${f1(E.x + re)},${f1(E.y + re * .2)}" stroke="#1A1A1A" stroke-width="${f1(re * .45)}" fill="none" stroke-linecap="round" opacity="0"/>`;
+  const s = bs, k = Bk;
+  let upper, lower, ridge = '', extra = '';
+  if (sp.beak.type === 'cone') {
+    upper = `M${f1(k.x - s * .05)},${f1(k.y - s * .42)} Q${f1(k.x + s * .6)},${f1(k.y - s * .3)} ${f1(k.x + s * 1.05)},${f1(k.y + s * .06)} L${f1(k.x - s * .05)},${f1(k.y + s * .12)}Z`;
+    lower = `M${f1(k.x - s * .05)},${f1(k.y + s * .1)} L${f1(k.x + s * .95)},${f1(k.y + s * .1)} Q${f1(k.x + s * .5)},${f1(k.y + s * .42)} ${f1(k.x - s * .05)},${f1(k.y + s * .42)}Z`;
+  } else {
+    upper = `M${f1(k.x)},${f1(k.y - s * .55)} C${f1(k.x + s * .9)},${f1(k.y - s * .78)} ${f1(k.x + s * 1.3)},${f1(k.y - s * .1)} ${f1(k.x + s * .98)},${f1(k.y + s * .78)} C${f1(k.x + s * .86)},${f1(k.y + s * .32)} ${f1(k.x + s * .5)},${f1(k.y + s * .14)} ${f1(k.x - s * .05)},${f1(k.y + s * .22)}Z`;
+    lower = `M${f1(k.x - s * .05)},${f1(k.y + s * .12)} C${f1(k.x + s * .45)},${f1(k.y + s * .08)} ${f1(k.x + s * .78)},${f1(k.y + s * .34)} ${f1(k.x + s * .64)},${f1(k.y + s * .62)} C${f1(k.x + s * .38)},${f1(k.y + s * .76)} ${f1(k.x + s * .1)},${f1(k.y + s * .64)} ${f1(k.x - s * .08)},${f1(k.y + s * .48)}Z`;
+    ridge = `<path class="ov" d="M${f1(k.x + s * .1)},${f1(k.y - s * .5)} C${f1(k.x + s * .8)},${f1(k.y - s * .66)} ${f1(k.x + s * 1.12)},${f1(k.y - s * .15)} ${f1(k.x + s * .98)},${f1(k.y + s * .5)}" stroke="rgba(255,255,255,.35)" stroke-width="1.2" fill="none" stroke-linecap="round"/>`;
+    if (sp.beak.type === 'budgie') extra = `<ellipse data-part="cere" cx="${f1(k.x + s * .1)}" cy="${f1(k.y - s * .62)}" rx="${f1(s * .42)}" ry="${f1(s * .25)}" fill="${c.cere}"/><circle class="ov" cx="${f1(k.x + s * .22)}" cy="${f1(k.y - s * .62)}" r=".9" fill="rgba(0,0,0,.45)"/>`;
+    else extra = `<circle class="ov" cx="${f1(k.x + s * .14)}" cy="${f1(k.y - s * .42)}" r="${f1(Math.max(.9, s * .05))}" fill="rgba(0,0,0,.45)"/>`;
+  }
+  const beak = `<ellipse class="ov" cx="${f1(k.x + s * .35)}" cy="${f1(k.y + s * .3)}" rx="${f1(s * .38)}" ry="${f1(s * .22)}" fill="#3A1F24"/><g data-g="lower"><path data-part="${sp.parts.includes('lowerBeak') ? 'lowerBeak' : 'beak'}" d="${lower}" fill="${U('lbeak')}"/></g><path data-part="beak" d="${upper}" fill="${U('beak')}"/>${ridge}${extra}`;
+  const acc = accessorySVG(b.accessory, H, hr);
+  const headG = `<g data-g="head">${crest}<ellipse data-part="head" ${headEl} fill="${U('head')}"/>${ov('head', U('fx'))}${partPattern('head')}${face}${cheek}${ring}${eye}${beak}${acc}</g>`;
+
+  // treat (stage only)
+  let millet = '';
+  if (o.stage) {
+    const tp = rot(P(Bk.x + bs * 1.05, Bk.y + bs * .35), G.N, 22); const cx = tp.x + 5, cy = tp.y + 6;
+    let seeds = ''; for (let i = 0; i < 15; i++) { const yy = cy - 6 + i * 2.4, side = i % 2 ? 1 : -1; seeds += `<ellipse class="seed" cx="${f1(cx + side * 3.2 + Math.sin(i) * 1)}" cy="${f1(yy)}" rx="2.6" ry="2.1" fill="#E6C66A" stroke="#B89535" stroke-width=".6"/>`; }
+    millet = `<g data-g="millet" style="opacity:0;transition:opacity .3s"><path d="M${f1(cx + 3)},-30 Q${f1(cx + 6)},${f1(cy - 30)} ${f1(cx)},${f1(cy + 30)}" stroke="#B89535" stroke-width="2" fill="none"/>${seeds}</g>`;
+  }
+
+  const base = `translate(${F.x} ${F.y}) scale(${sp.scale}) translate(${-F.x} ${-F.y})`;
+  const vb = o.vb || '0 0 320 400';
+  return `<svg class="bird-svg" viewBox="${vb}" role="img" aria-label="${esc(b.name || 'A')} the ${sp.label.toLowerCase()}"><defs>${defs.join('')}</defs><g data-g="all" data-base="${base}" transform="${base}">${tailG}</g>${perch}<g data-g="all" data-base="${base}" transform="${base}">${bodyG}${wingG}${feetG}${headG}${millet}</g></svg>`;
+}
+function accessorySVG(kind, H, hr) {
+  const tx = f1(H.x - hr * .02), ty = f1(H.y - hr * .9);
+  switch (kind) {
+    case 'crown': return `<g class="ov" transform="translate(${tx} ${ty}) rotate(-10)"><path d="M${-hr * .42},2 L${-hr * .5},${-hr * .48} L${-hr * .22},${-hr * .2} L0,${-hr * .6} L${hr * .22},${-hr * .2} L${hr * .5},${-hr * .48} L${hr * .42},2 Z" fill="#F6C126" stroke="#B7801A" stroke-width="1.4" stroke-linejoin="round"/><circle cy="${-hr * .08}" r="${hr * .08}" fill="#E4413B"/><circle cx="${-hr * .26}" cy="${-hr * .04}" r="${hr * .06}" fill="#2E7FCE"/><circle cx="${hr * .26}" cy="${-hr * .04}" r="${hr * .06}" fill="#2BB3A8"/></g>`;
+    case 'party': return `<g class="ov" transform="translate(${tx} ${ty}) rotate(-16)"><path d="M${-hr * .34},3 L${hr * .02},${-hr}  L${hr * .36},3 Z" fill="#7A4FC9"/><path d="M${-hr * .21},${-hr * .3} L${hr * .23},${-hr * .3} M${-hr * .1},${-hr * .62} L${hr * .13},${-hr * .62}" stroke="#FFD84A" stroke-width="${hr * .1}" stroke-linecap="round"/><circle cx="${hr * .02}" cy="${-hr * 1.04}" r="${hr * .13}" fill="#FF7FA8"/></g>`;
+    case 'tophat': return `<g class="ov" transform="translate(${tx} ${ty}) rotate(-12)"><rect x="${-hr * .32}" y="${-hr * .72}" width="${hr * .64}" height="${hr * .68}" rx="${hr * .05}" fill="#2B3444"/><rect x="${-hr * .32}" y="${-hr * .26}" width="${hr * .64}" height="${hr * .12}" fill="#E4413B"/><rect x="${-hr * .5}" y="${-hr * .08}" width="${hr}" height="${hr * .14}" rx="${hr * .07}" fill="#232A36"/></g>`;
+    case 'bow': return `<g class="ov" transform="translate(${f1(H.x - hr * .38)} ${f1(H.y - hr * .74)}) rotate(-20)"><path d="M0 0 L${-hr * .36} ${-hr * .2} L${-hr * .36} ${hr * .2}Z M0 0 L${hr * .36} ${-hr * .2} L${hr * .36} ${hr * .2}Z" fill="#F2689C" stroke="#C94377" stroke-width="1.2" stroke-linejoin="round"/><circle r="${hr * .1}" fill="#C94377"/></g>`;
+    case 'flower': { let p = ''; for (let i = 0; i < 5; i++) { const a = i * 72 * DEG; p += `<circle cx="${f1(Math.cos(a) * hr * .16)}" cy="${f1(Math.sin(a) * hr * .16)}" r="${f1(hr * .14)}" fill="#FF8FB1"/>`; } return `<g class="ov" transform="translate(${f1(H.x - hr * .52)} ${f1(H.y - hr * .36)})">${p}<circle r="${f1(hr * .1)}" fill="#FFD84A"/></g>`; }
+  }
+  return '';
+}
+
+/* ---------- animation ---------- */
+const BPM = 132;
+class Actor {
+  constructor(host, pfx) {
+    this.G = GEOS[pfx];
+    const q = s => host.querySelector(`[data-g="${s}"]`);
+    this.alls = $$('[data-g="all"]', host); this.base = this.alls[0] ? this.alls[0].getAttribute('data-base') : '';
+    this.headEl = q('head'); this.bodyEl = q('body'); this.wingEl = q('wing'); this.tailEl = q('tail'); this.lowerEl = q('lower'); this.eyeEl = q('eye'); this.happyEl = q('happy'); this.millet = q('millet');
+    this.fs = $$('[data-feather]', host).map(el => ({el, x: +el.dataset.x, y: +el.dataset.y, laid: +el.dataset.laid, raised: +el.dataset.raised, i: +el.dataset.i}));
+    this.s = {crest: .3, crestT: .3, beak: 0, beakT: 0, talk: false, rot: 0, rotT: 0, bob: 0, bobT: 0, happy: 0, happyT: 0, flap: 0, flapT: 0, fluff: 0, fluffT: 0, hop: 0, hopT: 0, dance: false};
+    this.rest = .3; this.timers = new Set(); this.alive = true; this.last = performance.now(); this.blinkAt = this.last + 1200; this.blinkStart = -1e9; this.danceStart = 0;
+    this.reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.raf = requestAnimationFrame(t => this.tick(t));
+  }
+  later(ms, fn) { const id = setTimeout(() => { this.timers.delete(id); if (this.alive) fn(); }, ms); this.timers.add(id); return id; }
+  stop() { this.alive = false; cancelAnimationFrame(this.raf); this.timers.forEach(clearTimeout); this.timers.clear(); }
+  talk(on) { this.s.talk = on; if (!on) this.s.beakT = 0; }
+  excite(ms = 1400) { this.s.crestT = .95; clearTimeout(this.exT); this.exT = this.later(ms, () => { if (!this.s.dance) this.s.crestT = this.rest; }); }
+  chirpMove(dur) { this.excite(); this.s.bobT = -3; this.later(150, () => this.s.bobT = 0); this.talk(true); this.later(Math.max(200, dur * 1000), () => this.talk(false)); }
+  whistleMove(dur) { this.excite(dur * 1000 + 400); this.s.beakT = .22; this.later(dur * 1000, () => { if (!this.s.talk) this.s.beakT = 0; }); }
+  listen() { this.s.rotT = -13; this.s.crestT = .75; this.later(1500, () => { this.s.rotT = 0; }); }
+  happyFor(ms) { const s = this.s; s.happyT = 1; s.crestT = .05; s.fluffT = 1; s.rotT = 10; clearTimeout(this.hT); this.hT = this.later(ms, () => { s.happyT = 0; s.fluffT = 0; s.rotT = 0; s.crestT = this.rest; }); }
+  flapWings(n = 4) { let i = 0; const step = () => { if (i >= n * 2) { this.s.flapT = 0; return; } this.s.flapT = i % 2 ? .15 : 1; i++; this.later(115, step); }; step(); }
+  hop() { this.s.hopT = 16; this.later(260, () => this.s.hopT = 0); }
+  preen() { const s = this.s; s.rotT = 30; this.later(300, () => this.talk(true)); this.later(1300, () => { this.talk(false); s.rotT = 0; }); }
+  startDance() { this.s.dance = true; this.danceStart = performance.now(); this.s.crestT = 1; }
+  stopDance() { this.s.dance = false; this.s.crestT = this.rest; }
+  tick(now) {
+    if (!this.alive) return;
+    const dt = Math.min(.05, (now - this.last) / 1000); this.last = now;
+    const s = this.s, G = this.G, t = now / 1000, e = r => 1 - Math.exp(-r * dt);
+    s.crest += (s.crestT - s.crest) * e(7); s.rot += (s.rotT - s.rot) * e(9); s.bob += (s.bobT - s.bob) * e(16);
+    s.flap += (s.flapT - s.flap) * e(22); s.fluff += (s.fluffT - s.fluff) * e(5); s.hop += (s.hopT - s.hop) * e(12); s.happy += (s.happyT - s.happy) * e(10);
+    if (s.talk) s.beakT = (.5 + .5 * Math.sin(t * 25)) * (.55 + .45 * Math.sin(t * 6.1 + 1));
+    s.beak += (s.beakT - s.beak) * e(35);
+    if (now > this.blinkAt) { this.blinkStart = now; this.blinkAt = now + 2000 + Math.random() * 4500; }
+    const bp = (now - this.blinkStart) / 160, blink = bp >= 0 && bp < 1 ? Math.sin(bp * Math.PI) : 0;
+    const calm = this.reduce ? 0 : 1, breath = Math.sin(t * 2.3) * .012 * calm, sway = Math.sin(t * .8) * 1.4 * calm;
+    let db = 0, dr = 0;
+    if (s.dance) { const ph = (now - this.danceStart) / 1000 * BPM / 60; db = Math.abs(Math.sin(ph * Math.PI)) * 7 * (calm || .3); dr = Math.sin(ph * Math.PI) * 9 * (calm || .3); }
+    const at = `${this.base} translate(0 ${(-s.hop - db).toFixed(2)})`;
+    for (const el of this.alls) el.setAttribute('transform', at);
+    if (this.bodyEl) this.bodyEl.setAttribute('transform', `translate(${G.B.x} ${G.B.y}) scale(${(1 + s.fluff * .05).toFixed(3)} ${(1 + breath + s.fluff * .06).toFixed(3)}) translate(${-G.B.x} ${-G.B.y})`);
+    if (this.headEl) this.headEl.setAttribute('transform', `rotate(${(s.rot + sway * .6 + dr).toFixed(2)} ${G.N.x} ${G.N.y}) translate(${(-s.bob * .5).toFixed(2)} ${s.bob.toFixed(2)})`);
+    for (const f of this.fs) { const a = lerp(f.laid, f.raised, s.crest) + Math.sin(t * 1.6 + f.i * .7) * 1.3 * calm; f.el.setAttribute('transform', `translate(${f.x} ${f.y}) rotate(${a.toFixed(2)})`); }
+    if (this.lowerEl) this.lowerEl.setAttribute('transform', `rotate(${(s.beak * 17).toFixed(2)} ${G.hinge.x} ${G.hinge.y})`);
+    if (this.eyeEl) { const open = Math.max(.05, 1 - Math.max(blink * .92, s.happy)); this.eyeEl.setAttribute('transform', `translate(${G.E.x} ${G.E.y}) scale(1 ${open.toFixed(3)})`); }
+    if (this.happyEl) this.happyEl.setAttribute('opacity', s.happy.toFixed(2));
+    if (this.wingEl) this.wingEl.setAttribute('transform', `rotate(${(-s.flap * 48).toFixed(2)} ${G.S.x} ${G.S.y})`);
+    if (this.tailEl) this.tailEl.setAttribute('transform', `rotate(${(sway * .9 + (s.dance ? dr * .3 : 0)).toFixed(2)} ${G.R.x} ${G.R.y})`);
+    this.raf = requestAnimationFrame(tt => this.tick(tt));
+  }
+}
+
+/* ---------- sound ---------- */
+const AU = {ctx: null, out: null, on: true, unlocked: false, nb: null};
+function audio() {
+  if (!AU.on) return null;
+  if (!AU.ctx) {
+    const C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    const ctx = new C(); AU.ctx = ctx;
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.connect(ctx.destination);
+    const master = ctx.createGain(); master.gain.value = .9; master.connect(comp);
+    const conv = ctx.createConvolver(); const len = Math.floor(ctx.sampleRate * 1.3); const ir = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) { const dd = ir.getChannelData(ch); for (let i = 0; i < len; i++) dd[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+    conv.buffer = ir; const wet = ctx.createGain(); wet.gain.value = .16; master.connect(conv); conv.connect(wet); wet.connect(comp);
+    AU.out = master;
+  }
+  if (AU.ctx.state === 'suspended') AU.ctx.resume();
+  return AU.ctx;
+}
+function noiseBuf() { if (!AU.nb) { const ctx = AU.ctx; const b = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate); const d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; AU.nb = b; } return AU.nb; }
+function distCurve(k) { const n = 512, c = new Float32Array(n); for (let i = 0; i < n; i++) { const x = i * 2 / n - 1; c[i] = (1 + k) * x / (1 + k * Math.abs(x)); } return c; }
+function tone(t0, dur, curve, o = {}) {
+  const ctx = AU.ctx; if (!ctx) return;
+  const g = ctx.createGain(); const vol = o.vol ?? .25; const env = o.env || [[0, 0], [.08, 1], [.75, .8], [1, 0]];
+  g.gain.setValueAtTime(0, t0); env.forEach(([tf, v]) => g.gain.linearRampToValueAtTime(Math.max(0, v * vol), t0 + tf * dur));
+  let last = g;
+  if (o.shape) { const ws = ctx.createWaveShaper(); ws.curve = distCurve(o.shape); last.connect(ws); last = ws; }
+  if (o.filter) { const fl = ctx.createBiquadFilter(); fl.type = o.filter.type || 'bandpass'; fl.frequency.value = o.filter.f; fl.Q.value = o.filter.q || 1; last.connect(fl); last = fl; }
+  last.connect(AU.out);
+  (o.harm || [[1, 1]]).forEach(([m, hg]) => {
+    const osc = ctx.createOscillator(); osc.type = o.type || 'sine';
+    curve.forEach(([tf, f], i) => { const t = t0 + tf * dur; if (i === 0) osc.frequency.setValueAtTime(f * m, t); else osc.frequency.exponentialRampToValueAtTime(f * m, t); });
+    if (o.fm) { const l = ctx.createOscillator(); l.frequency.value = o.fm.rate; const lg = ctx.createGain(); lg.gain.value = o.fm.depth * m; l.connect(lg).connect(osc.frequency); l.start(t0); l.stop(t0 + dur + .05); }
+    const og = ctx.createGain(); og.gain.value = hg; osc.connect(og).connect(g); osc.start(t0); osc.stop(t0 + dur + .05);
+  });
+}
+function noise(t0, dur, o = {}) {
+  const ctx = AU.ctx; if (!ctx) return;
+  const src = ctx.createBufferSource(); src.buffer = noiseBuf(); const fl = ctx.createBiquadFilter(); fl.type = o.type || 'bandpass'; fl.frequency.value = o.f || 2000; fl.Q.value = o.q || 1;
+  const g = ctx.createGain(); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(o.vol || .2, t0 + Math.min(.01, dur * .2)); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+  src.connect(fl).connect(g).connect(AU.out); src.start(t0, Math.random() * .5); src.stop(t0 + dur + .02);
+}
+const CALLS = {
+  tiel(t) { const v = 1 + (Math.random() - .5) * .08; tone(t, .34, [[0, 2300 * v], [.22, 3500 * v], [.5, 3250 * v], [1, 2050 * v]], {harm: [[1, 1], [2, .22], [3, .07]], fm: {rate: 95, depth: 80}, vol: .2}); if (Math.random() < .5) { tone(t + .44, .3, [[0, 2400 * v], [.25, 3400 * v], [1, 2200 * v]], {harm: [[1, 1], [2, .2]], fm: {rate: 90, depth: 70}, vol: .17}); return .8; } return .4; },
+  budgie(t) { let x = t; const n = 8 + Math.random() * 10 | 0; for (let i = 0; i < n; i++) { const d = .04 + Math.random() * .07, f = 2600 + Math.random() * 2800; tone(x, d, [[0, f], [1, f * (.8 + Math.random() * .45)]], {harm: [[1, 1], [2, .15]], fm: {rate: 60 + Math.random() * 160, depth: 200 + Math.random() * 500}, vol: .1, env: [[0, 0], [.15, 1], [.7, .7], [1, 0]]}); if (Math.random() < .2) noise(x, .02, {f: 5000, q: 2, vol: .05}); x += d + .01 + Math.random() * .035; } return x - t; },
+  grey(t) { tone(t, .5, [[0, 1300], [.35, 2700], [.5, 2650], [1, 1500]], {fm: {rate: 6.5, depth: 22}, vol: .22, harm: [[1, 1], [2, .05]]}); noise(t + .56, .018, {f: 3000, q: 1.5, vol: .12}); tone(t + .62, .22, [[0, 1900], [1, 2300]], {vol: .18}); return .9; },
+  macaw(t) { tone(t, .55, [[0, 720], [.15, 920], [.6, 860], [1, 600]], {type: 'sawtooth', harm: [[1, 1], [1.5, .3]], fm: {rate: 34, depth: 140}, vol: .2, shape: 6, filter: {type: 'bandpass', f: 1500, q: .6}}); noise(t, .55, {f: 2600, q: .8, vol: .07}); return .6; },
+  too(t) { tone(t, .75, [[0, 1050], [.2, 1350], [.7, 1200], [1, 850]], {type: 'sawtooth', harm: [[1, 1], [2, .3]], fm: {rate: 42, depth: 160}, vol: .17, shape: 5, filter: {type: 'bandpass', f: 2200, q: .7}}); noise(t, .75, {f: 3200, q: .9, vol: .06}); return .8; },
+  love(t) { let x = t; const n = 3 + Math.random() * 3 | 0; for (let i = 0; i < n; i++) { tone(x, .06, [[0, 4000 + Math.random() * 400], [1, 5500 + Math.random() * 500]], {harm: [[1, 1], [2, .2]], vol: .14, env: [[0, 0], [.1, 1], [1, 0]]}); x += .09 + Math.random() * .03; } return x - t; },
+  canary(t) { let x = t; const phrases = 3 + Math.random() * 2 | 0; for (let p = 0; p < phrases; p++) { const kind = Math.random() * 3 | 0; const reps = kind === 1 ? 3 + Math.random() * 2 | 0 : 7 + Math.random() * 8 | 0; const f0 = 2400 + Math.random() * 1800; for (let r = 0; r < reps; r++) { if (kind === 0) { tone(x, .035, [[0, f0], [1, f0 * 1.5]], {vol: .11, env: [[0, 0], [.2, 1], [1, 0]]}); x += .045; } else if (kind === 1) { tone(x, .13, [[0, f0 * .9], [1, f0 * .8]], {vol: .11, fm: {rate: 30, depth: 60}}); x += .16; } else { tone(x, .03, [[0, f0 * 1.9], [1, f0 * 1.1]], {vol: .1, env: [[0, 0], [.2, 1], [1, 0]]}); x += .038; } } x += .08; } return x - t; }
+};
+function mallet(t, f, vol = .2) { tone(t, .7, [[0, f], [1, f]], {harm: [[1, 1], [4, .12], [10, .03]], vol, env: [[0, 0], [.01, 1], [.2, .35], [1, 0]]}); }
+function pluck(t, f, d, vol) { tone(t, Math.max(.18, d), [[0, f], [1, f]], {type: 'triangle', harm: [[1, 1], [2, .25], [3, .1]], vol, env: [[0, 0], [.03, 1], [.3, .45], [1, 0]]}); }
+function wolf(t0, vol = .2, m = 1) { tone(t0, .3, [[0, 1350 * m], [1, 2900 * m]], {vol, env: [[0, 0], [.1, 1], [.8, .9], [1, 0]], fm: {rate: 6, depth: 15}}); tone(t0 + .42, .62, [[0, 1300 * m], [.35, 2700 * m], [1, 1150 * m]], {vol, env: [[0, 0], [.08, 1], [.8, .8], [1, 0]], fm: {rate: 6, depth: 15}}); return 1.1; }
+function whistle(t0, notes, base, beat = .32, vol = .2) {
+  const ctx = AU.ctx; if (!ctx) return 0;
+  const osc = ctx.createOscillator(), osc2 = ctx.createOscillator(), g = ctx.createGain(), g2 = ctx.createGain(); g2.gain.value = .07;
+  const lfo = ctx.createOscillator(); lfo.frequency.value = 5.6; const lg = ctx.createGain(); lg.gain.value = base * .012; const lg2 = ctx.createGain(); lg2.gain.value = base * .024;
+  lfo.connect(lg).connect(osc.frequency); lfo.connect(lg2).connect(osc2.frequency);
+  g.gain.setValueAtTime(0, t0);
+  let t = t0;
+  notes.forEach(([semi, beats], i) => { const f = base * Math.pow(2, semi / 12), d = beats * beat; if (i === 0) { osc.frequency.setValueAtTime(f, t); osc2.frequency.setValueAtTime(f * 2, t); } else { osc.frequency.setTargetAtTime(f, t, .018); osc2.frequency.setTargetAtTime(f * 2, t, .018); } g.gain.setTargetAtTime(vol, t, .012); g.gain.setTargetAtTime(vol * .22, t + d - .06, .015); t += d; });
+  g.gain.setTargetAtTime(0, t, .03);
+  osc.connect(g); osc2.connect(g2).connect(g); g.connect(AU.out);
+  [osc, osc2, lfo].forEach(x => { x.start(t0); x.stop(t + .4); });
+  return t - t0;
+}
+function sfx(kind) {
+  const ctx = audio(); if (!ctx) return; const t = ctx.currentTime + .01;
+  if (kind === 'pop') tone(t, .07, [[0, 700], [1, 1200]], {vol: .06});
+  if (kind === 'crunch') for (let i = 0; i < 3; i++) noise(t + i * .035, .03, {f: 1800 + Math.random() * 1500, q: 1.2, vol: .24});
+  if (kind === 'purr') { for (let i = 0; i < 28; i++) noise(t + i * .03, .012, {f: 4200, q: 3, vol: .05}); tone(t, .7, [[0, 1800], [1, 1700]], {fm: {rate: 45, depth: 250}, vol: .045}); }
+  if (kind === 'flap') for (let i = 0; i < 5; i++) noise(t + i * .23, .1, {type: 'lowpass', f: 800, q: .5, vol: .22});
+  if (kind === 'win') [0, 4, 7, 12, 16].forEach((s, i) => mallet(t + i * .09, 1046.5 * Math.pow(2, s / 12), .14));
+}
+function playDance() {
+  const ctx = audio(); const beat = 60 / BPM;
+  const mel = [[12, .5], [16, .5], [19, .5], [16, .5], [17, .5], [21, .5], [24, 1], [23, .5], [21, .5], [19, .5], [17, .5], [16, 1], [14, 1], [12, .5], [16, .5], [19, .5], [21, .5], [19, .5], [16, .5], [14, .5], [16, .5], [12, 2]];
+  const total = mel.reduce((a, m) => a + m[1], 0) * beat;
+  if (!ctx) return total;
+  const t = ctx.currentTime + .05; let x = t;
+  mel.forEach(([s, b]) => { pluck(x, 261.63 * Math.pow(2, s / 12), b * beat * .9, .15); x += b * beat; });
+  [0, 0, 5, 5, 7, 7, 0, 0, 0, 0, 5, 7, 0, 0].forEach((s, i) => pluck(t + i * beat, 130.81 * Math.pow(2, s / 12), beat * .8, .11));
+  return total;
+}
+let VOICE = null;
+function getVoice() {
+  if (VOICE || !('speechSynthesis' in window)) return VOICE;
+  const vs = speechSynthesis.getVoices(); if (!vs.length) return null;
+  for (const name of ['Samantha', 'Karen', 'Moira', 'Tessa', 'Google US English', 'Aria', 'Jenny']) { const v = vs.find(x => x.name.includes(name) && /^en/i.test(x.lang)); if (v) return (VOICE = v); }
+  return (VOICE = vs.find(x => /^en/i.test(x.lang)) || null);
+}
+if ('speechSynthesis' in window) { try { speechSynthesis.onvoiceschanged = () => { VOICE = null; getVoice(); }; } catch (e) {} }
+function speak(text, o = {}) {
+  const done = () => o.onend && o.onend();
+  if (!AU.on || !('speechSynthesis' in window)) { setTimeout(done, 900); return false; }
+  try {
+    const u = new SpeechSynthesisUtterance(text); u.pitch = o.pitch ?? 1; u.rate = o.rate ?? 1; u.volume = 1;
+    const v = getVoice(); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'en-US';
+    let fin = false; const end = () => { if (fin) return; fin = true; done(); };
+    u.onend = end; u.onerror = end; setTimeout(end, 1400 + text.length * 120 / (o.rate || 1));
+    if (speechSynthesis.speaking) speechSynthesis.cancel();
+    speechSynthesis.speak(u); return true;
+  } catch (e) { setTimeout(done, 900); return false; }
+}
+function unlock() {
+  if (AU.unlocked) return; AU.unlocked = true; audio();
+  if ('speechSynthesis' in window && AU.on) { try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {} }
+  const h = $('#hint'); if (h) setTimeout(() => { h.style.opacity = 0; }, 2500);
+}
+document.addEventListener('pointerdown', unlock, true);
+
+/* ---------- storage ---------- */
+const LS_B = 'aviary.birds.v1', LS_S = 'aviary.settings.v1';
+const Store = {
+  mode: 'local', db: null, birds: new Map(), settings: {kidName: 'Havi', seeded: false, sound: true},
+  localAtLoad: [], pending: new Map(), dirty: new Map(), deleted: new Set(), flushing: false, ft: 0, readOnly: false,
+  loadLocal() { try { const b = JSON.parse(localStorage.getItem(LS_B) || 'null'); if (Array.isArray(b)) { b.forEach(x => this.birds.set(x.id, x)); this.localAtLoad = b; } const s = JSON.parse(localStorage.getItem(LS_S) || 'null'); if (s) Object.assign(this.settings, s); } catch (e) {} },
+  saveLocal() { try { localStorage.setItem(LS_B, JSON.stringify([...this.birds.values()])); localStorage.setItem(LS_S, JSON.stringify(this.settings)); } catch (e) {} },
+  seedLocal() { if (!this.birds.size && !this.settings.seeded) { const e = makeElvis(); this.birds.set(e.id, e); this.settings.seeded = true; this.saveLocal(); } },
+  async connect() {
+    if (!hasClaude) { this.seedLocal(); return; }
+    let db = null; try { db = await window.claude.use('db'); } catch (e) {}
+    if (!db) { this.seedLocal(); return; }
+    this.db = db; this.mode = 'db';
+    try { const snap = await db.doc('settings/app').get(); if (snap.exists) Object.assign(this.settings, snap.data()); } catch (e) { console.warn('settings', e); }
+    await new Promise(resolve => {
+      let first = true;
+      const finish = () => { if (first) { first = false; resolve(); } };
+      try {
+        this.unsub = db.collection('birds').onSnapshot(snap => {
+          if (snap.metadata.fromCache && snap.empty) return;
+          this.applySnap(snap);
+          if (!snap.metadata.fromCache && !this.seedChecked) { this.seedChecked = true; this.maybeSeed().finally(() => { finish(); onStoreChange(); }); return; }
+          if (first) finish(); else onStoreChange();
+        }, err => { console.warn('birds', err); if (first) { this.mode = 'local'; this.seedLocal(); finish(); } });
+      } catch (e) { console.warn(e); this.mode = 'local'; this.seedLocal(); finish(); }
+      setTimeout(() => { if (first) { if (!this.birds.size) this.seedLocal(); finish(); } }, 7000);
+    });
+  },
+  applySnap(snap) {
+    const now = Date.now(), next = new Map();
+    snap.docs.forEach(doc => { const id = doc.id; if (this.deleted.has(id)) return; if ((this.dirty.get(id) || 0) > now && this.birds.has(id)) { next.set(id, this.birds.get(id)); return; } const data = doc.data(); if (data && data.species && SPECIES[data.species]) next.set(id, clone(data)); });
+    this.birds.forEach((b, id) => { if (!next.has(id) && (this.dirty.get(id) || 0) > now) next.set(id, b); });
+    this.birds = next; this.saveLocal();
+  },
+  async maybeSeed() {
+    if (this.birds.size || this.settings.seeded) return;
+    const carry = this.localAtLoad.filter(b => b && b.species && SPECIES[b.species]);
+    const list = carry.length ? carry : [makeElvis()];
+    list.forEach(b => this.save(b));
+    this.settings.seeded = true; this.saveSettings();
+  },
+  save(b) {
+    b.updated = Date.now(); this.birds.set(b.id, b); this.deleted.delete(b.id); this.saveLocal();
+    if (this.mode !== 'db' || this.readOnly) return;
+    this.dirty.set(b.id, Date.now() + 5000); this.pending.set(b.id, b);
+    clearTimeout(this.ft); this.ft = setTimeout(() => this.flush(), 400);
+  },
+  async flush() {
+    if (this.flushing) return; this.flushing = true;
+    try {
+      while (this.pending.size) {
+        const [id, b] = this.pending.entries().next().value; this.pending.delete(id);
+        try { await this.db.collection('birds').doc(id).set(clone(b)); this.dirty.set(id, Date.now() + 1500); }
+        catch (e) { if (e && e.code === 'unavailable' && !b._retry) { b._retry = 1; setTimeout(() => { delete b._retry; this.save(b); }, 1500); } else this.writeErr(e); }
+      }
+    } finally { this.flushing = false; }
+  },
+  remove(id) { this.birds.delete(id); this.deleted.add(id); this.pending.delete(id); this.saveLocal(); if (this.mode === 'db' && !this.readOnly) this.db.collection('birds').doc(id).delete().catch(e => this.writeErr(e)); },
+  saveSettings() { this.saveLocal(); if (this.mode === 'db' && !this.readOnly) this.db.doc('settings/app').set({...this.settings}).catch(e => this.writeErr(e)); },
+  writeErr(e) {
+    const code = e && e.code; console.warn('save failed', e);
+    if (code === 'quota_exceeded') toast('The aviary is full. Let a bird fly away to make room.');
+    else if (code === 'invalid_argument' || code === 'not_granted') { this.readOnly = true; toast('Birds are saved on this device only right now.'); }
+    else if (code !== 'revoked') toast('Couldn’t save just now. Your bird is safe on this device.');
+  }
+};
+function kid() { return (Store.settings.kidName || 'Havi').trim() || 'Havi'; }
+function makeElvis() {
+  const e = newBird('cockatiel', 'normal', 'Elvis');
+  e.words = [{t: `Hi ${kid()}!`, reps: 5, learned: true}, {t: 'Pretty bird', reps: 5, learned: true}];
+  e.tunes = [{id: 'wolf', name: 'Wolf whistle', special: 'wolf', notes: null, reps: 2, learned: true}];
+  e.hearts = 10; e.created = 1; return e;
+}
+function onStoreChange() {
+  if (S.screen === 'aviary') renderAviary();
+  else if (S.screen === 'room' && !Store.birds.has(S.id)) go('aviary');
+}
+
+/* ---------- ui helpers ---------- */
+const IC = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>',
+  brush: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4.5l5 5L10 19H5v-5z"/><path d="M12.5 6.5l5 5"/></svg>',
+  mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z"/></svg>',
+  speaker: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  dice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.3" fill="currentColor"/><circle cx="15" cy="15" r="1.3" fill="currentColor"/><circle cx="15" cy="9" r="1.3" fill="currentColor"/><circle cx="9" cy="15" r="1.3" fill="currentColor"/></svg>',
+  sparkle: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.9 5.6 5.6 1.9-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.9zM18.5 15l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg>',
+  millet: '<svg viewBox="0 0 40 40"><path d="M20 36 Q22 20 16 4" stroke="#9C7A2C" stroke-width="2" fill="none"/>' + [0, 1, 2, 3, 4, 5, 6, 7].map(i => `<ellipse cx="${18 + (i % 2 ? 3.6 : -3.4) - i * .3}" cy="${8 + i * 3.4}" rx="3.4" ry="2.6" fill="#E6C66A" stroke="#B89535" stroke-width=".8"/>`).join('') + '</svg>',
+  hand: '<svg viewBox="0 0 40 40"><path d="M13 22V9.5a2.5 2.5 0 0 1 5 0V19M18 18V7.5a2.5 2.5 0 0 1 5 0V19M23 18.5V9.5a2.5 2.5 0 0 1 5 0v11M28 16a2.5 2.5 0 0 1 5 0v7c0 7-5 12-11 12-4.5 0-7-2-9.5-5.5L8 23.5a2.4 2.4 0 0 1 3.8-2.9L13 22" fill="#FFE0CC" stroke="#C0613A" stroke-width="2" stroke-linejoin="round"/><path d="M4 8l3 2M5 3l2 3" stroke="#D6336C" stroke-width="2" stroke-linecap="round"/></svg>',
+  music: '<svg viewBox="0 0 40 40"><path d="M15 29V9l17-4v19" fill="none" stroke="#2E5FA8" stroke-width="3" stroke-linejoin="round"/><ellipse cx="11" cy="29" rx="5" ry="4" fill="#2E5FA8"/><ellipse cx="28" cy="24" rx="5" ry="4" fill="#2E5FA8"/><path d="M15 14l17-4" stroke="#2E5FA8" stroke-width="3"/></svg>',
+  wing: '<svg viewBox="0 0 40 40"><path d="M6 30 C8 14 20 6 34 6 C30 10 29 13 30 16 C26 16 24 18 25 21 C21 21 19 24 20 27 C15 27 11 29 6 30Z" fill="#6CBD45" stroke="#2E7A38" stroke-width="2" stroke-linejoin="round"/><path d="M12 25 C17 18 24 12 32 8" stroke="#2E7A38" stroke-width="1.6" fill="none"/></svg>'
+};
+const EGG = `<svg viewBox="0 0 200 250" aria-hidden="true"><ellipse cx="100" cy="200" rx="70" ry="22" fill="#B7864F"/><path d="M34 196 q66 -34 132 0" stroke="#8A5A2B" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M100 60 C140 60 158 130 150 165 C144 192 124 204 100 204 C76 204 56 192 50 165 C42 130 60 60 100 60Z" fill="#FFF6E4" stroke="#E6D3AE" stroke-width="3"/><circle cx="82" cy="110" r="5" fill="#D9C39A"/><circle cx="118" cy="95" r="4" fill="#D9C39A"/><circle cx="112" cy="150" r="6" fill="#D9C39A"/><circle cx="86" cy="165" r="3.5" fill="#D9C39A"/><path d="M40 205 q60 18 120 0" stroke="#8A5A2B" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="150" cy="80" r="22" fill="#FFB836"/><path d="M150 70v20M140 80h20" stroke="#1F3047" stroke-width="5" stroke-linecap="round"/></svg>`;
+const app = $('#app');
+let actor = null;
+const S = {screen: 'loading', id: null, tab: 'play', lesson: null, tune: null, part: 'body', busyUntil: 0, idle: 0, nextIdle: 0, factIx: 0};
+function stopActor() { if (actor) { actor.stop(); actor = null; } }
+function isBusy() { return Date.now() < S.busyUntil; }
+function setBusy(ms) { S.busyUntil = Math.max(S.busyUntil, Date.now() + ms); S.nextIdle = Math.max(S.nextIdle, Date.now() + ms + 6000); }
+function cur() { return Store.birds.get(S.id); }
+let toastT = 0;
+function toast(msg, win) { const el = $('#toast'); el.textContent = msg; el.className = win ? 'win' : ''; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, win ? 3200 : 2600); }
+function bubble(who, text, ms) {
+  const el = $('#bub-' + who); if (!el) return;
+  el.innerHTML = (who === 'kid' ? `<small>${esc(kid())}</small>` : '') + esc(text);
+  el.hidden = false; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+  clearTimeout(el._t); el._t = setTimeout(() => { el.hidden = true; }, ms || 2600);
+}
+function hearts(n = 1) {
+  const st = $('#stage'); if (!st || !actor || !actor.headEl) return;
+  const sr = st.getBoundingClientRect(), hr = actor.headEl.getBoundingClientRect();
+  for (let i = 0; i < n; i++) setTimeout(() => { const h = document.createElement('div'); h.className = 'heart'; h.textContent = '♥'; h.style.left = (hr.left - sr.left + hr.width * (.3 + Math.random() * .4)) + 'px'; h.style.top = (hr.top - sr.top + 10) + 'px'; h.style.setProperty('--dx', ((Math.random() - .5) * 60) + 'px'); st.appendChild(h); setTimeout(() => h.remove(), 1500); }, i * 180);
+}
+function addLove(n) { const b = cur(); if (!b) return; b.hearts = (b.hearts || 0) + n; const el = $('#love span'); if (el) el.textContent = b.hearts; clearTimeout(S.loveT); S.loveT = setTimeout(() => { const bb = cur(); if (bb) Store.save(bb); }, 1500); }
+function feathers(cols) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for (let i = 0; i < 22; i++) {
+    const f = document.createElement('div'); f.className = 'feather'; const c = pick(cols);
+    f.innerHTML = `<svg viewBox="0 0 22 40"><path d="M11 39 L11 6" stroke="${dark(c, .3)}" stroke-width="1.2"/><path d="M11 3 C18 8 19 20 11 32 C3 20 4 8 11 3Z" fill="${c}"/></svg>`;
+    f.style.left = (Math.random() * 100) + 'vw'; f.style.animationDuration = (2.2 + Math.random() * 1.8) + 's'; f.style.animationDelay = (Math.random() * .6) + 's';
+    f.style.setProperty('--dx', ((Math.random() - .5) * 160) + 'px'); f.style.setProperty('--r', ((Math.random() - .5) * 720) + 'deg');
+    document.body.appendChild(f); setTimeout(() => f.remove(), 4800);
+  }
+}
+function celebrate(msg) {
+  const b = cur(); toast(msg, true); sfx('win');
+  if (b) feathers([b.colors.body, b.colors.wing, b.colors.face || b.colors.head, b.colors.tail, '#FFB836']);
+  if (actor) { actor.flapWings(3); actor.excite(2000); actor.hop(); }
+  hearts(4); addLove(3);
+}
+function go(screen, arg) {
+  stopActor(); closeSheet(); clearInterval(S.idle);
+  if ('speechSynthesis' in window) { try { speechSynthesis.cancel(); } catch (e) {} }
+  S.screen = screen;
+  if (screen === 'aviary') renderAviary();
+  else if (screen === 'room') renderRoom(arg);
+  else if (screen === 'design') renderDesign(arg);
+  window.scrollTo(0, 0);
+}
+function knowsLine(b) {
+  const w = (b.words || []).filter(x => x.learned).length, t = (b.tunes || []).filter(x => x.learned).length;
+  if (SPECIES[b.species].talk === 0) return `Sings ${t} song${t === 1 ? '' : 's'}`;
+  return `Says ${w} thing${w === 1 ? '' : 's'} · ${t} song${t === 1 ? '' : 's'}`;
+}
+const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+
+/* ---------- aviary ---------- */
+function renderAviary() {
+  S.screen = 'aviary';
+  const birds = [...Store.birds.values()].sort((a, b) => (a.created || 0) - (b.created || 0));
+  app.innerHTML = `
+  <header class="hero">
+    <div class="hero-row"><div><p class="eyebrow">Welcome to</p><h1>${esc(kid())}’s <em>Aviary</em></h1></div>
+    <button class="icon-btn" id="btnSettings" aria-label="Settings">${IC.gear}</button></div>
+    <p class="lede">${birds.length ? `${birds.length === 1 ? 'One bird lives' : birds.length + ' birds live'} here. Tap a bird to visit, or hatch a brand-new one.` : 'No birds yet — hatch your first one!'}</p>
+  </header>
+  <section class="grid">
+    ${birds.map((b, i) => `<button class="card" data-id="${b.id}"><div class="thumb">${SUN}${SCENE}${birdSVG(b, 'c' + i)}</div><div class="meta"><b>${esc(b.name)}</b><span>${SPECIES[b.species].label}</span><span class="knows">${knowsLine(b)}</span></div></button>`).join('')}
+    <button class="card new" id="btnNew"><div class="thumb">${EGG}</div><div class="meta"><b>Hatch a bird</b><span>Design your own</span></div></button>
+  </section>`;
+  $$('.card[data-id]').forEach(el => el.onclick = () => { sfx('pop'); go('room', el.dataset.id); });
+  $('#btnNew').onclick = () => { sfx('pop'); go('design', null); };
+  $('#btnSettings').onclick = openSettings;
+}
+
+/* ---------- bird room ---------- */
+function renderRoom(id) {
+  const b = Store.birds.get(id); if (!b) return renderAviary();
+  S.screen = 'room'; S.id = id; S.lesson = null; S.tune = null;
+  const sp = SPECIES[b.species];
+  app.innerHTML = `
+  <header class="top"><button class="icon-btn" id="btnBack" aria-label="Back to the aviary">${IC.back}</button>
+    <div class="ttl"><h1>${esc(b.name)}</h1><span class="sub">${sp.label}</span></div>
+    <button class="icon-btn" id="btnEdit" aria-label="Change how ${esc(b.name)} looks">${IC.brush}</button></header>
+  <div class="stage" id="stage">${SUN}${SCENE}<div class="layer" id="birdLayer">${birdSVG(b, 'r', {stage: true})}</div>
+    <div class="love" id="love">♥ <span>${b.hearts || 0}</span></div>
+    <div class="bubble bird" id="bub-bird" hidden></div><div class="bubble kid" id="bub-kid" hidden></div>
+    <div class="hint" id="hint">Tap ${esc(b.name)} · rub the head to scratch</div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="play" aria-selected="${S.tab === 'play'}">Play</button>
+    <button role="tab" data-tab="talk" aria-selected="${S.tab === 'talk'}">${sp.talk ? 'Talk' : 'Sing'}</button>
+    <button role="tab" data-tab="whistle" aria-selected="${S.tab === 'whistle'}">Whistle</button>
+  </nav>
+  <section class="panel" id="panel"></section>`;
+  actor = new Actor($('#birdLayer'), 'r');
+  $('#btnBack').onclick = () => go('aviary');
+  $('#btnEdit').onclick = () => go('design', id);
+  $$('.tabs button').forEach(t => t.onclick = () => { S.tab = t.dataset.tab; $$('.tabs button').forEach(x => x.setAttribute('aria-selected', x === t)); sfx('pop'); renderTab(); });
+  bindStage();
+  renderTab();
+  S.nextIdle = Date.now() + 7000;
+  S.idle = setInterval(idleTick, 1000);
+  if (AU.unlocked) setTimeout(greet, 700);
+}
+function greet() {
+  const b = cur(); if (!b || !actor) return;
+  const hi = b.words.find(w => w.learned && w.t.toLowerCase().includes(kid().toLowerCase()));
+  if (hi && SPECIES[b.species].talk) birdSays(hi.t); else doCall();
+}
+function bindStage() {
+  const st = $('#stage'); let ptr = null;
+  const HEAD = new Set(['head', 'face', 'crest', 'cheek', 'iris', 'ring', 'cere']);
+  st.addEventListener('pointerdown', e => { const el = e.target.closest('[data-part]'); ptr = {x: e.clientX, y: e.clientY, dist: 0, part: el ? el.dataset.part : null, t: Date.now()}; });
+  st.addEventListener('pointermove', e => { if (!ptr) return; ptr.dist += Math.hypot(e.clientX - ptr.x, e.clientY - ptr.y); ptr.x = e.clientX; ptr.y = e.clientY; if (ptr.dist > 45 && ptr.part && HEAD.has(ptr.part)) { ptr.dist = 0; ptr.moved = true; scratch(); } });
+  const up = () => { if (ptr && !ptr.moved && ptr.dist < 14 && Date.now() - ptr.t < 600 && ptr.part && ptr.part !== 'feet') tapBird(); ptr = null; };
+  st.addEventListener('pointerup', up); st.addEventListener('pointercancel', () => ptr = null);
+}
+function doCall() {
+  const b = cur(); if (!b || !actor) return;
+  const sp = SPECIES[b.species]; const ctx = audio(); let dur = .6;
+  if (ctx) dur = CALLS[sp.call](ctx.currentTime + .02);
+  actor.chirpMove(dur); setBusy(dur * 1000 + 200);
+}
+function tapBird() {
+  if (isBusy()) return;
+  const b = cur(); const sp = SPECIES[b.species]; const learned = b.words.filter(w => w.learned);
+  if (sp.talk && learned.length && Math.random() < .45) birdSays(pick(learned).t); else doCall();
+  addLove(1); hearts(1);
+}
+let lastScratch = 0;
+function scratch() {
+  if (!actor) return; const now = Date.now();
+  actor.happyFor(2200);
+  if (now - lastScratch > 900) { lastScratch = now; sfx('purr'); hearts(1); addLove(1); }
+  setBusy(1200);
+}
+function birdSays(text, after) {
+  const b = cur(); if (!b || !actor) return; const sp = SPECIES[b.species]; const a = actor;
+  if (!sp.voice) { birdSing(after); return; }
+  bubble('bird', text, 1700 + text.length * 90); setBusy(1700 + text.length * 90);
+  const ctx = audio(); if (ctx) tone(ctx.currentTime + .01, .09, [[0, 2600], [1, 3400]], {vol: .07});
+  a.excite(1500 + text.length * 80); a.talk(true);
+  setTimeout(() => speak(text, {pitch: sp.voice.pitch, rate: sp.voice.rate, onend: () => { if (a.alive) a.talk(false); after && after(); }}), 110);
+}
+function birdSing(after) {
+  const ctx = audio(); let dur = 2; if (ctx) dur = CALLS.canary(ctx.currentTime + .02);
+  if (actor) actor.whistleMove(dur); bubble('bird', '♪ ♫ ♪', dur * 1000 + 300); setBusy(dur * 1000 + 300);
+  setTimeout(() => after && after(), dur * 1000);
+}
+function idleTick() {
+  if (S.screen !== 'room' || !actor || document.hidden) return;
+  const now = Date.now(); if (now < S.busyUntil || now < S.nextIdle) return;
+  S.nextIdle = now + 9000 + Math.random() * 13000;
+  const b = cur(); if (!b) return; const sp = SPECIES[b.species]; const r = Math.random();
+  const learned = b.words.filter(w => w.learned), tunes = b.tunes.filter(t => t.learned);
+  if (!AU.unlocked) { if (r < .5) actor.preen(); else actor.listen(); return; }
+  if (r < .32 && learned.length && sp.talk) birdSays(pick(learned).t);
+  else if (r < .52) doCall();
+  else if (r < .66 && tunes.length) birdWhistle(pick(tunes), 1);
+  else if (r < .84) actor.preen();
+  else { actor.flapWings(2); sfx('flap'); }
+}
+function renderTab() {
+  const p = $('#panel'); if (!p) return;
+  if (S.tab === 'play') renderPlay(p); else if (S.tab === 'talk') renderTalk(p); else renderWhistle(p);
+}
+
+/* play */
+function renderPlay(p) {
+  const b = cur(), sp = SPECIES[b.species];
+  p.innerHTML = `
+  <div class="tiles">
+    <button class="tile t1" id="aTreat">${IC.millet}<span>Millet treat<small>A crunchy snack</small></span></button>
+    <button class="tile t2" id="aScratch">${IC.hand}<span>Head scratch<small>Or rub the head on screen</small></span></button>
+    <button class="tile t3" id="aDance">${IC.music}<span>Dance party<small>${esc(b.name)} bobs along</small></span></button>
+    <button class="tile t4" id="aFlap">${IC.wing}<span>Flap &amp; hop<small>Big wing stretch</small></span></button>
+  </div>
+  <div class="fact"><span class="eyebrow">${sp.label} fact</span><p id="factText">${esc(sp.facts[S.factIx % sp.facts.length])}</p><button class="linkbtn" id="nextFact">Another fact</button></div>
+  <div class="stars"><span>Talking <b>${stars(sp.talk)}</b></span><span>Whistling <b>${stars(sp.sing)}</b></span></div>`;
+  $('#aTreat').onclick = giveTreat;
+  $('#aScratch').onclick = () => { scratch(); setTimeout(scratch, 900); setTimeout(scratch, 1800); };
+  $('#aDance').onclick = dance;
+  $('#aFlap').onclick = () => { if (isBusy() || !actor) return; actor.flapWings(5); actor.hop(); actor.later(700, () => actor && actor.hop()); sfx('flap'); setBusy(1400); addLove(1); };
+  $('#nextFact').onclick = () => { S.factIx++; $('#factText').textContent = sp.facts[S.factIx % sp.facts.length]; sfx('pop'); };
+}
+function giveTreat() {
+  if (isBusy() || !actor || !actor.millet) return;
+  const a = actor, m = a.millet, seeds = $$('.seed', m);
+  setBusy(4600); seeds.forEach(s => s.style.opacity = 1); m.style.opacity = 1; a.excite(900);
+  a.later(500, () => { a.s.rotT = 16; });
+  let i = 0;
+  const peck = () => {
+    if (i >= 5) { a.s.rotT = 0; m.style.opacity = 0; a.later(350, () => { a.happyFor(1600); sfx('purr'); hearts(3); addLove(2); }); return; }
+    a.s.rotT = 25; a.s.beakT = .5;
+    a.later(130, () => { a.s.rotT = 15; a.s.beakT = 0; sfx('crunch'); seeds.slice(i * 3, i * 3 + 3).forEach(s => s.style.opacity = 0); i++; a.later(430, peck); });
+  };
+  a.later(850, peck);
+}
+function dance() {
+  if (isBusy() || !actor) return;
+  const a = actor; const dur = playDance(); a.startDance(); setBusy(dur * 1000 + 600);
+  const b = cur(); const tunes = b.tunes.filter(t => t.learned && t.special === 'wolf');
+  a.later(dur * 1000, () => { a.stopDance(); a.flapWings(2); if (tunes.length) birdWhistle(tunes[0], 1); else doCall(); hearts(2); addLove(2); });
+}
+
+/* talk */
+function phrases() { return ['Hello!', `Hi ${kid()}!`, 'I love you', 'Pretty bird', 'Good morning!', 'Give me a kiss', "What's up?", 'Peek-a-boo!', 'Want a snack?', 'Good night', 'Yummy!', 'Uh oh!']; }
+function dotsHTML(reps, need, learned) {
+  if (!isFinite(need)) return '';
+  let s = ''; for (let i = 0; i < need; i++) s += `<span class="dot ${learned || i < reps ? 'on' : ''}"></span>`;
+  return s + `<span class="lbl">${learned ? 'Learned!' : `${Math.min(reps, need)} of ${need}`}</span>`;
+}
+function renderTalk(p) {
+  const b = cur(), sp = SPECIES[b.species];
+  if (!sp.talk) {
+    p.innerHTML = `<div class="note"><b>Canaries don’t talk — they sing!</b><br>Tap below to hear ${esc(b.name)}’s song, or use the Whistle tab to teach a tune.</div><button class="btn go big" id="singNow">${IC.play} Sing, ${esc(b.name)}!</button>`;
+    $('#singNow').onclick = () => { if (!isBusy()) { birdSing(); addLove(1); } };
+    return;
+  }
+  const L = S.lesson, w = L ? b.words.find(x => x.t.toLowerCase() === L.toLowerCase()) : null, need = sp.needs.word;
+  const known = b.words.slice().sort((x, y) => (y.learned ? 1 : 0) - (x.learned ? 1 : 0));
+  p.innerHTML = `
+  <div class="lesson">
+    ${L ? `<span class="eyebrow">Teaching ${esc(b.name)}</span><p class="phrase">“${esc(L)}”</p><div class="dots">${dotsHTML(w ? w.reps : 0, need, w && w.learned)}</div>
+      <div class="row"><button class="btn go big" id="teachBtn">Say it to ${esc(b.name)}</button><button class="btn" id="hearBtn" aria-label="Hear the words">${IC.speaker}</button></div>
+      <p class="fine">Say it out loud, then tap the yellow button. ${sp.label}s need to hear something about ${need} time${need === 1 ? '' : 's'} to learn it.</p>`
+    : `<span class="eyebrow">Teach ${esc(b.name)} to talk</span><p class="phrase" style="font-size:24px">Pick some words below, or type your own.</p>`}
+  </div>
+  ${MIC ? `<div class="lesson"><span class="eyebrow">Parrot mode</span><p>Hold the button, say something to ${esc(b.name)}, then let go. ${esc(b.name)} will copy your voice!</p><div class="row"><button class="btn go big" id="micBtn">${IC.mic} Hold to talk</button><button class="btn" id="micAgain" aria-label="Hear it again" ${Rec.last ? '' : 'disabled'}>${IC.play}</button></div></div>` : ''}
+  <div class="chips">${phrases().map(t => `<button class="chip" data-ph="${esc(t)}" aria-pressed="${L === t}">${esc(t)}</button>`).join('')}</div>
+  <form class="custom" id="customForm"><input id="customPhrase" maxlength="40" placeholder="Type your own words…" autocomplete="off" enterkeyhint="done"><button class="btn go" type="submit">Teach</button></form>
+  <h3>What ${esc(b.name)} can say</h3>
+  <div class="known">${known.length ? known.map((x, i) => `<span class="word ${x.learned ? '' : 'learning'}"><button data-say="${i}">${x.learned ? IC.play : ''}${esc(x.t)}${x.learned ? '' : ` <small>(${Math.min(x.reps, need)}/${need})</small>`}</button><button class="x" data-forget="${i}" aria-label="Forget ${esc(x.t)}">×</button></span>`).join('') : `<p class="empty">Nothing yet — teach ${esc(b.name)} some words!</p>`}</div>`;
+  $$('[data-ph]', p).forEach(el => el.onclick = () => { S.lesson = el.dataset.ph; sfx('pop'); renderTalk(p); });
+  $('#customForm').onsubmit = e => { e.preventDefault(); const v = $('#customPhrase').value.trim().replace(/\s+/g, ' '); if (!v) return; S.lesson = v; renderTalk(p); setTimeout(() => { const t = $('#teachBtn'); t && t.scrollIntoView({block: 'center', behavior: 'smooth'}); }, 50); };
+  if (MIC) bindMic();
+  if (L) {
+    $('#teachBtn').onclick = teachWord;
+    $('#hearBtn').onclick = () => { if (!isBusy()) { bubble('kid', L, 2000); speak(L, {pitch: 1, rate: .9}); } };
+  }
+  $$('[data-say]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.say]; if (x.learned) { if (!isBusy()) { birdSays(x.t); addLove(1); } } else { S.lesson = x.t; renderTalk(p); } });
+  $$('[data-forget]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.forget]; b.words = b.words.filter(y => y !== x); if (S.lesson && S.lesson.toLowerCase() === x.t.toLowerCase()) S.lesson = null; Store.save(b); renderTalk(p); });
+}
+function teachWord() {
+  const b = cur(), sp = SPECIES[b.species], t = S.lesson; if (!t || isBusy() || !actor) return;
+  let w = b.words.find(x => x.t.toLowerCase() === t.toLowerCase());
+  if (!w) { if (b.words.length >= 40) { toast(`${b.name} knows a lot already! Forget a word to teach a new one.`); return; } w = {t, reps: 0, learned: false}; b.words.push(w); }
+  const a = actor; bubble('kid', t, 1800); a.listen(); setBusy(3200); addLove(1);
+  a.later(1350, () => {
+    const need = sp.needs.word;
+    if (!w.learned) w.reps++;
+    const p = Math.min(1, w.reps / need);
+    if (w.learned || p >= 1) { const first = !w.learned; w.learned = true; birdSays(t, () => { if (first) celebrate(`${b.name} learned “${t}”!`); }); }
+    else if (w.reps === 1) { doCall(); bubble('bird', '?', 1200); }
+    else { const words = t.split(/\s+/); const k = Math.max(1, Math.floor(p * words.length)); let tryIt = words.slice(0, k).join(' '); if (k === words.length) tryIt = tryIt.slice(0, Math.max(2, Math.ceil(tryIt.length * .6))); birdSays(tryIt + '…?'); }
+    Store.save(b); if (S.tab === 'talk') renderTalk($('#panel'));
+  });
+}
+
+/* parrot mode: record Havi, the bird copies her voice */
+const Rec = {stream: null, node: null, chunks: null, pressing: false, last: null};
+const PARROT_RATE = {budgie: 1.45, cockatiel: 1.38, lovebird: 1.5, cockatoo: 1.27, grey: 1.12, macaw: 1.08, canary: 1.6};
+function bindMic() {
+  const btn = $('#micBtn'); if (!btn) return;
+  const down = e => { e.preventDefault(); if (Rec.pressing || isBusy()) return; Rec.pressing = true; btn.classList.add('rec'); btn.lastChild.textContent = ' Listening…'; micStart(); };
+  const upH = e => { if (!Rec.pressing) return; e.preventDefault(); Rec.pressing = false; btn.classList.remove('rec'); btn.lastChild.textContent = ' Hold to talk'; micStop(); };
+  btn.addEventListener('pointerdown', down); btn.addEventListener('pointerup', upH); btn.addEventListener('pointercancel', upH); btn.addEventListener('pointerleave', upH);
+  btn.addEventListener('contextmenu', e => e.preventDefault());
+  const again = $('#micAgain'); if (again) again.onclick = () => { if (Rec.last && !isBusy()) parrotPlay(Rec.last); };
+}
+async function micStart() {
+  const ctx = audio(); if (!ctx) { toast('Turn sounds on in Settings first.'); return; }
+  try { if (navigator.audioSession) navigator.audioSession.type = 'play-and-record'; } catch (e) {}
+  try { if (!Rec.stream) Rec.stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true, autoGainControl: true}}); }
+  catch (e) { Rec.pressing = false; const b = $('#micBtn'); if (b) { b.classList.remove('rec'); b.lastChild.textContent = ' Hold to talk'; } toast('The microphone is off. A grown-up can turn it on in Settings.'); return; }
+  if (ctx.state === 'suspended') await ctx.resume();
+  if (!Rec.pressing) { micRelease(); return; }
+  const src = ctx.createMediaStreamSource(Rec.stream), proc = ctx.createScriptProcessor(4096, 1, 1), mute = ctx.createGain(); mute.gain.value = 0;
+  const chunks = []; proc.onaudioprocess = e => { if (chunks.length < 400) chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+  src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
+  Rec.node = {src, proc, mute}; Rec.chunks = chunks; Rec.t0 = Date.now();
+  if (actor) { actor.s.rotT = -13; actor.s.crestT = .8; }
+}
+function micRelease() {
+  if (Rec.node) { try { Rec.node.src.disconnect(); Rec.node.proc.disconnect(); Rec.node.mute.disconnect(); } catch (e) {} Rec.node = null; }
+  if (Rec.stream) { Rec.stream.getTracks().forEach(t => t.stop()); Rec.stream = null; }
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+}
+function micStop() {
+  const chunks = Rec.chunks; Rec.chunks = null; const wasRecording = !!Rec.node; micRelease();
+  if (actor) { actor.s.rotT = 0; actor.s.crestT = actor.rest; }
+  if (!wasRecording || !chunks) return;
+  const ctx = AU.ctx, sr = ctx.sampleRate, len = chunks.reduce((a, c) => a + c.length, 0);
+  if (len < sr * .35) { toast('Keep holding the button while you talk.'); return; }
+  const all = new Float32Array(len); let o = 0; chunks.forEach(c => { all.set(c, o); o += c.length; });
+  let peak = 0; for (let i = 0; i < len; i++) peak = Math.max(peak, Math.abs(all[i]));
+  if (peak < .01) { toast(`${cur().name} couldn’t hear you. Try talking a little louder.`); return; }
+  const th = peak * .06; let a = 0, z = len - 1; while (a < len && Math.abs(all[a]) < th) a++; while (z > a && Math.abs(all[z]) < th) z--;
+  a = Math.max(0, a - Math.floor(sr * .05)); z = Math.min(len - 1, z + Math.floor(sr * .08));
+  const n = Math.min(z - a + 1, sr * 6), buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0), k = .85 / peak;
+  for (let i = 0; i < n; i++) { const fade = Math.min(1, i / 200, (n - i) / 400); d[i] = all[a + i] * k * fade; }
+  Rec.last = buf; const again = $('#micAgain'); if (again) again.disabled = false;
+  bubble('kid', '🎤 …', 900);
+  setTimeout(() => parrotPlay(buf), 650);
+}
+function parrotPlay(buf) {
+  const b = cur(); const ctx = audio(); if (!b || !ctx || !actor) return;
+  const rate = PARROT_RATE[b.species] || 1.3, t = ctx.currentTime + .16;
+  tone(ctx.currentTime + .01, .09, [[0, 2600], [1, 3400]], {vol: .07});
+  const src = ctx.createBufferSource(); src.buffer = buf; src.playbackRate.value = rate;
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 420;
+  const pk = ctx.createBiquadFilter(); pk.type = 'peaking'; pk.frequency.value = 2700; pk.gain.value = 8; pk.Q.value = 1;
+  const ws = ctx.createWaveShaper(); ws.curve = distCurve(2.2);
+  const g = ctx.createGain(); g.gain.value = .95;
+  src.connect(hp).connect(pk).connect(ws).connect(g).connect(AU.out); src.start(t);
+  const dur = buf.duration / rate; const a = actor;
+  a.excite(dur * 1000 + 800); a.later(160, () => a.talk(true)); a.later(160 + dur * 1000, () => a.talk(false));
+  bubble('bird', 'Copying you!', dur * 1000 + 900); setBusy(dur * 1000 + 500); addLove(1);
+  a.later(dur * 1000 + 400, () => hearts(2));
+}
+
+/* whistle */
+const SCALE = [0, 2, 4, 5, 7, 9, 11, 12];
+const KEYC = ['#E4413B', '#F0873A', '#F5C024', '#6CBD45', '#2BB3A8', '#2E7FCE', '#7A4FC9', '#E27A9E'];
+const TUNES = {
+  wolf: {name: 'Wolf whistle', special: 'wolf'},
+  twinkle: {name: 'Twinkle Twinkle', notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]]},
+  birthday: {name: 'Happy Birthday', notes: [[0, .75], [0, .25], [2, 1], [0, 1], [5, 1], [4, 2], [0, .75], [0, .25], [2, 1], [0, 1], [7, 1], [5, 2]]},
+  mac: {name: 'Old MacDonald', notes: [[5, 1], [5, 1], [5, 1], [0, 1], [2, 1], [2, 1], [0, 2], [9, 1], [9, 1], [7, 1], [7, 1], [5, 2]]},
+  mary: {name: 'Mary’s Lamb', notes: [[4, 1], [2, 1], [0, 1], [2, 1], [4, 1], [4, 1], [4, 2], [2, 1], [2, 1], [2, 2], [4, 1], [7, 1], [7, 2]]}
+};
+const semiColor = s => KEYC[Math.max(0, SCALE.indexOf(s))] || '#999';
+function findTune(b, tn) { if (!tn) return null; return b.tunes.find(x => tn.special ? x.special === tn.special : x.notes && JSON.stringify(x.notes) === JSON.stringify(tn.notes)); }
+function melodyHTML() {
+  const tn = S.tune;
+  if (!tn || (!tn.special && !tn.notes.length)) return '<span class="empty">Tap the colored bars to make a tune</span>';
+  if (tn.special) return `<b>〜 ${esc(tn.name)} 〜</b>`;
+  return tn.notes.map(([s, bt]) => `<span class="nd ${bt >= 2 ? 'long' : ''}" style="background:${semiColor(s)}"></span>`).join('');
+}
+function renderWhistle(p) {
+  const b = cur(), sp = SPECIES[b.species], need = sp.needs.tune, lesson = findTune(b, S.tune);
+  const known = b.tunes.slice().sort((x, y) => (y.learned ? 1 : 0) - (x.learned ? 1 : 0));
+  p.innerHTML = `
+  <p>Play a little tune on the xylophone, then teach it to ${esc(b.name)}.</p>
+  <div class="xylo">${SCALE.map((s, i) => `<button class="key" data-k="${i}" style="--c:${KEYC[i]};--h:${100 - i * 6}%" aria-label="Note ${i + 1}"></button>`).join('')}</div>
+  <div class="melody" id="melody">${melodyHTML()}</div>
+  <div class="row3"><button class="btn" id="tPlay">${IC.play} Play</button><button class="btn" id="tClear">Clear</button><button class="btn go" id="tTeach">Teach ${esc(b.name)}</button></div>
+  <div class="dots" id="tDots">${lesson ? dotsHTML(lesson.reps, need, lesson.learned) : ''}</div>
+  <h3>Famous tunes</h3>
+  <div class="chips">${Object.entries(TUNES).map(([k, t]) => `<button class="chip" data-preset="${k}" aria-pressed="${!!(S.tune && S.tune.preset === k)}">${esc(t.name)}</button>`).join('')}</div>
+  <h3>Songs ${esc(b.name)} can whistle</h3>
+  <div class="known">${known.length ? known.map((x, i) => `<span class="word ${x.learned ? '' : 'learning'}"><button data-wt="${i}">${x.learned ? IC.play : ''}${esc(x.name)}${x.learned ? '' : ` <small>(${Math.min(x.reps, need)}/${need})</small>`}</button><button class="x" data-ft="${i}" aria-label="Forget ${esc(x.name)}">×</button></span>`).join('') : `<p class="empty">No songs yet — make one up!</p>`}</div>`;
+  $$('.key', p).forEach(k => k.addEventListener('pointerdown', e => {
+    e.preventDefault(); const i = +k.dataset.k; const ctx = audio(); if (ctx) mallet(ctx.currentTime + .005, 523.25 * Math.pow(2, SCALE[i] / 12));
+    k.classList.add('hit'); setTimeout(() => k.classList.remove('hit'), 140);
+    if (!S.tune || S.tune.special || S.tune.preset) S.tune = {notes: []};
+    if (S.tune.notes.length < 16) S.tune.notes.push([SCALE[i], 1]);
+    $('#melody').innerHTML = melodyHTML(); const ls = findTune(b, S.tune); $('#tDots').innerHTML = ls ? dotsHTML(ls.reps, need, ls.learned) : '';
+    $$('[data-preset]', p).forEach(c => c.setAttribute('aria-pressed', 'false'));
+  }));
+  $('#tPlay').onclick = () => { if (!isBusy()) kidPlay(S.tune); };
+  $('#tClear').onclick = () => { S.tune = null; renderWhistle(p); };
+  $('#tTeach').onclick = teachTune;
+  $$('[data-preset]', p).forEach(el => el.onclick = () => { const k = el.dataset.preset, t = TUNES[k]; S.tune = {preset: k, name: t.name, special: t.special || null, notes: t.notes ? clone(t.notes) : null}; renderWhistle(p); if (!isBusy()) kidPlay(S.tune); });
+  $$('[data-wt]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.wt]; if (x.learned) { if (!isBusy()) { birdWhistle(x, 1); addLove(1); } } else { S.tune = {name: x.name, special: x.special || null, notes: x.notes ? clone(x.notes) : null}; renderWhistle(p); } });
+  $$('[data-ft]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.ft]; b.tunes = b.tunes.filter(y => y !== x); Store.save(b); renderWhistle(p); });
+}
+function kidPlay(tn) {
+  if (!tn || (!tn.special && !(tn.notes && tn.notes.length))) { toast('Tap the colored bars to make a tune first.'); return 0; }
+  const ctx = audio(); let dur = 1.2;
+  if (ctx) { const t = ctx.currentTime + .05; if (tn.special === 'wolf') dur = wolf(t, .12, .8); else { let x = t; tn.notes.forEach(([s, bt]) => { mallet(x, 523.25 * Math.pow(2, s / 12), .2); x += bt * .32; }); dur = x - t; } }
+  else if (tn.notes) dur = tn.notes.reduce((a, n) => a + n[1] * .32, 0);
+  bubble('kid', '♪ ♪ ♪', dur * 1000 + 300); setBusy(dur * 1000 + 200);
+  return dur;
+}
+function birdWhistle(tn, p = 1) {
+  const b = cur(); if (!b || !actor) return 0; const sp = SPECIES[b.species]; const ctx = audio(); let dur = 1.2;
+  if (ctx) { const t = ctx.currentTime + .05;
+    if (tn.special === 'wolf') dur = wolf(t, .2, sp.whistleBase / 1046.5);
+    else { let notes = tn.notes; if (p < 1) { const k = Math.max(2, Math.ceil(notes.length * p)); notes = notes.slice(0, k).map(([s, bt]) => [Math.random() < (1 - p) * .5 ? s + pick([-2, -1, 1, 2]) : s, bt]); } dur = whistle(t, notes, sp.whistleBase); }
+  }
+  actor.whistleMove(dur); bubble('bird', '♪ ♫ ♪', dur * 1000 + 400); setBusy(dur * 1000 + 300);
+  return dur;
+}
+function teachTune() {
+  const b = cur(), sp = SPECIES[b.species], tn = S.tune; if (isBusy() || !actor) return;
+  if (!tn || (!tn.special && !(tn.notes && tn.notes.length))) { toast('Tap the colored bars to make a tune first.'); return; }
+  if (!tn.special && tn.notes.length < 2) { toast('Add at least two notes.'); return; }
+  let rec = findTune(b, tn);
+  if (!rec) { if (b.tunes.length >= 20) { toast(`${b.name} knows lots of songs! Forget one first.`); return; } const n = b.tunes.filter(x => !x.special && !TUNES[x.preset]).length + 1; rec = {id: uid(), name: tn.name || `${kid()}’s song ${n}`, preset: tn.preset || null, special: tn.special || null, notes: tn.notes ? clone(tn.notes) : null, reps: 0, learned: false}; b.tunes.push(rec); }
+  const dur = kidPlay(tn); const a = actor; a.listen(); setBusy(dur * 1000 + 3000); addLove(1);
+  a.later(dur * 1000 + 700, () => {
+    const need = sp.needs.tune; if (!rec.learned) rec.reps++;
+    const p = Math.min(1, rec.reps / need);
+    if (rec.learned || p >= 1) { const first = !rec.learned; rec.learned = true; const d = birdWhistle(rec, 1); if (first) a.later(d * 1000 + 200, () => celebrate(`${b.name} learned ${rec.name}!`)); }
+    else if (rec.reps === 1 && need > 2) { doCall(); bubble('bird', '?', 1200); }
+    else birdWhistle(rec, Math.max(.35, p));
+    Store.save(b); if (S.tab === 'whistle') { const ls = findTune(b, S.tune); const el = $('#tDots'); if (el) el.innerHTML = ls ? dotsHTML(ls.reps, need, ls.learned) : ''; a.later(1500, () => { if (S.tab === 'whistle' && S.screen === 'room') renderWhistle($('#panel')); }); }
+  });
+}
+
+/* ---------- designer ---------- */
+let D = null, DZ = {};
+function renderDesign(id) {
+  const src = id ? Store.birds.get(id) : null;
+  S.screen = 'design';
+  DZ = {isNew: !src, dirty: false, armedBack: 0, armedDel: 0};
+  D = src ? clone(src) : newBird('cockatiel', 'lutino', '');
+  S.part = 'body';
+  app.innerHTML = `
+  <header class="top"><button class="icon-btn" id="dBack" aria-label="Back">${IC.back}</button>
+    <div class="ttl"><h1>${DZ.isNew ? 'Hatch a bird' : 'Change ' + esc(D.name)}</h1><span class="sub">Tap any part of the bird to paint it</span></div></header>
+  <div class="stage small" id="dstage">${SUN}${SCENE}<div class="layer" id="dbird"></div></div>
+  <section class="sec"><h2>Pick a bird</h2><div class="scroller" id="spList">${Object.keys(SPECIES).map(k => `<button class="sp" data-sp="${k}" aria-pressed="${k === D.species}">${birdSVG(newBird(k), 's' + k, {vb: '70 44 200 250'})}<span>${SPECIES[k].label}</span></button>`).join('')}</div><p class="fine" id="spBlurb"></p></section>
+  <section class="sec"><h2>Real-life colors</h2><div class="chips" id="looks"></div></section>
+  <section class="sec"><h2>Paint it</h2><div class="chips" id="parts"></div><div class="swatches" id="swatches"></div></section>
+  <section class="sec"><h2>Pattern</h2><div class="chips" id="patterns"></div><div class="swatches" id="pcolors"></div></section>
+  <section class="sec"><h2>Dress up</h2><div class="chips" id="accs"></div></section>
+  <section class="sec"><h2>Name</h2><div class="namerow"><input id="birdName" maxlength="16" placeholder="Name your bird" value="${esc(D.name)}" autocomplete="off" enterkeyhint="done"><button class="btn" id="dice" aria-label="Pick a random name">${IC.dice}</button></div></section>
+  ${DZ.isNew ? '' : `<section class="sec"><button class="btn danger" id="dDelete">Let ${esc(D.name)} fly away</button></section>`}
+  <div class="bar"><div class="inner"><button class="btn" id="dSurprise">${IC.sparkle} Surprise!</button><button class="btn go" id="dSave">${DZ.isNew ? 'Hatch!' : 'Save'}</button></div></div>`;
+  drawD(); renderDesignControls();
+  $$('#spList .sp').forEach(el => el.onclick = () => { if (el.dataset.sp === D.species) return; D.species = el.dataset.sp; applyLook(D, Object.keys(SPECIES[D.species].looks)[0]); if (!SPECIES[D.species].parts.includes(S.part)) S.part = 'body'; dirty(); $$('#spList .sp').forEach(x => x.setAttribute('aria-pressed', x === el)); drawD(true); renderDesignControls(); });
+  $('#dstage').addEventListener('click', e => {
+    const el = e.target.closest('[data-part]'); if (!el) return; let part = el.dataset.part; const parts = SPECIES[D.species].parts;
+    const fallback = {lowerBeak: 'beak', cere: 'beak', belly: 'body', wingPatch: 'wing', wingTip: 'wing', tailTip: 'tail', face: 'head', ring: 'head', cheek: 'head', crest: 'head', feet: 'body', iris: 'head'};
+    while (!parts.includes(part) && fallback[part]) part = fallback[part];
+    if (!parts.includes(part)) part = 'body';
+    S.part = part; sfx('pop'); renderParts(); renderSwatches(); flashPart(part);
+  });
+  $('#birdName').oninput = e => { D.name = e.target.value.slice(0, 16); dirty(); };
+  $('#dice').onclick = () => { D.name = pick(NAMES.filter(n => n !== D.name)); $('#birdName').value = D.name; dirty(); sfx('pop'); };
+  $('#dSurprise').onclick = surprise;
+  $('#dSave').onclick = saveDesign;
+  $('#dBack').onclick = () => { if (DZ.dirty && Date.now() - DZ.armedBack > 3000) { DZ.armedBack = Date.now(); toast('Tap Save to keep your bird. Tap back again to leave without saving.'); return; } DZ.isNew ? go('aviary') : go('room', D.id); };
+  const del = $('#dDelete');
+  if (del) del.onclick = () => { if (Date.now() - DZ.armedDel > 3000) { DZ.armedDel = Date.now(); del.textContent = `Tap again to say goodbye to ${D.name}`; setTimeout(() => { if (del.isConnected) del.textContent = `Let ${D.name} fly away`; }, 3000); return; } Store.remove(D.id); toast(`${D.name} flew off to a happy forest.`); go('aviary'); };
+}
+function dirty() { DZ.dirty = true; }
+function drawD(call) {
+  stopActor(); const host = $('#dbird'); host.innerHTML = birdSVG(D, 'd'); actor = new Actor(host, 'd'); actor.excite(900);
+  const sp = SPECIES[D.species]; $('#spBlurb').textContent = `${sp.label}: talking ${stars(sp.talk)} · whistling ${stars(sp.sing)}`;
+  if (call) { const ctx = audio(); if (ctx) { const d = CALLS[sp.call](ctx.currentTime + .02); actor.chirpMove(d); } }
+}
+function flashPart(part) { $$(`#dbird [data-part="${part}"]`).forEach(el => { el.classList.remove('flash'); void el.getBoundingClientRect(); el.classList.add('flash'); }); }
+function renderDesignControls() { renderLooks(); renderParts(); renderSwatches(); renderPatterns(); renderAccs(); }
+function renderLooks() {
+  const sp = SPECIES[D.species];
+  $('#looks').innerHTML = Object.entries(sp.looks).map(([k, l]) => `<button class="chip" data-look="${k}" aria-pressed="${D.look === k}"><i style="background:${l.colors.body}"></i><i style="background:${l.colors.face || l.colors.head || l.colors.belly}"></i><i style="background:${l.colors.wingTip || l.colors.tail}"></i>${esc(l.label)}</button>`).join('');
+  $$('#looks [data-look]').forEach(el => el.onclick = () => { applyLook(D, el.dataset.look); dirty(); sfx('pop'); drawD(); renderDesignControls(); });
+}
+function renderParts() {
+  const sp = SPECIES[D.species];
+  $('#parts').innerHTML = sp.parts.map(p => `<button class="chip" data-pp="${p}" aria-pressed="${S.part === p}"><i style="background:${D.colors[p] === 'none' ? '#fff' : D.colors[p]}"></i>${PART_LABEL[p]}</button>`).join('');
+  $$('#parts [data-pp]').forEach(el => el.onclick = () => { S.part = el.dataset.pp; sfx('pop'); renderParts(); renderSwatches(); flashPart(S.part); });
+}
+function renderSwatches() {
+  const curC = (D.colors[S.part] || '').toUpperCase();
+  const none = S.part === 'ring' ? `<button class="sw none" data-sw="none" aria-label="No eye ring" aria-pressed="${curC === 'NONE'}"></button>` : '';
+  $('#swatches').innerHTML = none + SWATCHES.map(([c, n]) => `<button class="sw" data-sw="${c}" aria-label="${n}" aria-pressed="${curC === c.toUpperCase()}" style="background:${c}"></button>`).join('');
+  $$('#swatches [data-sw]').forEach(el => el.onclick = () => paint(el.dataset.sw));
+}
+function paint(color) {
+  const sp = SPECIES[D.species]; D.colors[S.part] = color;
+  (LINKS[S.part] || []).forEach(([child, fn]) => { if (!sp.parts.includes(child)) D.colors[child] = fn(color); });
+  D.look = null; dirty(); sfx('pop'); drawD(); renderLooks(); renderParts(); renderSwatches();
+}
+function renderPatterns() {
+  $('#patterns').innerHTML = PATTERNS.map(([k, n]) => `<button class="chip" data-pat="${k}" aria-pressed="${D.pattern === k}">${n}</button>`).join('');
+  $$('#patterns [data-pat]').forEach(el => el.onclick = () => { D.pattern = el.dataset.pat; if (PATTERN_PC[D.pattern]) D.pc = PATTERN_PC[D.pattern]; dirty(); sfx('pop'); drawD(); renderPatterns(); });
+  const pcEl = $('#pcolors'); const needs = !['plain', 'rainbow'].includes(D.pattern); pcEl.hidden = !needs;
+  if (needs) { pcEl.innerHTML = SWATCHES.map(([c, n]) => `<button class="sw" data-pc="${c}" aria-label="${n} pattern" aria-pressed="${(D.pc || '').toUpperCase() === c.toUpperCase()}" style="background:${c}"></button>`).join(''); $$('#pcolors [data-pc]').forEach(el => el.onclick = () => { D.pc = el.dataset.pc; dirty(); sfx('pop'); drawD(); renderPatterns(); }); }
+}
+function renderAccs() {
+  $('#accs').innerHTML = ACCS.map(([k, n]) => `<button class="chip" data-acc="${k}" aria-pressed="${D.accessory === k}">${n}</button>`).join('');
+  $$('#accs [data-acc]').forEach(el => el.onclick = () => { D.accessory = el.dataset.acc; dirty(); sfx('pop'); drawD(); renderAccs(); });
+}
+function surprise() {
+  const sp = SPECIES[D.species]; const pal = SWATCHES.map(s => s[0]).sort(() => Math.random() - .5);
+  const [a, b2, c3] = pal; const cols = {...D.colors};
+  sp.parts.forEach(p => { if (p === 'iris') return; if (p === 'beak' || p === 'lowerBeak') { cols[p] = pick(['#2A2A2C', '#EFE5D3', '#EFC6A4', '#9C958F', '#F5C024', '#E4413B']); return; } if (p === 'ring') { cols[p] = pick(['none', '#FFFFFF', '#DCEAF4']); return; } if (p === 'feet') { cols[p] = pick(['#B8A8A0', '#9A9A9A', '#E8B9A0']); return; } cols[p] = pick([a, a, b2, c3, light(a, .3), dark(b2, .2)]); });
+  sp.parts.forEach(p => (LINKS[p] || []).forEach(([child, fn]) => { if (!sp.parts.includes(child)) cols[child] = fn(cols[p]); }));
+  D.colors = completeColors(cols); D.look = null;
+  D.pattern = Math.random() < .45 ? pick(['pearl', 'pied', 'bars', 'rainbow', 'sparkles']) : 'plain'; D.pc = pick(pal.slice(3, 9));
+  if (Math.random() < .35) D.accessory = pick(ACCS.slice(1))[0];
+  dirty(); drawD(true); renderDesignControls();
+}
+function saveDesign() {
+  D.name = (($('#birdName').value || '').trim() || pick(NAMES)).slice(0, 16);
+  const sp = SPECIES[D.species];
+  const target = DZ.isNew ? D : Object.assign(Store.birds.get(D.id) || {}, D);
+  if (DZ.isNew) target.created = Date.now();
+  Store.save(target); DZ.dirty = false; sfx('win');
+  toast(DZ.isNew ? `${target.name} the ${sp.label.toLowerCase()} hatched!` : `Saved ${target.name}!`, true);
+  go('room', target.id);
+}
+
+/* ---------- settings ---------- */
+function openSettings() {
+  const sh = $('#sheet');
+  sh.innerHTML = `<div class="sheet-back" id="sheetBack"></div><div class="sheet" role="dialog" aria-label="Settings"><h2>Settings</h2>
+    <label for="kidName">Who keeps these birds?</label><input id="kidName" maxlength="20" value="${esc(kid())}" autocomplete="off">
+    <div class="srow"><span><b>Sounds &amp; voices</b><br><span class="fine">Turn up the volume. On iPhone, check the silent switch too.</span></span><button class="chip" id="soundToggle" aria-pressed="${AU.on}">${AU.on ? 'On' : 'Off'}</button></div>
+    <p class="fine">${Store.mode === 'db' && !Store.readOnly ? 'Birds are saved to your Claude account, so they’re here on any device you sign in on.' : 'Birds are saved in this browser on this device.'}</p>
+    <button class="btn go" id="sheetDone">Done</button></div>`;
+  sh.hidden = false;
+  const close = () => { const v = ($('#kidName').value || '').trim().slice(0, 20); if (v && v !== Store.settings.kidName) { Store.settings.kidName = v; Store.saveSettings(); } closeSheet(); if (S.screen === 'aviary') renderAviary(); };
+  $('#sheetBack').onclick = close; $('#sheetDone').onclick = close;
+  $('#soundToggle').onclick = e => { AU.on = !AU.on; Store.settings.sound = AU.on; Store.saveSettings(); e.currentTarget.setAttribute('aria-pressed', AU.on); e.currentTarget.textContent = AU.on ? 'On' : 'Off'; if (!AU.on && 'speechSynthesis' in window) speechSynthesis.cancel(); };
+}
+function closeSheet() { const sh = $('#sheet'); if (sh) { sh.hidden = true; sh.innerHTML = ''; } }
+
+/* ---------- boot ---------- */
+(async function boot() {
+  Store.loadLocal();
+  AU.on = Store.settings.sound !== false;
+  if (!hasClaude) { Store.seedLocal(); renderAviary(); return; }
+  if (Store.birds.size) renderAviary();
+  await Store.connect();
+  AU.on = Store.settings.sound !== false;
+  if (S.screen === 'aviary' || S.screen === 'loading') renderAviary();
+})();
+})();
+</script>
+
+<script>if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>
+</body>
+</html>
