@@ -646,6 +646,48 @@ const CALLS = {
   love(t) { let x = t; const n = 3 + Math.random() * 3 | 0; for (let i = 0; i < n; i++) { tone(x, .06, [[0, 4000 + Math.random() * 400], [1, 5500 + Math.random() * 500]], {harm: [[1, 1], [2, .2]], vol: .14, env: [[0, 0], [.1, 1], [1, 0]]}); x += .09 + Math.random() * .03; } return x - t; },
   canary(t) { let x = t; const phrases = 3 + Math.random() * 2 | 0; for (let p = 0; p < phrases; p++) { const kind = Math.random() * 3 | 0; const reps = kind === 1 ? 3 + Math.random() * 2 | 0 : 7 + Math.random() * 8 | 0; const f0 = 2400 + Math.random() * 1800; for (let r = 0; r < reps; r++) { if (kind === 0) { tone(x, .035, [[0, f0], [1, f0 * 1.5]], {vol: .11, env: [[0, 0], [.2, 1], [1, 0]]}); x += .045; } else if (kind === 1) { tone(x, .13, [[0, f0 * .9], [1, f0 * .8]], {vol: .11, fm: {rate: 30, depth: 60}}); x += .16; } else { tone(x, .03, [[0, f0 * 1.9], [1, f0 * 1.1]], {vol: .1, env: [[0, 0], [.2, 1], [1, 0]]}); x += .038; } } x += .08; } return x - t; }
 };
+/* real recordings: sounds/manifest.json lists short clips per species */
+const SND = {manifest: null, loading: null, bufs: {}, pending: {}};
+function loadSounds() {
+  if (!SND.loading) SND.loading = fetch('sounds/manifest.json').then(r => r.ok ? r.json() : null).then(m => { SND.manifest = m; }).catch(() => {});
+  return SND.loading;
+}
+function preloadSpecies(key) {
+  loadSounds().then(() => {
+    const list = SND.manifest && SND.manifest[key]; if (!list) return; const ctx = audio(); if (!ctx) return;
+    list.forEach(c => {
+      if (SND.bufs[c.file] || SND.pending[c.file]) return;
+      SND.pending[c.file] = fetch(c.file).then(r => r.arrayBuffer()).then(ab => new Promise((res, rej) => ctx.decodeAudioData(ab, res, rej))).then(buf => { SND.bufs[c.file] = buf; }).catch(() => {});
+    });
+  });
+}
+function clipsFor(key) { const list = SND.manifest && SND.manifest[key]; return list ? list.filter(c => SND.bufs[c.file]) : []; }
+function playBuf(buf, t, rate = 1, vol = 1) {
+  const src = AU.ctx.createBufferSource(); src.buffer = buf; src.playbackRate.value = rate;
+  const g = AU.ctx.createGain(); g.gain.value = vol; src.connect(g).connect(AU.out); src.start(t);
+  return buf.duration / rate;
+}
+// one natural call: returns seconds, or 0 if recordings aren't ready
+function realCall(key, t) {
+  const cl = clipsFor(key); if (!cl.length) return 0;
+  const pool = cl.filter(c => c.kind !== 'long' && c.kind !== 'song');
+  const c = Math.random() < .25 || !pool.length ? pick(cl) : pick(pool);
+  return playBuf(SND.bufs[c.file], t, .96 + Math.random() * .08);
+}
+// "saying" something: a run of real calls about as long as the words would take
+function realChatter(key, t, target) {
+  const cl = clipsFor(key); if (!cl.length) return 0;
+  if (key === 'canary') { const songs = cl.filter(c => c.kind === 'song' || c.kind === 'long'); return playBuf(SND.bufs[pick(songs.length ? songs : cl).file], t); }
+  const short = cl.filter(c => c.kind === 'chirp' || c.kind === 'call'); const pool = short.length ? short : cl;
+  let x = t, last = null, n = 0;
+  while ((x - t < target || n === 0) && n < 8) {
+    let c = pick(pool); if (pool.length > 1) while (c === last) c = pick(pool);
+    x += playBuf(SND.bufs[c.file], x, .95 + Math.random() * .1, .9 + Math.random() * .1) + .05 + Math.random() * .09;
+    last = c; n++;
+  }
+  return x - t;
+}
+function syllables(text) { const m = String(text).toLowerCase().match(/[aeiouy]+/g); return Math.max(1, m ? m.length : 1); }
 function mallet(t, f, vol = .2) { tone(t, .7, [[0, f], [1, f]], {harm: [[1, 1], [4, .12], [10, .03]], vol, env: [[0, 0], [.01, 1], [.2, .35], [1, 0]]}); }
 function pluck(t, f, d, vol) { tone(t, Math.max(.18, d), [[0, f], [1, f]], {type: 'triangle', harm: [[1, 1], [2, .25], [3, .1]], vol, env: [[0, 0], [.03, 1], [.3, .45], [1, 0]]}); }
 function wolf(t0, vol = .2, m = 1) { tone(t0, .3, [[0, 1350 * m], [1, 2900 * m]], {vol, env: [[0, 0], [.1, 1], [.8, .9], [1, 0]], fm: {rate: 6, depth: 15}}); tone(t0 + .42, .62, [[0, 1300 * m], [.35, 2700 * m], [1, 1150 * m]], {vol, env: [[0, 0], [.08, 1], [.8, .8], [1, 0]], fm: {rate: 6, depth: 15}}); return 1.1; }
@@ -702,6 +744,7 @@ function speak(text, o = {}) {
 }
 function unlock() {
   if (AU.unlocked) return; AU.unlocked = true; audio();
+  if (S.screen === 'room' && cur()) preloadSpecies(cur().species); else if (S.screen === 'design' && D) preloadSpecies(D.species);
   if ('speechSynthesis' in window && AU.on) { try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {} }
   const h = $('#hint'); if (h) setTimeout(() => { h.style.opacity = 0; }, 2500);
 }
@@ -898,6 +941,7 @@ function renderRoom(id) {
   $('#btnEdit').onclick = () => go('design', id);
   $$('.tabs button').forEach(t => t.onclick = () => { S.tab = t.dataset.tab; $$('.tabs button').forEach(x => x.setAttribute('aria-selected', x === t)); sfx('pop'); renderTab(); });
   bindStage();
+  preloadSpecies(b.species);
   renderTab();
   S.nextIdle = Date.now() + 7000;
   S.idle = setInterval(idleTick, 1000);
@@ -919,7 +963,7 @@ function bindStage() {
 function doCall() {
   const b = cur(); if (!b || !actor) return;
   const sp = SPECIES[b.species]; const ctx = audio(); let dur = .6;
-  if (ctx) dur = CALLS[sp.call](ctx.currentTime + .02);
+  if (ctx) { const t = ctx.currentTime + .02; dur = realCall(b.species, t) || CALLS[sp.call](t); }
   actor.chirpMove(dur); setBusy(dur * 1000 + 200);
 }
 function tapBird() {
@@ -935,16 +979,18 @@ function scratch() {
   if (now - lastScratch > 900) { lastScratch = now; sfx('purr'); hearts(1); addLove(1); }
   setBusy(1200);
 }
+// The bird never speaks English: the bubble shows the words, the sound is its own species' calls.
 function birdSays(text, after) {
   const b = cur(); if (!b || !actor) return; const sp = SPECIES[b.species]; const a = actor;
   if (!sp.voice) { birdSing(after); return; }
-  bubble('bird', text, 1700 + text.length * 90); setBusy(1700 + text.length * 90);
-  const ctx = audio(); if (ctx) tone(ctx.currentTime + .01, .09, [[0, 2600], [1, 3400]], {vol: .07});
-  a.excite(1500 + text.length * 80); a.talk(true);
-  setTimeout(() => speak(text, {pitch: sp.voice.pitch, rate: sp.voice.rate, onend: () => { if (a.alive) a.talk(false); after && after(); }}), 110);
+  const target = .3 + syllables(text) * .2; const ctx = audio(); let dur = target;
+  if (ctx) { const t = ctx.currentTime + .03; dur = realChatter(b.species, t, target); if (!dur) { let x = t; while (x - t < target) x += CALLS[sp.call](x) + .06; dur = x - t; } }
+  bubble('bird', text, Math.max(1800, dur * 1000 + 1300)); setBusy(dur * 1000 + 400);
+  a.excite(dur * 1000 + 600); a.talk(true); a.s.bobT = -3; a.later(150, () => a.s.bobT = 0);
+  a.later(dur * 1000, () => { a.talk(false); after && after(); });
 }
 function birdSing(after) {
-  const ctx = audio(); let dur = 2; if (ctx) dur = CALLS.canary(ctx.currentTime + .02);
+  const ctx = audio(); let dur = 2; if (ctx) { const t = ctx.currentTime + .02; dur = realChatter('canary', t, 2) || CALLS.canary(t); }
   if (actor) actor.whistleMove(dur); bubble('bird', '♪ ♫ ♪', dur * 1000 + 300); setBusy(dur * 1000 + 300);
   setTimeout(() => after && after(), dur * 1000);
 }
@@ -1241,7 +1287,8 @@ function dirty() { DZ.dirty = true; }
 function drawD(call) {
   stopActor(); const host = $('#dbird'); host.innerHTML = birdSVG(D, 'd'); actor = new Actor(host, 'd'); actor.excite(900);
   const sp = SPECIES[D.species]; $('#spBlurb').textContent = `${sp.label}: talking ${stars(sp.talk)} · whistling ${stars(sp.sing)}`;
-  if (call) { const ctx = audio(); if (ctx) { const d = CALLS[sp.call](ctx.currentTime + .02); actor.chirpMove(d); } }
+  preloadSpecies(D.species);
+  if (call) { const ctx = audio(); if (ctx) { const t = ctx.currentTime + .02; const d = realCall(D.species, t) || CALLS[sp.call](t); actor.chirpMove(d); } }
 }
 function flashPart(part) { $$(`#dbird [data-part="${part}"]`).forEach(el => { el.classList.remove('flash'); void el.getBoundingClientRect(); el.classList.add('flash'); }); }
 function renderDesignControls() { renderLooks(); renderParts(); renderSwatches(); renderPatterns(); renderAccs(); }
@@ -1303,10 +1350,18 @@ function openSettings() {
     <label for="kidName">Who keeps these birds?</label><input id="kidName" maxlength="20" value="${esc(kid())}" autocomplete="off">
     <div class="srow"><span><b>Sounds &amp; voices</b><br><span class="fine">Turn up the volume. On iPhone, check the silent switch too.</span></span><button class="chip" id="soundToggle" aria-pressed="${AU.on}">${AU.on ? 'On' : 'Off'}</button></div>
     <p class="fine">${Store.mode === 'db' && !Store.readOnly ? 'Birds are saved to your Claude account, so they’re here on any device you sign in on.' : 'Birds are saved in this browser on this device.'}</p>
+    <details id="credits"><summary class="fine" style="cursor:pointer;font-weight:700">Bird sound recordings &amp; credits</summary><div class="fine" id="creditList" style="max-height:34vh;overflow:auto;display:grid;gap:6px;padding-top:8px">Loading…</div></details>
     <button class="btn go" id="sheetDone">Done</button></div>`;
   sh.hidden = false;
   const close = () => { const v = ($('#kidName').value || '').trim().slice(0, 20); if (v && v !== Store.settings.kidName) { Store.settings.kidName = v; Store.saveSettings(); } closeSheet(); if (S.screen === 'aviary') renderAviary(); };
   $('#sheetBack').onclick = close; $('#sheetDone').onclick = close;
+  $('#credits').addEventListener('toggle', () => {
+    const box = $('#creditList'); if (box.dataset.done) return; box.dataset.done = 1;
+    fetch('sounds/credits.json').then(r => r.json()).then(list => {
+      const seen = new Map(); list.forEach(c => { const k = c.sourceUrl; if (!seen.has(k)) seen.set(k, c); });
+      box.innerHTML = '<p>All bird sounds are real recordings, trimmed for the game. Thank you to these recordists:</p>' + [...seen.values()].map(c => `<p><b>${esc(c.species)}</b> — ${esc(c.author)}, <a href="${esc(c.sourceUrl)}" target="_blank" rel="noopener">${esc(c.recording || c.sourceUrl)}</a> (${esc(c.license)})</p>`).join('');
+    }).catch(() => { box.textContent = 'Sound credits are listed at sounds/credits.json.'; });
+  });
   $('#soundToggle').onclick = e => { AU.on = !AU.on; Store.settings.sound = AU.on; Store.saveSettings(); e.currentTarget.setAttribute('aria-pressed', AU.on); e.currentTarget.textContent = AU.on ? 'On' : 'Off'; if (!AU.on && 'speechSynthesis' in window) speechSynthesis.cancel(); };
 }
 function closeSheet() { const sh = $('#sheet'); if (sh) { sh.hidden = true; sh.innerHTML = ''; } }
