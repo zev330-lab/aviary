@@ -722,30 +722,9 @@ function playDance() {
   [0, 0, 5, 5, 7, 7, 0, 0, 0, 0, 5, 7, 0, 0].forEach((s, i) => pluck(t + i * beat, 130.81 * Math.pow(2, s / 12), beat * .8, .11));
   return total;
 }
-let VOICE = null;
-function getVoice() {
-  if (VOICE || !('speechSynthesis' in window)) return VOICE;
-  const vs = speechSynthesis.getVoices(); if (!vs.length) return null;
-  for (const name of ['Samantha', 'Karen', 'Moira', 'Tessa', 'Google US English', 'Aria', 'Jenny']) { const v = vs.find(x => x.name.includes(name) && /^en/i.test(x.lang)); if (v) return (VOICE = v); }
-  return (VOICE = vs.find(x => /^en/i.test(x.lang)) || null);
-}
-if ('speechSynthesis' in window) { try { speechSynthesis.onvoiceschanged = () => { VOICE = null; getVoice(); }; } catch (e) {} }
-function speak(text, o = {}) {
-  const done = () => o.onend && o.onend();
-  if (!AU.on || !('speechSynthesis' in window)) { setTimeout(done, 900); return false; }
-  try {
-    const u = new SpeechSynthesisUtterance(text); u.pitch = o.pitch ?? 1; u.rate = o.rate ?? 1; u.volume = 1;
-    const v = getVoice(); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'en-US';
-    let fin = false; const end = () => { if (fin) return; fin = true; done(); };
-    u.onend = end; u.onerror = end; setTimeout(end, 1400 + text.length * 120 / (o.rate || 1));
-    if (speechSynthesis.speaking) speechSynthesis.cancel();
-    speechSynthesis.speak(u); return true;
-  } catch (e) { setTimeout(done, 900); return false; }
-}
 function unlock() {
   if (AU.unlocked) return; AU.unlocked = true; audio();
   if (S.screen === 'room' && cur()) preloadSpecies(cur().species); else if (S.screen === 'design' && D) preloadSpecies(D.species);
-  if ('speechSynthesis' in window && AU.on) { try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) {} }
   const h = $('#hint'); if (h) setTimeout(() => { h.style.opacity = 0; }, 2500);
 }
 document.addEventListener('pointerdown', unlock, true);
@@ -1069,11 +1048,11 @@ function renderTalk(p) {
   p.innerHTML = `
   <div class="lesson">
     ${L ? `<span class="eyebrow">Teaching ${esc(b.name)}</span><p class="phrase">“${esc(L)}”</p><div class="dots">${dotsHTML(w ? w.reps : 0, need, w && w.learned)}</div>
-      <div class="row"><button class="btn go big" id="teachBtn">Say it to ${esc(b.name)}</button><button class="btn" id="hearBtn" aria-label="Hear the words">${IC.speaker}</button></div>
+      <div class="row"><button class="btn go big" id="teachBtn">Say it to ${esc(b.name)}</button></div>
       <p class="fine">Say it out loud, then tap the yellow button. ${sp.label}s need to hear something about ${need} time${need === 1 ? '' : 's'} to learn it.</p>`
     : `<span class="eyebrow">Teach ${esc(b.name)} to talk</span><p class="phrase" style="font-size:24px">Pick some words below, or type your own.</p>`}
   </div>
-  ${MIC ? `<div class="lesson"><span class="eyebrow">Parrot mode</span><p>Hold the button, say something to ${esc(b.name)}, then let go. ${esc(b.name)} will copy your voice!</p><div class="row"><button class="btn go big" id="micBtn">${IC.mic} Hold to talk</button><button class="btn" id="micAgain" aria-label="Hear it again" ${Rec.last ? '' : 'disabled'}>${IC.play}</button></div></div>` : ''}
+  ${MIC ? `<div class="lesson"><span class="eyebrow">Talk out loud</span><p>Hold the button, say something to ${esc(b.name)}, then let go. ${esc(b.name)} will try to copy you in bird talk!</p><div class="row"><button class="btn go big" id="micBtn">${IC.mic} Hold to talk</button></div></div>` : ''}
   <div class="chips">${phrases().map(t => `<button class="chip" data-ph="${esc(t)}" aria-pressed="${L === t}">${esc(t)}</button>`).join('')}</div>
   <form class="custom" id="customForm"><input id="customPhrase" maxlength="40" placeholder="Type your own words…" autocomplete="off" enterkeyhint="done"><button class="btn go" type="submit">Teach</button></form>
   <h3>What ${esc(b.name)} can say</h3>
@@ -1083,7 +1062,6 @@ function renderTalk(p) {
   if (MIC) bindMic();
   if (L) {
     $('#teachBtn').onclick = teachWord;
-    $('#hearBtn').onclick = () => { if (!isBusy()) { bubble('kid', L, 2000); speak(L, {pitch: 1, rate: .9}); } };
   }
   $$('[data-say]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.say]; if (x.learned) { if (!isBusy()) { birdSays(x.t); addLove(1); } } else { S.lesson = x.t; renderTalk(p); } });
   $$('[data-forget]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.forget]; b.words = b.words.filter(y => y !== x); if (S.lesson && S.lesson.toLowerCase() === x.t.toLowerCase()) S.lesson = null; Store.save(b); renderTalk(p); });
@@ -1104,29 +1082,54 @@ function teachWord() {
   });
 }
 
-/* parrot mode: record Havi, the bird copies her voice */
-const Rec = {stream: null, node: null, chunks: null, pressing: false, last: null};
-const PARROT_RATE = {budgie: 1.45, cockatiel: 1.38, lovebird: 1.5, cockatoo: 1.27, grey: 1.12, macaw: 1.08, canary: 1.6};
+/* talk out loud: the phone turns Havi's words into text for the bubbles, the bird answers in bird calls */
+const SRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+const Rec = {stream: null, node: null, chunks: null, pressing: false, sr: null, heard: '', srErr: null, srBroken: false};
+function micLabel(on) { const b = $('#micBtn'); if (!b) return; b.classList.toggle('rec', on); b.lastChild.textContent = on ? ' Listening…' : ' Hold to talk'; }
 function bindMic() {
   const btn = $('#micBtn'); if (!btn) return;
-  const down = e => { e.preventDefault(); if (Rec.pressing || isBusy()) return; Rec.pressing = true; btn.classList.add('rec'); btn.lastChild.textContent = ' Listening…'; micStart(); };
-  const upH = e => { if (!Rec.pressing) return; e.preventDefault(); Rec.pressing = false; btn.classList.remove('rec'); btn.lastChild.textContent = ' Hold to talk'; micStop(); };
+  const down = e => { e.preventDefault(); if (Rec.pressing || isBusy() || Rec.sr) return; Rec.pressing = true; micLabel(true); if (actor) { actor.s.rotT = -13; actor.s.crestT = .8; } if (SRec && !Rec.srBroken) srStart(); else micStart(); };
+  const upH = e => { if (!Rec.pressing) return; e.preventDefault(); Rec.pressing = false; micLabel(false); if (Rec.sr) { try { Rec.sr.stop(); } catch (err) { srFinish(); } } else micStop(); };
   btn.addEventListener('pointerdown', down); btn.addEventListener('pointerup', upH); btn.addEventListener('pointercancel', upH); btn.addEventListener('pointerleave', upH);
   btn.addEventListener('contextmenu', e => e.preventDefault());
-  const again = $('#micAgain'); if (again) again.onclick = () => { if (Rec.last && !isBusy()) parrotPlay(Rec.last); };
 }
+function srStart() {
+  audio();
+  let r; try { r = new SRec(); } catch (e) { Rec.srBroken = true; micStart(); return; }
+  Rec.sr = r; Rec.heard = ''; Rec.srErr = null;
+  r.lang = 'en-US'; r.continuous = true; r.interimResults = true; r.maxAlternatives = 1;
+  r.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; Rec.heard = t; if (t.trim()) bubble('kid', t.trim(), 4000); };
+  r.onerror = e => { Rec.srErr = e.error; };
+  r.onend = () => { if (Rec.sr === r) srFinish(); };
+  try { r.start(); } catch (e) { Rec.sr = null; Rec.srBroken = true; micStart(); }
+}
+function srFinish() {
+  const err = Rec.srErr, text = (Rec.heard || '').replace(/\s+/g, ' ').trim(); Rec.sr = null; Rec.pressing = false; micLabel(false);
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+  if (actor) { actor.s.rotT = 0; actor.s.crestT = actor.rest; }
+  if (err === 'not-allowed') { toast('The microphone is off. A grown-up can turn it on in Settings.'); return; }
+  if (err === 'service-not-allowed' || err === 'language-not-supported') { Rec.srBroken = true; toast('Hold the button again and talk — the bird will chirp back.'); return; }
+  if (!text) { if (actor) { doCall(); bubble('bird', '?', 1200); } return; }
+  heardWords(text);
+}
+function heardWords(text) {
+  let t = text.slice(0, 40).trim(); t = t.charAt(0).toUpperCase() + t.slice(1);
+  S.lesson = t; S.busyUntil = 0;
+  const p = $('#panel'); if (p && S.tab === 'talk') renderTalk(p);
+  teachWord();
+}
+// fallback when the phone can't turn speech into words: listen, then chirp back for as long as she talked
 async function micStart() {
   const ctx = audio(); if (!ctx) { toast('Turn sounds on in Settings first.'); return; }
   try { if (navigator.audioSession) navigator.audioSession.type = 'play-and-record'; } catch (e) {}
   try { if (!Rec.stream) Rec.stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true, autoGainControl: true}}); }
-  catch (e) { Rec.pressing = false; const b = $('#micBtn'); if (b) { b.classList.remove('rec'); b.lastChild.textContent = ' Hold to talk'; } toast('The microphone is off. A grown-up can turn it on in Settings.'); return; }
+  catch (e) { Rec.pressing = false; micLabel(false); toast('The microphone is off. A grown-up can turn it on in Settings.'); return; }
   if (ctx.state === 'suspended') await ctx.resume();
   if (!Rec.pressing) { micRelease(); return; }
   const src = ctx.createMediaStreamSource(Rec.stream), proc = ctx.createScriptProcessor(4096, 1, 1), mute = ctx.createGain(); mute.gain.value = 0;
-  const chunks = []; proc.onaudioprocess = e => { if (chunks.length < 400) chunks.push(new Float32Array(e.inputBuffer.getChannelData(0))); };
+  const lv = []; proc.onaudioprocess = e => { const d = e.inputBuffer.getChannelData(0); let m = 0; for (let i = 0; i < d.length; i += 8) m = Math.max(m, Math.abs(d[i])); lv.push(m); };
   src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
-  Rec.node = {src, proc, mute}; Rec.chunks = chunks; Rec.t0 = Date.now();
-  if (actor) { actor.s.rotT = -13; actor.s.crestT = .8; }
+  Rec.node = {src, proc, mute}; Rec.chunks = lv;
 }
 function micRelease() {
   if (Rec.node) { try { Rec.node.src.disconnect(); Rec.node.proc.disconnect(); Rec.node.mute.disconnect(); } catch (e) {} Rec.node = null; }
@@ -1134,37 +1137,18 @@ function micRelease() {
   try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
 }
 function micStop() {
-  const chunks = Rec.chunks; Rec.chunks = null; const wasRecording = !!Rec.node; micRelease();
+  const lv = Rec.chunks; Rec.chunks = null; const was = !!Rec.node; micRelease();
   if (actor) { actor.s.rotT = 0; actor.s.crestT = actor.rest; }
-  if (!wasRecording || !chunks) return;
-  const ctx = AU.ctx, sr = ctx.sampleRate, len = chunks.reduce((a, c) => a + c.length, 0);
-  if (len < sr * .35) { toast('Keep holding the button while you talk.'); return; }
-  const all = new Float32Array(len); let o = 0; chunks.forEach(c => { all.set(c, o); o += c.length; });
-  let peak = 0; for (let i = 0; i < len; i++) peak = Math.max(peak, Math.abs(all[i]));
+  if (!was || !lv) return;
+  const ctx = AU.ctx, block = 4096 / ctx.sampleRate, peak = Math.max(0, ...lv);
+  if (lv.length * block < .35) { toast('Keep holding the button while you talk.'); return; }
   if (peak < .01) { toast(`${cur().name} couldn’t hear you. Try talking a little louder.`); return; }
-  const th = peak * .06; let a = 0, z = len - 1; while (a < len && Math.abs(all[a]) < th) a++; while (z > a && Math.abs(all[z]) < th) z--;
-  a = Math.max(0, a - Math.floor(sr * .05)); z = Math.min(len - 1, z + Math.floor(sr * .08));
-  const n = Math.min(z - a + 1, sr * 6), buf = ctx.createBuffer(1, n, sr), d = buf.getChannelData(0), k = .85 / peak;
-  for (let i = 0; i < n; i++) { const fade = Math.min(1, i / 200, (n - i) / 400); d[i] = all[a + i] * k * fade; }
-  Rec.last = buf; const again = $('#micAgain'); if (again) again.disabled = false;
-  bubble('kid', '🎤 …', 900);
-  setTimeout(() => parrotPlay(buf), 650);
+  const loud = lv.filter(v => v > peak * .15).length * block;
+  const b = cur(), sp = SPECIES[b.species], a = actor; if (!a) return;
+  bubble('kid', '…', 900);
+  a.later(600, () => { const t = AU.ctx.currentTime + .03; const dur = realChatter(b.species, t, Math.min(3, Math.max(.5, loud))) || CALLS[sp.call](t); a.chirpMove(dur); bubble('bird', '♪ ♫ ♪', dur * 1000 + 900); setBusy(dur * 1000 + 400); addLove(1); a.later(dur * 1000 + 300, () => hearts(2)); });
 }
-function parrotPlay(buf) {
-  const b = cur(); const ctx = audio(); if (!b || !ctx || !actor) return;
-  const rate = PARROT_RATE[b.species] || 1.3, t = ctx.currentTime + .16;
-  tone(ctx.currentTime + .01, .09, [[0, 2600], [1, 3400]], {vol: .07});
-  const src = ctx.createBufferSource(); src.buffer = buf; src.playbackRate.value = rate;
-  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 420;
-  const pk = ctx.createBiquadFilter(); pk.type = 'peaking'; pk.frequency.value = 2700; pk.gain.value = 8; pk.Q.value = 1;
-  const ws = ctx.createWaveShaper(); ws.curve = distCurve(2.2);
-  const g = ctx.createGain(); g.gain.value = .95;
-  src.connect(hp).connect(pk).connect(ws).connect(g).connect(AU.out); src.start(t);
-  const dur = buf.duration / rate; const a = actor;
-  a.excite(dur * 1000 + 800); a.later(160, () => a.talk(true)); a.later(160 + dur * 1000, () => a.talk(false));
-  bubble('bird', 'Copying you!', dur * 1000 + 900); setBusy(dur * 1000 + 500); addLove(1);
-  a.later(dur * 1000 + 400, () => hearts(2));
-}
+
 
 /* whistle */
 const SCALE = [0, 2, 4, 5, 7, 9, 11, 12];
@@ -1348,7 +1332,7 @@ function openSettings() {
   const sh = $('#sheet');
   sh.innerHTML = `<div class="sheet-back" id="sheetBack"></div><div class="sheet" role="dialog" aria-label="Settings"><h2>Settings</h2>
     <label for="kidName">Who keeps these birds?</label><input id="kidName" maxlength="20" value="${esc(kid())}" autocomplete="off">
-    <div class="srow"><span><b>Sounds &amp; voices</b><br><span class="fine">Turn up the volume. On iPhone, check the silent switch too.</span></span><button class="chip" id="soundToggle" aria-pressed="${AU.on}">${AU.on ? 'On' : 'Off'}</button></div>
+    <div class="srow"><span><b>Bird sounds</b><br><span class="fine">Turn up the volume. On iPhone, check the silent switch too.</span></span><button class="chip" id="soundToggle" aria-pressed="${AU.on}">${AU.on ? 'On' : 'Off'}</button></div>
     <p class="fine">${Store.mode === 'db' && !Store.readOnly ? 'Birds are saved to your Claude account, so they’re here on any device you sign in on.' : 'Birds are saved in this browser on this device.'}</p>
     <details id="credits"><summary class="fine" style="cursor:pointer;font-weight:700">Bird sound recordings &amp; credits</summary><div class="fine" id="creditList" style="max-height:34vh;overflow:auto;display:grid;gap:6px;padding-top:8px">Loading…</div></details>
     <button class="btn go" id="sheetDone">Done</button></div>`;
