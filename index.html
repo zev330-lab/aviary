@@ -162,6 +162,60 @@ p{margin:0}
 .nd.long{width:34px;border-radius:10px}
 .row3{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px}
 .row3 .btn{padding-inline:8px;font-size:17px}
+/* songs */
+.songs-lede{color:var(--ink2);font-size:16px}
+.key{transition:filter .08s,box-shadow .08s}
+.key.lit{filter:brightness(1.25) saturate(1.15);transform:translateY(2px);box-shadow:inset 0 -7px 0 rgba(0,0,0,.18),inset 0 5px 0 rgba(255,255,255,.3),0 0 0 3px #fff,0 0 18px 5px var(--c)}
+.key.want{animation:keyWant .6s ease-in-out 4}
+@keyframes keyWant{50%{box-shadow:0 0 0 4px #fff,0 0 0 8px var(--ink)}}
+.xylo.nudge,.melody.full{animation:nudge .3s}
+@keyframes nudge{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.melody{flex-wrap:nowrap;gap:8px;min-height:58px}
+.mbody{flex:1;min-width:0;display:grid;gap:7px}
+.mtitle,.mspecial{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.1;overflow-wrap:anywhere}
+.mcells{display:flex;flex-wrap:wrap;gap:7px 5px;align-items:flex-start}
+.mc{display:inline-flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.mc .nd{width:calc(8px + var(--w,1) * 14px);height:20px;border-radius:10px;background:var(--c);transition:transform .12s,box-shadow .12s}
+.mc em{font-style:normal;font-size:13px;font-weight:700;line-height:1.15;color:var(--ink2);white-space:nowrap;padding:1px 3px;border-radius:6px}
+.mc.on .nd{transform:translateY(-3px) scale(1.12);box-shadow:0 0 0 2px #fff,0 0 0 4px var(--c),0 4px 10px -2px var(--c)}
+.mc.on em{background:var(--sun);color:var(--ink)}
+.mundo{flex:0 0 auto;width:50px;height:50px;border-radius:16px;border:2px solid var(--line);background:var(--paper);color:var(--ink2);display:grid;place-items:center;box-shadow:0 3px 0 var(--line)}
+.mundo svg{width:24px;height:24px}
+.mundo:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.songplay{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.songplay.one{grid-template-columns:1fr}
+.sgame{border:0;border-radius:22px;min-height:78px;padding:12px;display:flex;align-items:center;gap:10px;text-align:left;font-family:var(--display);font-weight:800;font-size:19px;line-height:1.1;color:var(--ink);box-shadow:0 4px 0 rgba(31,48,71,.14);min-width:0;overflow-wrap:anywhere}
+.sgame:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(31,48,71,.14)}
+.sgame .em{font-size:32px;line-height:1;flex:0 0 auto}
+.sgame small{display:block;font-family:var(--body);font-weight:700;font-size:13px;color:var(--ink2);margin-top:3px}
+.sgame.sing{background:#FFD6C4}.sgame.copy{background:#D3EBFA}
+.sgame.rec{background:#E4413B;color:#fff;box-shadow:0 4px 0 #8E1C16;animation:pulse 1s ease-in-out infinite}
+.sgame.rec small{color:#FFE3E0}
+#panel.hum-on > :not(.songplay):not(.xylo):not(.melody),#panel.hum-on .sgame.copy{opacity:.4;pointer-events:none}
+#panel.hum-on .xylo{pointer-events:none}
+.tgroup{display:grid;gap:8px}
+.tunes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.song{position:relative;border:2px solid var(--line);background:var(--card);border-radius:18px;min-height:58px;padding:8px 10px;display:flex;align-items:center;gap:9px;text-align:left;font-weight:700;font-size:16px;line-height:1.15;box-shadow:0 3px 0 var(--line);min-width:0}
+.song .em{font-size:26px;line-height:1;flex:0 0 auto}
+.song .nm{min-width:0;overflow-wrap:anywhere}
+.song:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.song[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff;box-shadow:none}
+.song.knows::after{content:'✓';position:absolute;top:-7px;right:-4px;width:22px;height:22px;border-radius:50%;background:var(--leaf);color:#fff;font-size:13px;font-weight:800;line-height:22px;text-align:center;box-shadow:0 0 0 2px var(--paper)}
+.word button span[aria-hidden]{font-size:17px}
+.cgame{background:var(--card);border-radius:24px;padding:14px 16px 16px;box-shadow:0 4px 0 var(--line);display:grid;gap:10px}
+.cg-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.cg-top b{font-family:var(--display);font-size:22px}
+.cg-best{background:#FFF1CF;border-radius:999px;padding:4px 12px;font-weight:800;white-space:nowrap}
+.cg-status{font-family:var(--display);font-weight:800;font-size:clamp(24px,7vw,30px);line-height:1.15;min-height:1.15em}
+.cgame[data-phase="kid"] .cg-status{color:var(--leaf2)}
+.cgame[data-phase="oops"] .cg-status{color:var(--rose)}
+.cg-dots{display:flex;flex-wrap:wrap;gap:8px;min-height:24px}
+.cg-dots i{width:24px;height:24px;border-radius:50%;background:#EFE4CE;transition:background .1s,transform .1s}
+.cg-dots i.on{background:var(--c);transform:scale(1.08)}
+.cg-dots i.miss{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--rose)}
+.cg-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.cg-row .btn{font-size:18px;padding:14px 10px;min-height:58px}
+@media (prefers-reduced-motion: reduce){.key.lit,.key.hit,.key:active,.mc.on .nd,.cg-dots i.on{transform:none}.key.want,.xylo.nudge,.melody.full,.sgame.rec{animation:none}}
 
 /* designer */
 .sec{padding-block:16px 4px;display:grid;gap:10px}
@@ -1256,75 +1310,377 @@ function micStop() {
 /* whistle */
 const SCALE = [0, 2, 4, 5, 7, 9, 11, 12];
 const KEYC = ['#E4413B', '#F0873A', '#F5C024', '#6CBD45', '#2BB3A8', '#2E7FCE', '#7A4FC9', '#E27A9E'];
+const BEAT = .32, XYLO = 523.25;
+// lyrics: one syllable per note; words split on spaces, syllables on "-"
+const syl = s => s.split(/\s+/).flatMap(w => w.split('-').map((x, i, a) => i < a.length - 1 ? x + '-' : x));
+// every preset fits the 8 bars exactly (C D E F G A B C); beats are quarter notes, beat = seconds per quarter
 const TUNES = {
-  wolf: {name: 'Wolf whistle', special: 'wolf'},
-  twinkle: {name: 'Twinkle Twinkle', notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]]},
-  birthday: {name: 'Happy Birthday', notes: [[0, .75], [0, .25], [2, 1], [0, 1], [5, 1], [4, 2], [0, .75], [0, .25], [2, 1], [0, 1], [7, 1], [5, 2]]},
-  mac: {name: 'Old MacDonald', notes: [[5, 1], [5, 1], [5, 1], [0, 1], [2, 1], [2, 1], [0, 2], [9, 1], [9, 1], [7, 1], [7, 1], [5, 2]]},
-  mary: {name: 'Mary’s Lamb', notes: [[4, 1], [2, 1], [0, 1], [2, 1], [4, 1], [4, 1], [4, 2], [2, 1], [2, 1], [2, 2], [4, 1], [7, 1], [7, 2]]}
+  wolf: {name: 'Wolf whistle', special: 'wolf', icon: '😗', group: 'bird'},
+  twinkle: {name: 'Twinkle Twinkle', icon: '⭐', group: 'sing', notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]], lyrics: syl('Twin-kle twin-kle lit-tle star, how I won-der what you are')},
+  birthday: {name: 'Happy Birthday', icon: '🎂', group: 'party', notes: [[0, .75], [0, .25], [2, 1], [0, 1], [5, 1], [4, 2], [0, .75], [0, .25], [2, 1], [0, 1], [7, 1], [5, 2]], lyrics: syl('Hap-py birth-day to you, hap-py birth-day to you')},
+  mac: {name: 'Old MacDonald', icon: '🐄', group: 'sing', notes: [[5, 1], [5, 1], [5, 1], [0, 1], [2, 1], [2, 1], [0, 2], [9, 1], [9, 1], [7, 1], [7, 1], [5, 2]], lyrics: syl('Old Mac-Don-ald had a farm, E-I-E-I-O')},
+  mary: {name: 'Mary’s Lamb', icon: '🐑', group: 'sing', notes: [[4, 1], [2, 1], [0, 1], [2, 1], [4, 1], [4, 1], [4, 2], [2, 1], [2, 1], [2, 2], [4, 1], [7, 1], [7, 2], [4, 1], [2, 1], [0, 1], [2, 1], [4, 1], [4, 1], [4, 1], [4, 1], [2, 1], [2, 1], [4, 1], [2, 1], [0, 4]], lyrics: syl('Ma-ry had a lit-tle lamb, lit-tle lamb, lit-tle lamb, Ma-ry had a lit-tle lamb, its fleece was white as snow')},
+  hotbuns: {name: 'Hot Cross Buns', icon: '🍞', group: 'sing', beat: .4, notes: [[4, 1], [2, 1], [0, 2], [4, 1], [2, 1], [0, 2], [0, .5], [0, .5], [0, .5], [0, .5], [2, .5], [2, .5], [2, .5], [2, .5], [4, 1], [2, 1], [0, 2]], lyrics: syl('Hot cross buns, hot cross buns, one a pen-ny, two a pen-ny, hot cross buns')},
+  row: {name: 'Row Your Boat', icon: '🚣', group: 'sing', beat: .42, notes: [[0, 1.5], [0, 1.5], [0, 1], [2, .5], [4, 1.5], [4, 1], [2, .5], [4, 1], [5, .5], [7, 3], [12, .5], [12, .5], [12, .5], [7, .5], [7, .5], [7, .5], [4, .5], [4, .5], [4, .5], [0, .5], [0, .5], [0, .5], [7, 1], [5, .5], [4, 1], [2, .5], [0, 3]], lyrics: syl('Row row row your boat, gent-ly down the stream, mer-ri-ly mer-ri-ly mer-ri-ly mer-ri-ly, life is but a dream')},
+  london: {name: 'London Bridge', icon: '🌉', group: 'sing', beat: .5, notes: [[7, .75], [9, .25], [7, .5], [5, .5], [4, .5], [5, .5], [7, 1], [2, .5], [4, .5], [5, 1], [4, .5], [5, .5], [7, 1], [7, .75], [9, .25], [7, .5], [5, .5], [4, .5], [5, .5], [7, 1], [2, 1], [7, 1], [4, .5], [0, 1.5]], lyrics: syl('Lon-don Bridge is fall-ing down, fall-ing down, fall-ing down, Lon-don Bridge is fall-ing down, my fair la-dy')},
+  jingle: {name: 'Jingle Bells', icon: '🔔', group: 'party', beat: .34, notes: [[4, 1], [4, 1], [4, 2], [4, 1], [4, 1], [4, 2], [4, 1], [7, 1], [0, 1.5], [2, .5], [4, 4], [5, 1], [5, 1], [5, 1.5], [5, .5], [5, 1], [4, 1], [4, 1], [4, .5], [4, .5], [7, 1], [7, 1], [5, 1], [2, 1], [0, 4]], lyrics: syl('Jin-gle bells, jin-gle bells, jin-gle all the way! Oh what fun it is to ride in a one-horse o-pen sleigh')},
+  ode: {name: 'Ode to Joy', icon: '🎻', group: 'calm', beat: .36, notes: [[4, 1], [4, 1], [5, 1], [7, 1], [7, 1], [5, 1], [4, 1], [2, 1], [0, 1], [0, 1], [2, 1], [4, 1], [4, 1.5], [2, .5], [2, 2], [4, 1], [4, 1], [5, 1], [7, 1], [7, 1], [5, 1], [4, 1], [2, 1], [0, 1], [0, 1], [2, 1], [4, 1], [2, 1.5], [0, .5], [0, 2]], lyrics: syl('Mi mi fa sol sol fa mi re do do re mi mi re re, mi mi fa sol sol fa mi re do do re mi re do do')}
 };
-const semiColor = s => KEYC[Math.max(0, SCALE.indexOf(s))] || '#999';
-function findTune(b, tn) { if (!tn) return null; return b.tunes.find(x => tn.special ? x.special === tn.special : x.notes && JSON.stringify(x.notes) === JSON.stringify(tn.notes)); }
+const TGROUPS = [['sing', '🎵 Sing-along'], ['party', '🎉 Party time'], ['calm', '🌙 Calm & classic'], ['bird', '🐦 Bird tricks']];
+const UNDO_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5L4 10l5 5"/><path d="M4 10h9.5a5.5 5.5 0 0 1 0 11H10"/></svg>';
+
+/* pitch: pure helpers (unit-tested; keep them free of DOM and app state) */
+function med(a) { if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; }
+// a gap relative to the typical gap -> beats
+function qBeat(r) { return r < .7 ? .5 : r < 1.3 ? 1 : r < 1.75 ? 1.5 : 2; }
+// the length of one beat: the median gap, unless another gap explains all the gaps better
+// (e.g. Hot Cross Buns: many short notes pull the median between the short and the long ones)
+function beatUnit(gaps) {
+  const m = med(gaps); if (!(m > 0)) return 0;
+  let best = m, be = Infinity;
+  [m, ...gaps.filter(g => g > 0)].forEach(u => {
+    let e = Math.abs(Math.log2(u / m)) * .15;
+    gaps.forEach(g => { const r = g / u; e += Math.abs(Math.log2(r / qBeat(r))); });
+    if (e < be - 1e-9) { be = e; best = u; }
+  });
+  return best;
+}
+// nearest bar (semitone on the 8-bar scale), folding notes outside C..C back in by octaves
+function snapDeg(x) {
+  let v = x, pen = 0;
+  while (v > 12.5) { v -= 12; pen += 2; }
+  while (v < -.5) { v += 12; pen += 2; }
+  let s = 0, d = 99; for (const q of SCALE) { const dd = Math.abs(v - q); if (dd < d - 1e-9) { d = dd; s = q; } }
+  return {s, v, pen};
+}
+// YIN pitch estimate for one window of samples: {f: Hz or 0, c: clarity 0..1}
+function yinPitch(buf, sr) {
+  const n = buf.length, W = n >> 1;
+  const tMin = Math.max(2, Math.floor(sr / 1100)), tMax = Math.min(n - W - 2, Math.ceil(sr / 80));
+  if (tMax <= tMin + 2) return {f: 0, c: 0};
+  const cm = new Float32Array(tMax + 2); let sum = 0; cm[0] = 1;
+  for (let tau = 1; tau <= tMax + 1; tau++) {
+    let s = 0; for (let j = 0; j < W; j++) { const v = buf[j] - buf[j + tau]; s += v * v; }
+    sum += s; cm[tau] = sum > 0 ? s * tau / sum : 1;
+  }
+  let tau = -1;
+  for (let t = tMin; t <= tMax; t++) if (cm[t] < .15) { while (t < tMax && cm[t + 1] < cm[t]) t++; tau = t; break; }
+  if (tau < 0) { let m = tMin; for (let t = tMin + 1; t <= tMax; t++) if (cm[t] < cm[m]) m = t; if (cm[m] > .3) return {f: 0, c: 1 - cm[m]}; tau = m; }
+  const a = cm[tau - 1], b = cm[tau], c = cm[tau + 1], den = a + c - 2 * b;
+  const sh = den > 0 ? Math.max(-1, Math.min(1, (a - c) / (2 * den))) : 0;
+  return {f: sr / (tau + sh), c: Math.max(0, 1 - b)};
+}
+function frameInfo(buf, sr) {
+  let e = 0; for (let i = 0; i < buf.length; i++) e += buf[i] * buf[i];
+  const rms = Math.sqrt(e / buf.length);
+  if (rms < .003) return {f: 0, c: 0, rms};
+  const p = yinPitch(buf, sr); return {f: p.f, c: p.c, rms};
+}
+// frames [{t, f, c, rms}] -> {notes: [[semitone, beats], ...] on the 8 bars, shift}
+function hummedNotes(frames) {
+  const out = {notes: [], shift: 0};
+  const N = frames ? frames.length : 0; if (N < 3) return out;
+  const dt = Math.min(.05, Math.max(.005, (frames[N - 1].t - frames[0].t) / (N - 1)));
+  const rs = frames.map(f => f.rms || 0).sort((a, b) => a - b);
+  const gate = Math.max(.006, rs[Math.floor(N * .1)] * 2.5, rs[N - 1] * .08);
+  const ok = frames.map(f => f.f >= 80 && f.f <= 1100 && !(f.c < .75) && f.rms >= gate);
+  const raw = frames.map(f => f.f > 0 ? 69 + 12 * Math.log2(f.f / 440) : 0);
+  const pit = raw.map((x, i) => { if (!ok[i]) return 0; const w = []; for (let k = Math.max(0, i - 2); k <= Math.min(N - 1, i + 2); k++) if (ok[k]) w.push(raw[k]); return med(w); });
+  // 1) voiced runs: one silent frame (or two unclear ones) ends a note
+  const runs = []; let a = -1, miss = 0;
+  const endRun = i => { let e = i; while (e > a && !ok[e]) e--; runs.push([a, e]); a = -1; miss = 0; };
+  for (let i = 0; i < N; i++) {
+    if (ok[i]) { if (a < 0) a = i; miss = 0; continue; }
+    if (a < 0) continue;
+    miss += frames[i].rms < gate ? 2 : 1;
+    if (miss >= 2) endRun(i - 1);
+  }
+  if (a >= 0) endRun(N - 1);
+  // 2) split where the pitch moves and stays moved
+  const segs = [];
+  runs.forEach(([s, e]) => {
+    let cs = s, ps = [];
+    for (let i = s; i <= e; i++) {
+      if (!ok[i]) continue;
+      if (ps.length >= 3) {
+        const ref = med(ps.slice(-10));
+        if (Math.abs(pit[i] - ref) > .8) {
+          const nx = []; for (let k = i; k <= e && nx.length < 3; k++) if (ok[k]) nx.push(pit[k]);
+          if (nx.length === 3 && nx.every(x => Math.abs(x - ref) > .8) && Math.max(...nx) - Math.min(...nx) < 1) { segs.push([cs, i - 1]); cs = i; ps = []; }
+        }
+      }
+      ps.push(pit[i]);
+    }
+    segs.push([cs, e]);
+  });
+  // 3) a clear loudness dip followed by a new swell is a repeated note
+  const parts = [];
+  segs.forEach(([s, e]) => {
+    let cs = s, peak = 0, dip = -1;
+    for (let i = s; i <= e; i++) {
+      const r = frames[i].rms;
+      if (dip < 0) { if (i - cs >= 4 && r < peak * .4) dip = i; else peak = Math.max(peak, r); }
+      else if (r > peak * .7) { parts.push([cs, dip - 1]); cs = i; peak = r; dip = -1; }
+    }
+    parts.push([cs, e]);
+  });
+  // 4) notes: median pitch; blips shorter than 90 ms are dropped
+  const ns = [];
+  parts.forEach(([s, e]) => {
+    const ps = []; for (let i = s; i <= e; i++) if (ok[i]) ps.push(pit[i]);
+    const t0 = frames[s].t, t1 = frames[e].t + dt;
+    if (ps.length && t1 - t0 >= .09) ns.push({t0, t1, p: med(ps)});
+  });
+  const use = ns.slice(0, 16); if (!use.length) return out;
+  // 5) rhythm: gaps between note starts, relative to the typical gap
+  const gaps = use.slice(1).map((n, k) => n.t0 - use[k].t0), mg = beatUnit(gaps) || (use[0].t1 - use[0].t0) || .4;
+  const beats = use.map((n, k) => k < gaps.length ? qBeat(gaps[k] / mg) : Math.min(2, Math.max(1, qBeat((n.t1 - n.t0) / mg))));
+  // 6) key: keep her tuning, then find where the tune sits best on the 8 bars
+  let cx = 0, cy = 0;
+  use.forEach((n, k) => { const ang = 2 * Math.PI * n.p; cx += beats[k] * Math.cos(ang); cy += beats[k] * Math.sin(ang); });
+  const fine = Math.atan2(cy, cx) / (2 * Math.PI);
+  const lo = Math.floor(Math.min(...use.map(n => n.p))), hi = Math.ceil(Math.max(...use.map(n => n.p)));
+  let best = null;
+  for (let K = lo - 13; K <= hi + 1; K++) {
+    const F = K + fine; let cost = 0;
+    const sn = use.map((n, k) => { const r = snapDeg(n.p - F); cost += beats[k] * (Math.abs(r.v - r.s) + r.pen); return r.s; });
+    const avg = sn.reduce((x, y) => x + y, 0) / sn.length;
+    cost += Math.abs(avg - 6) * .01 - (sn[sn.length - 1] % 12 === 0 ? .3 : 0) - ([0, 4, 7, 12].includes(sn[0]) ? .1 : 0);
+    if (!best || cost < best.cost - 1e-9) best = {cost, F, sn};
+  }
+  out.notes = best.sn.map((s, k) => [s, beats[k]]); out.shift = best.F;
+  return out;
+}
+/* pitch end */
+
+const semiKey = s => { let k = 0, d = 99; SCALE.forEach((x, i) => { const dd = Math.abs(x - s); if (dd < d) { d = dd; k = i; } }); return k; };
+const semiColor = s => KEYC[semiKey(s)];
+const tuneBeat = tn => (tn && tn.preset && TUNES[tn.preset] && TUNES[tn.preset].beat) || BEAT;
+const hasNotes = tn => !!(tn && (tn.special || (tn.notes && tn.notes.length)));
+function tuneLyrics(tn) { const t = tn && tn.preset && TUNES[tn.preset], ly = t && t.lyrics; return ly && tn.notes && ly.length === tn.notes.length ? ly : null; }
+function tuneIcon(x) { if (!x) return '🎵'; if (x.special === 'wolf') return TUNES.wolf.icon; if (x.preset && TUNES[x.preset]) return TUNES[x.preset].icon; return x.hummed ? '🎤' : '🎹'; }
+// saved tunes: famous ones by their preset key (so corrected melodies still match), others by their notes
+function findTune(b, tn) {
+  if (!tn || !b) return null;
+  if (tn.special) return b.tunes.find(x => x.special === tn.special) || null;
+  if (tn.preset) { const r = b.tunes.find(x => x.preset === tn.preset && !x.special); if (r) return r; }
+  if (!tn.notes) return null;
+  const k = JSON.stringify(tn.notes);
+  return b.tunes.find(x => !x.special && x.notes && JSON.stringify(x.notes) === k) || null;
+}
+function sameTune(a, b) {
+  if (!a || !b) return false;
+  if (a.special || b.special) return a.special === b.special;
+  if (a.preset && b.preset) return a.preset === b.preset;
+  return !!(a.notes && b.notes) && JSON.stringify(a.notes) === JSON.stringify(b.notes);
+}
+// a bird's copy of a famous tune follows corrections to the preset
+function syncPresets(b) {
+  let ch = false;
+  b.tunes.forEach(x => { const t = x.preset && !x.special && TUNES[x.preset]; if (t && t.notes && JSON.stringify(x.notes) !== JSON.stringify(t.notes)) { x.notes = clone(t.notes); ch = true; } });
+  if (ch) Store.save(b);
+}
+function newTuneName(b, hummed) {
+  const names = new Set(b.tunes.map(x => x.name));
+  let n = b.tunes.filter(x => !x.special && !(x.preset && TUNES[x.preset]) && !!x.hummed === hummed).length + 1, nm;
+  do { nm = hummed ? `${kid()}’s hummed song ${n}` : `${kid()}’s song ${n}`; n++; } while (names.has(nm));
+  return nm;
+}
+
+/* karaoke: keys (and the melody bar, when it shows this tune) light up in time with the audio */
+const KAR = {timers: []};
+function markCell(i) {
+  const m = $('#melody'); if (!m) return;
+  $$('.mc.on', m).forEach(c => c.classList.remove('on'));
+  if (i >= 0) { const c = m.querySelector(`.mc[data-i="${i}"]`); if (c) c.classList.add('on'); }
+}
+function lightKey(i, ms) {
+  const k = $(`.xylo .key[data-k="${i}"]`); if (!k) return;
+  k.classList.remove('lit'); void k.offsetWidth; k.classList.add('lit');
+  clearTimeout(k._lt); k._lt = setTimeout(() => k.classList.remove('lit'), ms);
+}
+function karaokeStop() { KAR.timers.forEach(clearTimeout); KAR.timers = []; markCell(-1); $$('.xylo .key.lit').forEach(k => k.classList.remove('lit')); }
+function karaoke(notes, t0, beat, o = {}) {
+  const ctx = AU.ctx; if (!ctx || !notes || !notes.length) return;
+  karaokeStop();
+  const lead = ((ctx.outputLatency || ctx.baseLatency || 0) + t0 - ctx.currentTime) * 1000, ver = S.mver, a = o.bird || null;
+  let x = 0;
+  notes.forEach(([s, bt], i) => {
+    const d = bt * beat;
+    KAR.timers.push(setTimeout(() => {
+      lightKey(semiKey(s), Math.max(90, d * 700));
+      if (o.bar && S.mver === ver) markCell(i);
+      if (o.dots) gameDot(i);
+      // 3D bird hook: open the beak and send out a colored note (no-op until the 3D bird has it)
+      if (a && actor === a && typeof a.note === 'function') { try { a.note(s, d); } catch (e) {} }
+    }, Math.max(0, lead + x * 1000)));
+    x += d;
+  });
+  if (o.bar) KAR.timers.push(setTimeout(() => { if (S.mver === ver) markCell(-1); }, Math.max(0, lead + x * 1000 + 150)));
+}
+
+/* melody bar */
 function melodyHTML() {
   const tn = S.tune;
-  if (!tn || (!tn.special && !tn.notes.length)) return '<span class="empty">Tap the colored bars to make a tune</span>';
-  if (tn.special) return `<b>〜 ${esc(tn.name)} 〜</b>`;
-  return tn.notes.map(([s, bt]) => `<span class="nd ${bt >= 2 ? 'long' : ''}" style="background:${semiColor(s)}"></span>`).join('');
+  if (!hasNotes(tn)) return '<span class="empty">♪ Your tune will show up here</span>';
+  if (tn.special) return `<span class="mspecial"><span aria-hidden="true">${tuneIcon(tn)}</span> ${esc(tn.name)}</span>`;
+  const ly = tuneLyrics(tn), k = tuneBeat(tn) / BEAT;
+  const cells = tn.notes.map(([s, bt], i) => `<span class="mc" data-i="${i}" data-s="${s}" data-b="${bt}"><i class="nd" style="--c:${semiColor(s)};--w:${f1(Math.min(4, bt * k))}"></i>${ly ? `<em>${esc(ly[i])}</em>` : ''}</span>`).join('');
+  const title = tn.name ? `<span class="mtitle"><span aria-hidden="true">${tuneIcon(tn)}</span> ${esc(tn.name)}</span>` : '';
+  const undo = tn.kind === 'draft' ? `<button class="mundo" id="tUndo" aria-label="Take back the last note">${UNDO_IC}</button>` : '';
+  return `<div class="mbody">${title}<div class="mcells">${cells}</div></div>${undo}`;
+}
+function renderMelody() {
+  const m = $('#melody'); if (!m) return;
+  S.mver = (S.mver || 0) + 1;
+  m.innerHTML = melodyHTML();
+  const u = $('#tUndo'); if (u) u.onclick = undoNote;
+  const b = cur(), d = $('#tDots');
+  if (b && d) { const ls = findTune(b, S.tune); d.innerHTML = ls ? dotsHTML(ls.reps, SPECIES[b.species].needs.tune, ls.learned) : ''; }
+  $$('[data-preset]').forEach(c => c.setAttribute('aria-pressed', String(!!(S.tune && S.tune.preset === c.dataset.preset))));
+}
+// bring the xylophone into view so the karaoke can be seen
+function showXylo() {
+  const x = $('#xylo'), first = $('#cgame') || x, last = $('#melody') || $('#cgRow') || x; if (!x) return;
+  const top = first.getBoundingClientRect().top, bot = last.getBoundingClientRect().bottom;
+  if (top >= 70 && bot <= innerHeight) return;
+  window.scrollTo({top: Math.max(0, scrollY + top - 84), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
+}
+
+/* the xylophone: free play records a melody with her rhythm */
+function xyloHTML() { return `<div class="xylo" id="xylo">${SCALE.map((s, i) => `<button class="key" data-k="${i}" style="--c:${KEYC[i]};--h:${100 - i * 6}%" aria-label="Note ${i + 1}"></button>`).join('')}</div>`; }
+function bindKeys(p) {
+  $$('.key', p).forEach(k => {
+    k.addEventListener('pointerdown', e => { e.preventDefault(); keyTap(+k.dataset.k); });
+    k.addEventListener('click', e => { if (e.detail === 0) keyTap(+k.dataset.k); });
+  });
+}
+function malletKey(i) {
+  const ctx = audio(); if (ctx) mallet(ctx.currentTime + .005, XYLO * Math.pow(2, SCALE[i] / 12));
+  const k = $(`.xylo .key[data-k="${i}"]`); if (k) { k.classList.add('hit'); setTimeout(() => k.classList.remove('hit'), 140); }
+}
+function quantize(tn) {
+  const g = tn.taps.slice(1).map((t, k) => t - tn.taps[k]), m = beatUnit(g);
+  tn.notes.forEach((n, k) => { n[1] = k < g.length && m > 0 ? qBeat(g[k] / m) : 1; });
+}
+function keyTap(i) {
+  if (S.game) { gameTap(i); return; }
+  if (Hum.on) return;
+  malletKey(i);
+  S.nextIdle = Math.max(S.nextIdle, Date.now() + 6000);
+  let tn = S.tune;
+  if (!tn || tn.kind !== 'draft' || tn.taught) tn = S.tune = {kind: 'draft', notes: [], taps: [], off: 0, redo: null};
+  if (tn.notes.length >= 16) { const m = $('#melody'); if (m) { m.classList.remove('full'); void m.offsetWidth; m.classList.add('full'); } return; }
+  let now = performance.now() - tn.off;
+  // after "take back", the new note gets the timing of the one it replaces
+  if (tn.redo != null && tn.taps.length) { const want = tn.taps[tn.taps.length - 1] + tn.redo; tn.off += now - want; now = want; }
+  tn.redo = null;
+  tn.notes.push([SCALE[i], 1]); tn.taps.push(now); quantize(tn);
+  renderMelody();
+}
+function undoNote() {
+  const tn = S.tune; if (!tn || tn.kind !== 'draft' || !tn.notes.length || S.game || Hum.on) return;
+  const n = tn.taps.length;
+  tn.redo = n >= 2 ? tn.taps[n - 1] - tn.taps[n - 2] : null;
+  tn.notes.pop(); tn.taps.pop(); tn.taught = false; quantize(tn); sfx('pop');
+  if (!tn.notes.length) S.tune = null;
+  renderMelody();
+}
+function pickPreset(k) {
+  const t = TUNES[k]; if (!t || Hum.on) return;
+  const tn = S.tune = {kind: 'preset', preset: k, name: t.name, special: t.special || null, notes: t.notes ? clone(t.notes) : null};
+  renderMelody(); showXylo(); clearTimeout(S.playQ);
+  if (!isBusy()) { kidPlay(tn); return; }
+  // another tune is still playing: this one starts when it ends
+  const w = S.busyUntil - Date.now();
+  if (w < 13000) S.playQ = setTimeout(() => { if (S.tune === tn && S.screen === 'room' && S.tab === 'whistle' && !S.game && !Hum.on && !isBusy()) kidPlay(tn); }, w + 80);
+}
+function presetsHTML(b) {
+  return TGROUPS.map(([g, label]) => {
+    const items = Object.entries(TUNES).filter(([, t]) => t.group === g); if (!items.length) return '';
+    return `<div class="tgroup"><span class="eyebrow">${label}</span><div class="tunes">${items.map(([k, t]) => { const r = findTune(b, {preset: k, special: t.special || null, notes: t.notes || null}); return `<button class="song${r && r.learned ? ' knows' : ''}" data-preset="${k}" aria-pressed="${!!(S.tune && S.tune.preset === k)}"><span class="em" aria-hidden="true">${t.icon}</span><span class="nm">${esc(t.name)}</span></button>`; }).join('')}</div></div>`;
+  }).join('');
 }
 function renderWhistle(p) {
-  const b = cur(), sp = SPECIES[b.species], need = sp.needs.tune, lesson = findTune(b, S.tune);
+  const b = cur(); if (!b || !p) return;
+  if (S.game && (S.game.bird !== S.id || S.game.actor !== actor)) endGame(S.game, true);
+  if (S.game) { renderGame(p); return; }
+  syncPresets(b);
+  const sp = SPECIES[b.species], need = sp.needs.tune, lesson = findTune(b, S.tune);
   const known = b.tunes.slice().sort((x, y) => (y.learned ? 1 : 0) - (x.learned ? 1 : 0));
+  S.mver = (S.mver || 0) + 1;
   p.innerHTML = `
-  <p>Play a little tune on the xylophone, then teach it to ${esc(b.name)}.</p>
-  <div class="xylo">${SCALE.map((s, i) => `<button class="key" data-k="${i}" style="--c:${KEYC[i]};--h:${100 - i * 6}%" aria-label="Note ${i + 1}"></button>`).join('')}</div>
+  <p class="songs-lede">Tap the bars to make a tune, then teach ${esc(b.name)}!</p>
+  ${xyloHTML()}
   <div class="melody" id="melody">${melodyHTML()}</div>
   <div class="row3"><button class="btn" id="tPlay">${IC.play} Play</button><button class="btn" id="tClear">Clear</button><button class="btn go" id="tTeach">Teach ${esc(b.name)}</button></div>
   <div class="dots" id="tDots">${lesson ? dotsHTML(lesson.reps, need, lesson.learned) : ''}</div>
+  <div class="songplay${MIC ? '' : ' one'}">${MIC ? '<button class="sgame sing" id="tSing"></button>' : ''}<button class="sgame copy" id="tCopy"><span class="em" aria-hidden="true">🎯</span><span>Copy me!<small>${b.copyBest ? `🏆 Best: ${b.copyBest} notes` : 'Play it back'}</small></span></button></div>
   <h3>Famous tunes</h3>
-  <div class="chips">${Object.entries(TUNES).map(([k, t]) => `<button class="chip" data-preset="${k}" aria-pressed="${!!(S.tune && S.tune.preset === k)}">${esc(t.name)}</button>`).join('')}</div>
+  ${presetsHTML(b)}
   <h3>Songs ${esc(b.name)} can whistle</h3>
-  <div class="known">${known.length ? known.map((x, i) => `<span class="word ${x.learned ? '' : 'learning'}"><button data-wt="${i}">${x.learned ? IC.play : ''}${esc(x.name)}${x.learned ? '' : ` <small>(${Math.min(x.reps, need)}/${need})</small>`}</button><button class="x" data-ft="${i}" aria-label="Forget ${esc(x.name)}">×</button></span>`).join('') : `<p class="empty">No songs yet — make one up!</p>`}</div>`;
-  $$('.key', p).forEach(k => k.addEventListener('pointerdown', e => {
-    e.preventDefault(); const i = +k.dataset.k; const ctx = audio(); if (ctx) mallet(ctx.currentTime + .005, 523.25 * Math.pow(2, SCALE[i] / 12));
-    k.classList.add('hit'); setTimeout(() => k.classList.remove('hit'), 140);
-    if (!S.tune || S.tune.special || S.tune.preset) S.tune = {notes: []};
-    if (S.tune.notes.length < 16) S.tune.notes.push([SCALE[i], 1]);
-    $('#melody').innerHTML = melodyHTML(); const ls = findTune(b, S.tune); $('#tDots').innerHTML = ls ? dotsHTML(ls.reps, need, ls.learned) : '';
-    $$('[data-preset]', p).forEach(c => c.setAttribute('aria-pressed', 'false'));
-  }));
-  $('#tPlay').onclick = () => { if (!isBusy()) kidPlay(S.tune); };
-  $('#tClear').onclick = () => { S.tune = null; renderWhistle(p); };
+  <div class="known">${known.length ? known.map((x, i) => `<span class="word ${x.learned ? '' : 'learning'}"><button data-wt="${i}">${x.learned ? IC.play : ''}<span aria-hidden="true">${tuneIcon(x)}</span> ${esc(x.name)}${x.learned ? '' : ` <small>(${Math.min(x.reps, need)}/${need})</small>`}</button><button class="x" data-ft="${i}" aria-label="Forget ${esc(x.name)}">×</button></span>`).join('') : `<p class="empty">No songs yet — make one up!</p>`}</div>`;
+  bindKeys(p);
+  const u = $('#tUndo'); if (u) u.onclick = undoNote;
+  $('#tPlay').onclick = () => { if (!isBusy() && !Hum.on) kidPlay(S.tune); };
+  $('#tClear').onclick = () => { if (Hum.on) return; S.tune = null; renderMelody(); sfx('pop'); };
   $('#tTeach').onclick = teachTune;
-  $$('[data-preset]', p).forEach(el => el.onclick = () => { const k = el.dataset.preset, t = TUNES[k]; S.tune = {preset: k, name: t.name, special: t.special || null, notes: t.notes ? clone(t.notes) : null}; renderWhistle(p); if (!isBusy()) kidPlay(S.tune); });
-  $$('[data-wt]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.wt]; if (x.learned) { if (!isBusy()) { birdWhistle(x, 1); addLove(1); } } else { S.tune = {name: x.name, special: x.special || null, notes: x.notes ? clone(x.notes) : null}; renderWhistle(p); } });
-  $$('[data-ft]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.ft]; b.tunes = b.tunes.filter(y => y !== x); Store.save(b); renderWhistle(p); });
+  $('#tCopy').onclick = startGame;
+  if (MIC) { $('#tSing').onclick = humStart; humLabel(); }
+  $$('[data-preset]', p).forEach(el => el.onclick = () => pickPreset(el.dataset.preset));
+  $$('[data-wt]', p).forEach(el => el.onclick = () => {
+    const x = known[+el.dataset.wt]; if (!x || Hum.on) return;
+    if (x.learned) { if (!isBusy()) { birdWhistle(x, 1); addLove(1); } }
+    else { S.tune = {kind: 'known', name: x.name, preset: x.preset || null, special: x.special || null, notes: x.notes ? clone(x.notes) : null, hummed: !!x.hummed}; renderMelody(); showXylo(); }
+  });
+  $$('[data-ft]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.ft]; if (Hum.on) return; b.tunes = b.tunes.filter(y => y !== x); Store.save(b); renderWhistle(p); });
 }
 function kidPlay(tn) {
-  if (!tn || (!tn.special && !(tn.notes && tn.notes.length))) { toast('Tap the colored bars to make a tune first.'); return 0; }
-  const ctx = audio(); let dur = 1.2;
-  if (ctx) { const t = ctx.currentTime + .05; if (tn.special === 'wolf') dur = wolf(t, .12, .8); else { let x = t; tn.notes.forEach(([s, bt]) => { mallet(x, 523.25 * Math.pow(2, s / 12), .2); x += bt * .32; }); dur = x - t; } }
-  else if (tn.notes) dur = tn.notes.reduce((a, n) => a + n[1] * .32, 0);
-  bubble('kid', '♪ ♪ ♪', dur * 1000 + 300); setBusy(dur * 1000 + 200);
+  if (!hasNotes(tn)) { toast('Tap the colored bars to make a tune first.'); return 0; }
+  const ctx = audio(), beat = tuneBeat(tn); let dur = 1.2;
+  if (ctx) {
+    const t = ctx.currentTime + .05;
+    if (tn.special === 'wolf') dur = wolf(t, .12, .8);
+    else { let x = t; tn.notes.forEach(([s, bt]) => { mallet(x, XYLO * Math.pow(2, s / 12), .2); x += bt * beat; }); dur = x - t; karaoke(tn.notes, t, beat, {bar: sameTune(tn, S.tune)}); }
+  } else if (tn.notes) dur = tn.notes.reduce((a, n) => a + n[1] * beat, 0);
+  bubble('kid', tn.preset && tn.name ? `♪ ${tn.name}` : '♪ ♪ ♪', dur * 1000 + 300); setBusy(dur * 1000 + 200);
   return dur;
 }
 function birdWhistle(tn, p = 1) {
-  const b = cur(); if (!b || !actor) return 0; const sp = SPECIES[b.species]; const ctx = audio(); let dur = 1.2;
-  if (ctx) { const t = ctx.currentTime + .05;
-    if (tn.special === 'wolf') dur = wolf(t, .2, sp.whistleBase / 1046.5);
-    else { let notes = tn.notes; if (p < 1) { const k = Math.max(2, Math.ceil(notes.length * p)); notes = notes.slice(0, k).map(([s, bt]) => [Math.random() < (1 - p) * .5 ? s + pick([-2, -1, 1, 2]) : s, bt]); } dur = whistle(t, notes, sp.whistleBase); }
+  const b = cur(); if (!b || !actor || !hasNotes(tn)) return 0; const sp = SPECIES[b.species], ctx = audio(), a = actor; let dur = 1.2;
+  if (ctx) {
+    const t = ctx.currentTime + .05;
+    if (tn.special === 'wolf') {
+      dur = wolf(t, .2, sp.whistleBase / 1046.5);
+      [[12, .3, 0], [7, .62, .42]].forEach(([s, d, at]) => setTimeout(() => { if (actor === a && typeof a.note === 'function') { try { a.note(s, d); } catch (e) {} } }, ((t - ctx.currentTime) + at) * 1000));
+    } else {
+      let notes = tn.notes, beat = tuneBeat(tn);
+      if (p < 1) { const k = Math.max(2, Math.ceil(notes.length * p)); notes = notes.slice(0, k).map(([s, bt]) => [Math.random() < (1 - p) * .5 ? s + pick([-2, -1, 1, 2]) : s, bt]); }
+      dur = whistle(t, notes, sp.whistleBase, beat);
+      karaoke(notes, t, beat, {bar: sameTune(tn, S.tune), bird: a});
+    }
   }
-  actor.whistleMove(dur); bubble('bird', '♪ ♫ ♪', dur * 1000 + 400); setBusy(dur * 1000 + 300);
+  a.whistleMove(dur); bubble('bird', '♪ ♫ ♪', dur * 1000 + 400); setBusy(dur * 1000 + 300);
   return dur;
 }
 function teachTune() {
-  const b = cur(), sp = SPECIES[b.species], tn = S.tune; if (isBusy() || !actor) return;
-  if (!tn || (!tn.special && !(tn.notes && tn.notes.length))) { toast('Tap the colored bars to make a tune first.'); return; }
+  const b = cur(), tn = S.tune; if (!b || S.game || Hum.on || !actor) return;
+  // tapped while a tune is still playing: start the lesson as soon as it ends
+  if (isBusy()) { const w = S.busyUntil - Date.now(); if (w < 7000 && !S.teachQ) S.teachQ = setTimeout(() => { S.teachQ = 0; if (S.screen === 'room' && S.tab === 'whistle' && cur() === b) teachTune(); }, w + 60); return; }
+  const sp = SPECIES[b.species];
+  if (!hasNotes(tn)) { toast('Tap the colored bars to make a tune first.'); return; }
   if (!tn.special && tn.notes.length < 2) { toast('Add at least two notes.'); return; }
   let rec = findTune(b, tn);
-  if (!rec) { if (b.tunes.length >= 20) { toast(`${b.name} knows lots of songs! Forget one first.`); return; } const n = b.tunes.filter(x => !x.special && !TUNES[x.preset]).length + 1; rec = {id: uid(), name: tn.name || `${kid()}’s song ${n}`, preset: tn.preset || null, special: tn.special || null, notes: tn.notes ? clone(tn.notes) : null, reps: 0, learned: false}; b.tunes.push(rec); }
+  if (!rec) {
+    if (b.tunes.length >= 20) { toast(`${b.name} knows lots of songs! Forget one first.`); return; }
+    rec = {id: uid(), name: tn.name || newTuneName(b, false), preset: tn.preset || null, special: tn.special || null, notes: tn.notes ? clone(tn.notes) : null, reps: 0, learned: false};
+    if (tn.hummed) rec.hummed = true;
+    b.tunes.push(rec);
+  }
+  if (tn.kind === 'draft' || tn.kind === 'hum') { tn.taught = true; if (!tn.name) tn.name = rec.name; }
   const a = actor, need = sp.needs.tune;
   const dots = () => { const el = $('#tDots'); if (el) el.innerHTML = dotsHTML(rec.reps, need, rec.learned); };
-  const refresh = () => { if (S.tab === 'whistle' && S.screen === 'room') renderWhistle($('#panel')); };
+  const refresh = () => { if (S.tab === 'whistle' && S.screen === 'room' && !S.game) renderWhistle($('#panel')); };
   showStage();
   const kd = kidPlay(tn); a.listen(); setBusy(60000); addLove(1);
   if (rec.learned) { a.later(kd * 1000 + 600, () => { S.busyUntil = 0; birdWhistle(rec, 1); }); return; }
@@ -1347,6 +1703,216 @@ function teachTune() {
   };
   a.later(kd * 1000 + 700, attempt);
 }
+
+/* copy me! the bird whistles a pattern, she plays it back on the bars */
+const GMAX = 12;
+function gameValid(g) { return !!g && S.game === g && S.screen === 'room' && S.tab === 'whistle' && S.id === g.bird && actor === g.actor && !!$('#cgame'); }
+function gLater(g, ms, fn) { const id = setTimeout(() => { g.timers.delete(id); if (!gameValid(g)) { endGame(g, true); return; } fn(); }, ms); g.timers.add(id); }
+function endGame(g, quiet) {
+  g = g || S.game; if (!g) return;
+  g.timers.forEach(clearTimeout); g.timers.clear();
+  const was = S.game === g; if (was) S.game = null;
+  karaokeStop();
+  S.busyUntil = Math.min(S.busyUntil, Date.now() + 300);
+  if (was && !quiet && S.screen === 'room' && S.tab === 'whistle') renderWhistle($('#panel'));
+}
+function startGame() {
+  const b = cur(); if (!b || !actor || S.game || Hum.on) return;
+  const wait = Math.max(0, S.busyUntil - Date.now());
+  if (wait > 15000) { toast(`${b.name} is busy learning — try again in a moment.`); return; }
+  sfx('pop'); karaokeStop();
+  const g = S.game = {bird: b.id, actor, seq: [], pos: 0, phase: 'ready', best: b.copyBest || 0, score: 0, missed: -1, msg: '', timers: new Set()};
+  renderWhistle($('#panel')); showXylo(); setBusy(wait + 30000);
+  gLater(g, wait + 900, () => gameRound(g));
+}
+function renderGame(p) {
+  const g = S.game;
+  p.innerHTML = `
+  <div class="cgame" id="cgame" data-phase="${g.phase}">
+    <div class="cg-top"><b><span aria-hidden="true">🎯</span> Copy me!</b><span class="cg-best" id="cgBest"></span></div>
+    <p class="cg-status" id="cgStatus" aria-live="polite"></p>
+    <div class="cg-dots" id="cgDots" aria-hidden="true"></div>
+  </div>
+  ${xyloHTML()}
+  <div class="cg-row" id="cgRow"></div>`;
+  bindKeys(p);
+  paintGame(g);
+}
+function paintDots(g) {
+  const el = $('#cgDots'); if (!el) return;
+  const show = g.phase === 'over' || g.phase === 'won' || g.phase === 'show';
+  el.innerHTML = g.seq.map((k, i) => `<i data-k="${k}" class="${show || i < g.pos ? 'on' : ''}${i === g.missed && g.phase !== 'bird' ? ' miss' : ''}" style="--c:${KEYC[k]}"></i>`).join('');
+}
+function gameDot(i) { const g = S.game, el = g && $(`#cgDots i:nth-child(${i + 1})`); if (el) el.classList.add('on'); }
+function paintGame(g) {
+  const box = $('#cgame'); if (!box) return;
+  const b = cur(); box.dataset.phase = g.phase;
+  const text = {ready: '👂 Get ready…', bird: `👂 Listen to ${b ? b.name : 'the bird'}…`, kid: '👆 Your turn!', yay: g.msg, oops: '🙈 Oops!', show: '👀 Like this…', over: g.score ? `⭐ You copied ${g.score} notes!` : '💛 So close! Try again', won: `🏆 All ${GMAX}! Superstar!`}[g.phase] || '';
+  $('#cgStatus').textContent = text;
+  const best = $('#cgBest'); best.textContent = `🏆 Best ${g.best}`; best.hidden = !g.best;
+  paintDots(g);
+  const row = $('#cgRow'); if (!row) return;
+  const end = g.phase === 'over' || g.phase === 'won';
+  row.innerHTML = end ? '<button class="btn go" id="cgRetry">🔁 Try again</button><button class="btn" id="cgQuit">Done</button>'
+    : `<button class="btn" id="cgAgain"${g.phase === 'kid' ? '' : ' disabled'}>👂 Hear it again</button><button class="btn" id="cgQuit">✕ Stop</button>`;
+  $('#cgQuit').onclick = () => { sfx('pop'); endGame(g); };
+  const again = $('#cgAgain'); if (again) again.onclick = () => { if (g.phase !== 'kid') return; g.pos = 0; g.phase = 'bird'; paintGame(g); gameWhistle(g, () => { g.phase = 'kid'; paintGame(g); setBusy(30000); }); };
+  const retry = $('#cgRetry'); if (retry) retry.onclick = () => { sfx('pop'); g.seq = []; g.pos = 0; g.score = 0; g.missed = -1; g.phase = 'ready'; paintGame(g); setBusy(30000); gLater(g, 700, () => gameRound(g)); };
+}
+const rndKey = prev => { let k; do { k = Math.floor(Math.random() * SCALE.length); } while (k === prev); return k; };
+function gameRound(g) {
+  if (!g.seq.length) g.seq.push(rndKey(-1));
+  g.seq.push(rndKey(g.seq[g.seq.length - 1]));
+  g.pos = 0; g.missed = -1; g.phase = 'bird'; paintGame(g);
+  gameWhistle(g, () => { g.phase = 'kid'; paintGame(g); setBusy(30000); });
+}
+function gameWhistle(g, after) {
+  const b = cur(), a = actor; if (!b || !a) return;
+  const sp = SPECIES[b.species], ctx = audio(), beat = Math.max(.36, .5 - g.seq.length * .012);
+  const notes = g.seq.map(k => [SCALE[k], 1]); let dur = notes.length * beat;
+  if (ctx) { const t = ctx.currentTime + .08; dur = whistle(t, notes, sp.whistleBase, beat) || dur; karaoke(notes, t, beat, {bird: a, dots: g.phase === 'bird'}); }
+  a.whistleMove(dur); bubble('bird', '♪ ♫ ♪', dur * 1000 + 300); setBusy(dur * 1000 + 30000);
+  gLater(g, dur * 1000 + 450, after);
+}
+// a gentle, silly slide-whistle "whoops"
+function sillyCall(t) {
+  tone(t, .5, [[0, 1500], [.3, 2200], [1, 620]], {fm: {rate: 11, depth: 120}, vol: .15, harm: [[1, 1], [2, .15]]});
+  tone(t + .52, .14, [[0, 900], [1, 1350]], {vol: .09});
+  return .7;
+}
+function gameTap(i) {
+  const g = S.game; if (!g) return;
+  if (g.phase !== 'kid') { const x = $('#xylo'); if (x) { x.classList.remove('nudge'); void x.offsetWidth; x.classList.add('nudge'); } return; }
+  malletKey(i); setBusy(30000);
+  if (i === g.seq[g.pos]) { g.pos++; paintDots(g); if (g.pos >= g.seq.length) roundWon(g); return; }
+  g.missed = g.pos; roundLost(g);
+}
+function roundWon(g) {
+  const b = cur(); g.score = g.seq.length;
+  if (g.score > g.best) { g.best = g.score; if (b) { b.copyBest = g.best; Store.save(b); } }
+  g.phase = g.seq.length >= GMAX ? 'won' : 'yay'; g.msg = pick(['🎉 Yes!', '🌟 Great job!', '🎉 You did it!', '⭐ Perfect!']);
+  paintGame(g); hearts(2); addLove(1);
+  if (actor) { actor.excite(1000); actor.hop(); }
+  const ctx = audio(); if (ctx) { const t = ctx.currentTime + .12; [0, 4, 7].forEach((s, k) => mallet(t + k * .08, 1046.5 * Math.pow(2, s / 12), .11)); }
+  if (g.phase === 'won') { gLater(g, 600, () => { celebrate(`${kid()} copied all ${GMAX} notes!`); S.busyUntil = Date.now() + 3000; }); return; }
+  gLater(g, 1500, () => gameRound(g));
+}
+function roundLost(g) {
+  const b = cur(); g.phase = 'oops'; paintGame(g);
+  const ctx = audio(); const d = ctx ? sillyCall(ctx.currentTime + .05) : .7;
+  if (actor) actor.chirpMove(d);
+  bubble('bird', pick(['Whoops!', 'Oopsie!', 'Uh-oh!']), 1500);
+  gLater(g, d * 1000 + 600, () => {
+    g.phase = 'show'; paintGame(g);
+    const k = $(`.xylo .key[data-k="${g.seq[g.missed]}"]`); if (k) { k.classList.remove('want'); void k.offsetWidth; k.classList.add('want'); setTimeout(() => k.classList.remove('want'), 2400); }
+    gameWhistle(g, () => { g.phase = 'over'; paintGame(g); S.busyUntil = Date.now() + 2500; if (b && g.score && g.score >= g.best) hearts(3); });
+  });
+}
+
+/* sing or hum to teach: the phone listens, finds the notes, and the bird learns them (standalone app only) */
+const Hum = {on: false, gen: 0, bird: null, stream: null, nodes: null, buf: null, sr: 48000, timer: 0, frames: [], t0: 0, ignore: 0, floor: -1, heard: 0, lastVoice: 0, live: 0, ticks: 0};
+function humValid() { return S.screen === 'room' && S.tab === 'whistle' && S.id === Hum.bird && !S.game && !!$('#tSing'); }
+function humLabel() {
+  const btn = $('#tSing'), b = cur(), p = $('#panel');
+  if (p) p.classList.toggle('hum-on', Hum.on && S.tab === 'whistle');
+  if (!btn || !b) return;
+  btn.classList.toggle('rec', Hum.on);
+  btn.innerHTML = Hum.on ? '<span class="em" aria-hidden="true">👂</span><span>Listening…<small>Tap when you’re done</small></span>'
+    : `<span class="em" aria-hidden="true">🎤</span><span>Sing to ${esc(b.name)}<small>or hum a tune</small></span>`;
+}
+function humRelease() {
+  clearInterval(Hum.timer); Hum.timer = 0;
+  const n = Hum.nodes; Hum.nodes = null;
+  if (n) { try { n.src.disconnect(); n.an.disconnect(); n.mute.disconnect(); } catch (e) {} }
+  if (Hum.stream) { try { Hum.stream.getTracks().forEach(t => t.stop()); } catch (e) {} Hum.stream = null; }
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+  Hum.on = false;
+  if (actor && actor.s) { actor.s.rotT = 0; actor.s.crestT = actor.rest; }
+}
+function humCancel() { Hum.gen++; const was = Hum.on; humRelease(); humLabel(); if (was) S.busyUntil = Math.min(S.busyUntil, Date.now()); }
+async function humStart() {
+  try {
+    const b = cur(); if (!b || !actor || S.game) return;
+    if (Hum.on) { humStop(); return; }
+    const wait = Math.max(0, S.busyUntil - Date.now());
+    if (wait > 6000) { toast(`${b.name} is busy — try again in a moment.`); return; }
+    const ctx = audio(); if (!ctx) { toast('Turn sounds on in Settings first.'); return; }
+    const gen = ++Hum.gen;
+    Object.assign(Hum, {on: true, bird: b.id, frames: [], floor: -1, heard: 0, lastVoice: 0, live: 0, ticks: 0, t0: performance.now(), ignore: performance.now() + wait + 200});
+    karaokeStop(); humLabel(); setBusy(12000); actor.listen();
+    const m = $('#melody'); if (m) m.innerHTML = '<span class="empty">🎤 Sing or hum a little tune…</span>';
+    try { if (navigator.audioSession) navigator.audioSession.type = 'play-and-record'; } catch (e) {}
+    let stream = null;
+    try { stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: false, autoGainControl: true}}); }
+    catch (e) {
+      if (gen !== Hum.gen) return;
+      humCancel(); renderMelody();
+      toast('The microphone is off. A grown-up can turn it on in Settings.');
+      return;
+    }
+    if (gen !== Hum.gen || !Hum.on) { try { stream.getTracks().forEach(t => t.stop()); } catch (e) {} return; }
+    Hum.stream = stream;
+    if (ctx.state === 'suspended') { try { await ctx.resume(); } catch (e) {} }
+    if (gen !== Hum.gen || !Hum.on) return;
+    const src = ctx.createMediaStreamSource(stream), an = ctx.createAnalyser(), mute = ctx.createGain();
+    an.fftSize = 2048; an.smoothingTimeConstant = 0; mute.gain.value = 0;
+    src.connect(an); an.connect(mute); mute.connect(ctx.destination);
+    Hum.nodes = {src, an, mute}; Hum.buf = new Float32Array(an.fftSize); Hum.sr = ctx.sampleRate; Hum.t0 = performance.now();
+    Hum.timer = setInterval(humTick, 20);
+  } catch (e) {
+    humCancel(); renderMelody();
+    toast('The microphone didn’t start. Try again!');
+  }
+}
+function humTick() {
+  try {
+    if (!Hum.on || !Hum.nodes) return;
+    if (!humValid() || !actor) { humCancel(); return; }
+    const an = Hum.nodes.an, buf = Hum.buf, now = performance.now();
+    if (++Hum.ticks % 70 === 0) actor.listen();
+    if (now < Hum.ignore) return;
+    if (an.getFloatTimeDomainData) an.getFloatTimeDomainData(buf);
+    else { const u = new Uint8Array(buf.length); an.getByteTimeDomainData(u); for (let i = 0; i < u.length; i++) buf[i] = (u[i] - 128) / 128; }
+    const fr = frameInfo(buf, Hum.sr); fr.t = (now - Hum.t0) / 1000; Hum.frames.push(fr);
+    if (Hum.frames.length <= 6) Hum.floor = Hum.floor < 0 ? fr.rms : Math.min(Hum.floor, fr.rms);
+    if (fr.f >= 80 && fr.f <= 1100 && fr.c >= .75 && fr.rms >= humGate()) {
+      if (!Hum.heard) bubble('kid', '♪ ♫ ♪', 11000);
+      Hum.heard++; Hum.lastVoice = now;
+    }
+    if (now - Hum.live > 280) { Hum.live = now; humPreview(); }
+    const secs = (now - Hum.t0) / 1000;
+    if (secs > 10 || (Hum.heard > 4 && now - Hum.lastVoice > 1500) || (!Hum.heard && secs > 7)) humStop();
+  } catch (e) { humCancel(); }
+}
+// live view: the notes found so far, and the bar she is singing right now
+const humGate = () => Math.max(.008, Math.min(.04, Hum.floor * 3));
+function humPreview() {
+  const m = $('#melody'); if (!m) return;
+  const res = hummedNotes(Hum.frames);
+  S.mver = (S.mver || 0) + 1;
+  m.innerHTML = res.notes.length ? `<div class="mbody"><span class="mtitle"><span aria-hidden="true">🎤</span> I hear…</span><div class="mcells">${res.notes.map(([s, bt], i) => `<span class="mc" data-i="${i}"><i class="nd" style="--c:${semiColor(s)};--w:${bt}"></i></span>`).join('')}</div></div>` : '<span class="empty">🎤 Sing or hum a little tune…</span>';
+  const f = Hum.frames[Hum.frames.length - 1];
+  if (f && res.notes.length && f.f >= 80 && f.f <= 1100 && f.c >= .75 && f.rms >= humGate()) lightKey(SCALE.indexOf(snapDeg(69 + 12 * Math.log2(f.f / 440) - res.shift).s), 260);
+}
+function humStop() {
+  if (!Hum.on) return;
+  Hum.gen++; const frames = Hum.frames; Hum.frames = [];
+  humRelease(); humLabel(); S.busyUntil = Math.min(S.busyUntil, Date.now());
+  const b = cur(); if (!b || !actor || !humValidAfter()) return;
+  let res = {notes: []};
+  try { res = hummedNotes(frames); } catch (e) {}
+  if (res.notes.length < 2) {
+    renderMelody(); doCall(); bubble('bird', '?', 1400);
+    toast(res.notes.length ? 'I only heard one note — sing a few more!' : 'I couldn’t hear a tune — try humming louder');
+    return;
+  }
+  S.tune = {kind: 'hum', name: newTuneName(b, true), notes: res.notes, hummed: true};
+  renderMelody(); sfx('pop'); setBusy(500);
+  try { if (AU.ctx && AU.ctx.state !== 'running') AU.ctx.resume().catch(() => {}); } catch (e) {}
+  const a = actor, tn = S.tune;
+  setTimeout(() => { if (actor !== a || S.tune !== tn || !humValidAfter()) return; S.busyUntil = 0; teachTune(); }, 550);
+}
+function humValidAfter() { return S.screen === 'room' && S.tab === 'whistle' && S.id === Hum.bird && !S.game; }
 
 /* ---------- designer ---------- */
 let D = null, DZ = {};
