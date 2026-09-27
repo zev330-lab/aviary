@@ -855,7 +855,7 @@ function load3D() {
   R3.p = import('./vendor/three.js').then(m => { R3.T = m; R3.state = 'ready'; return true; }).catch(e => { console.warn('3D birds unavailable', e); R3.state = 'off'; return false; });
   return R3.p;
 }
-const has3D = () => R3.state === 'ready';
+const has3D = () => R3.state === 'ready' && !R3.lost;
 
 /* math for sculpting: signed distance fields meshed with surface nets */
 const ss = (a, b, x) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -1803,6 +1803,7 @@ function renderer3() {
   r.shadowMap.enabled = true; r.shadowMap.type = T.PCFShadowMap;
   r.domElement.className = 'gl'; r.domElement.setAttribute('aria-hidden', 'true');
   r.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); R3.lost = true; });
+  r.domElement.addEventListener('webglcontextrestored', () => { R3.lost = false; });
   return (R3.r = r);
 }
 const HEAD_PARTS = new Set(['head', 'face', 'crest', 'cheek', 'iris', 'ring', 'cere', 'acc']);
