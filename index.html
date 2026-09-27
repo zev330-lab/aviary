@@ -457,7 +457,7 @@ const LINKS = {body: [['belly', c => light(c, .08)]], tail: [['tailTip', c => da
 const SWATCHES = [['#FAFAF6','White'],['#EDE5D2','Cream'],['#FBE36B','Lemon'],['#FAD53A','Sunflower'],['#F5C024','Gold'],['#F0873A','Orange'],['#F2866A','Peach'],['#E4413B','Red'],['#B01E4A','Ruby'],['#F4A7C3','Pink'],['#E27A9E','Rose'],['#C06BD9','Orchid'],['#7A4FC9','Purple'],['#3E4FB8','Indigo'],['#2E7FCE','Blue'],['#7FC6E6','Sky'],['#2BB3A8','Teal'],['#6CBD45','Green'],['#2E8B4A','Emerald'],['#B9D35A','Lime'],['#A5A6A8','Silver'],['#8F8D8A','Grey'],['#5E5B58','Slate'],['#2A2A2C','Black'],['#8A5A3B','Brown'],['#C49A82','Tan']];
 const PATTERNS = [['plain','Plain'],['pearl','Pearls'],['pied','Patches'],['bars','Stripes'],['rainbow','Rainbow'],['sparkles','Sparkles']];
 const PATTERN_PC = {pearl: '#F2DC8A', pied: '#F6F0DA', bars: '#1F1F1F', sparkles: '#FFFFFF'};
-const ACCS = [['none','Nothing'],['bow','Bow'],['crown','Crown'],['party','Party hat'],['flower','Flower'],['tophat','Top hat']];
+const ACCS = [['none','Nothing'],['bow','Bow'],['crown','Crown'],['party','Party hat'],['flower','Flower'],['tophat','Top hat'],['glasses','Sunglasses'],['headphones','Headphones'],['bowtie','Bow tie']];
 const NAMES = ['Kiwi','Mango','Sunny','Pip','Coco','Peaches','Biscuit','Blueberry','Ziggy','Pickle','Nugget','Maple','Jellybean','Pepper','Sprinkles','Waffles','Luna','Rio','Buttercup','Noodle','Mochi','Tweety','Sky','Clementine','Pistachio','Banjo','Marshmallow','Twix'];
 
 function completeColors(c) {
@@ -673,6 +673,9 @@ function accessorySVG(kind, H, hr) {
     case 'party': return `<g class="ov" transform="translate(${tx} ${ty}) rotate(-16)"><path d="M${-hr * .34},3 L${hr * .02},${-hr}  L${hr * .36},3 Z" fill="#7A4FC9"/><path d="M${-hr * .21},${-hr * .3} L${hr * .23},${-hr * .3} M${-hr * .1},${-hr * .62} L${hr * .13},${-hr * .62}" stroke="#FFD84A" stroke-width="${hr * .1}" stroke-linecap="round"/><circle cx="${hr * .02}" cy="${-hr * 1.04}" r="${hr * .13}" fill="#FF7FA8"/></g>`;
     case 'tophat': return `<g class="ov" transform="translate(${tx} ${ty}) rotate(-12)"><rect x="${-hr * .32}" y="${-hr * .72}" width="${hr * .64}" height="${hr * .68}" rx="${hr * .05}" fill="#2B3444"/><rect x="${-hr * .32}" y="${-hr * .26}" width="${hr * .64}" height="${hr * .12}" fill="#E4413B"/><rect x="${-hr * .5}" y="${-hr * .08}" width="${hr}" height="${hr * .14}" rx="${hr * .07}" fill="#232A36"/></g>`;
     case 'bow': return `<g class="ov" transform="translate(${f1(H.x - hr * .38)} ${f1(H.y - hr * .74)}) rotate(-20)"><path d="M0 0 L${-hr * .36} ${-hr * .2} L${-hr * .36} ${hr * .2}Z M0 0 L${hr * .36} ${-hr * .2} L${hr * .36} ${hr * .2}Z" fill="#F2689C" stroke="#C94377" stroke-width="1.2" stroke-linejoin="round"/><circle r="${hr * .1}" fill="#C94377"/></g>`;
+    case 'glasses': return `<g class="ov"><circle cx="${f1(H.x + hr * .3)}" cy="${f1(H.y - hr * .1)}" r="${f1(hr * .3)}" fill="#1F2430" stroke="#0E1118" stroke-width="2"/><circle cx="${f1(H.x + hr * .22)}" cy="${f1(H.y - hr * .2)}" r="${f1(hr * .08)}" fill="#fff" opacity=".5"/><path d="M${f1(H.x + hr * .58)},${f1(H.y - hr * .14)} L${f1(H.x + hr * .95)},${f1(H.y - hr * .05)}" stroke="#0E1118" stroke-width="2.5"/></g>`;
+    case 'headphones': return `<g class="ov"><path d="M${f1(H.x - hr * .75)},${f1(H.y + hr * .1)} A${f1(hr * .9)},${f1(hr * .95)} 0 0 1 ${f1(H.x + hr * .55)},${f1(H.y - hr * .5)}" stroke="#7A4FC9" stroke-width="${f1(hr * .16)}" fill="none" stroke-linecap="round"/><ellipse cx="${f1(H.x - hr * .55)}" cy="${f1(H.y + hr * .15)}" rx="${f1(hr * .24)}" ry="${f1(hr * .32)}" fill="#F2689C"/></g>`;
+    case 'bowtie': return `<g class="ov" transform="translate(${f1(H.x + hr * .15)} ${f1(H.y + hr * 1.05)}) rotate(-15)"><path d="M0 0 L${-hr * .38} ${-hr * .22} L${-hr * .38} ${hr * .22}Z M0 0 L${hr * .38} ${-hr * .22} L${hr * .38} ${hr * .22}Z" fill="#2E7FCE" stroke="#1D4F98" stroke-width="1.2" stroke-linejoin="round"/><circle r="${hr * .1}" fill="#F5C024"/></g>`;
     case 'flower': { let p = ''; for (let i = 0; i < 5; i++) { const a = i * 72 * DEG; p += `<circle cx="${f1(Math.cos(a) * hr * .16)}" cy="${f1(Math.sin(a) * hr * .16)}" r="${f1(hr * .14)}" fill="#FF8FB1"/>`; } return `<g class="ov" transform="translate(${f1(H.x - hr * .52)} ${f1(H.y - hr * .36)})">${p}<circle r="${f1(hr * .1)}" fill="#FFD84A"/></g>`; }
   }
   return '';
@@ -1341,6 +1344,32 @@ class Bird3D {
       for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; const p = new T.Mesh(new T.SphereGeometry(hr * .12, 12, 8), petal); p.scale.set(1, 1, .45); p.position.set(Math.cos(a) * hr * .14, Math.sin(a) * hr * .14, 0); g.add(p); }
       const mid = new T.Mesh(new T.SphereGeometry(hr * .08, 12, 8), M('#FFD84A')); mid.position.z = hr * .04; g.add(mid);
       const dir = [.78, .42, .2]; g.position.copy(this.headAt(this.headPoint(dir, 1.0))); g.lookAt(g.position.clone().add(new T.Vector3(dir[0], dir[1], dir[2])));
+    }
+    else if (kind === 'glasses') {
+      const lens = M('#1F2430', {roughness: .12, metalness: .3}), rim = M('#0E1118', {roughness: .4});
+      const r = F.S.head * .19 * (F.S.eyeScale || 1) * 1.7, pts = [];
+      [1, -1].forEach(sd => {
+        const dir = [F.eye[0] * sd, F.eye[1], F.eye[2]], p = this.headAt(this.headPoint(dir, (F.S.eyeIn || .9) + .12));
+        const l = new T.Mesh(new T.CylinderGeometry(r, r, r * .18, 28), lens); l.position.copy(p);
+        l.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(dir[0], dir[1], dir[2])); g.add(l);
+        const ring = new T.Mesh(new T.TorusGeometry(r, r * .12, 8, 28), rim); ring.position.copy(p); ring.quaternion.setFromUnitVectors(new T.Vector3(0, 0, 1), new T.Vector3(dir[0], dir[1], dir[2])); g.add(ring);
+        pts.push(p);
+      });
+      const front = this.headAt(this.headPoint([0, .2, 1], 1.06));
+      const bar = new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([pts[0], front, pts[1]]), 16, r * .1, 6), rim); g.add(bar);
+    } else if (kind === 'headphones') {
+      const band = M('#7A4FC9', {roughness: .45}), cup = M('#F2689C', {roughness: .5});
+      const ear = sd => this.headAt(this.headPoint([sd * .96, -.05, -.22], 1.04));
+      const topP = this.headAt(this.headPoint([0, 1, -.15], 1.12));
+      const arc = new T.CatmullRomCurve3([ear(1), this.headAt(this.headPoint([.7, .72, -.18], 1.1)), topP, this.headAt(this.headPoint([-.7, .72, -.18], 1.1)), ear(-1)]);
+      g.add(new T.Mesh(new T.TubeGeometry(arc, 30, hr * .07, 8), band));
+      [1, -1].forEach(sd => { const c = new T.Mesh(new T.CylinderGeometry(hr * .28, hr * .28, hr * .16, 24), cup); c.position.copy(ear(sd)); c.rotation.z = Math.PI / 2; g.add(c); });
+    } else if (kind === 'bowtie') {
+      const blue = M('#2E7FCE', {roughness: .45});
+      [-1, 1].forEach(sd => { const w = new T.Mesh(new T.ConeGeometry(hr * .26, hr * .46, 16), blue); w.rotation.z = sd * Math.PI / 2; w.position.x = sd * hr * .23; w.scale.set(1, 1, .45); g.add(w); });
+      g.add(new T.Mesh(new T.SphereGeometry(hr * .12, 12, 8), M('#F5C024', {roughness: .4})));
+      const neck = vadd(F.H, vnorm([0, -.78, .62]), hr * 1.13);
+      g.position.copy(this.headAt(neck)); g.rotation.x = -.5;
     }
     g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.userData.part = 'acc'; } });
     this.acc = g; this.headBone.add(g);
