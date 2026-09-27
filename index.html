@@ -1421,7 +1421,7 @@ class Bird3D {
   }
   setAccessory(kind) {
     const T = R3.T, F = this.F, hr = F.S.head;
-    if (this.acc) { this.headBone.remove(this.acc); this.acc.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); this.acc = null; }
+    if (this.acc) { this.headBone.remove(this.acc); this.acc.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } }); this.acc = null; }
     if (!kind || kind === 'none') return;
     const g = new T.Group(), M = (hex, o = {}) => new T.MeshStandardMaterial(Object.assign({color: hex, roughness: .5}, o));
     const top = this.headPoint([0, 1, -.08], .9);
@@ -1569,7 +1569,7 @@ class Bird3D {
     const shared = new Set(Object.values(R3.geos).flatMap(g => g.upper ? [g.upper, g.lower] : [g]));
     this.pivot.traverse(o => { if (o.isInstancedMesh) o.dispose(); if (o.geometry && !shared.has(o.geometry) && o !== this.mesh) o.geometry.dispose(); });
     this.mesh.skeleton.dispose(); this.mesh.geometry.dispose();
-    if (this.acc) this.acc.traverse(o => { if (o.material && o.material.map) o.material.map.dispose(); });
+    if (this.acc) this.acc.traverse(o => { if (o.material) { if (o.material.map) o.material.map.dispose(); o.material.dispose(); } });
   }
 }
 
@@ -1695,7 +1695,7 @@ class Actor3D {
     let db = 0, dr = 0, dy = 0;
     if (s.dance) { const ph = (now - this.danceStart) / 1000 * BPM / 60; db = Math.abs(Math.sin(ph * Math.PI)) * .06 * (calm || .3); dr = Math.sin(ph * Math.PI) * .22 * (calm || .3); dy = Math.sin(ph * Math.PI * .5) * .2 * (calm || .3); }
     const breath = Math.sin(t * 2.3) * .012 * calm;
-    B.root.position.set(x.px || 0, s.hop * .012 + (x.py || 0) + db, x.pz || 0);
+    B.root.position.set(x.px || 0, PERCH_R + s.hop * .012 + (x.py || 0) + db, x.pz || 0);
     B.pivot.rotation.x = x.hang || 0;
     // spin/flip/bank around the body center
     const q = this.tmp.q.setFromEuler(this.tmp.e.set((x.rx || 0), (x.ry || 0) + dy, (x.rz || 0), 'YXZ'));
@@ -1789,11 +1789,13 @@ function buildScene() {
     scene.add(new T.Mesh(mg, leafMats[mi]));
   });
   // soft reflections for eyes and beaks
-  try {
-    const envScene = new T.Scene(); envScene.add(new T.Mesh(new T.SphereGeometry(10, 16, 8), skyMat));
-    const pm = new T.PMREMGenerator(R3.r); scene.environment = pm.fromScene(envScene, .04).texture; scene.environmentIntensity = .55; pm.dispose();
-  } catch (e) {}
-  R3.scene = scene; return scene;
+  R3.envScene = new T.Scene(); R3.envScene.add(new T.Mesh(new T.SphereGeometry(10, 16, 8), skyMat));
+  R3.scene = scene; rebuildEnv(); return scene;
+}
+// soft reflections for eyes and beaks (rebuilt if the phone drops and restores the 3D context)
+function rebuildEnv() {
+  const T = R3.T; if (!R3.scene || !R3.r) return;
+  try { const pm = new T.PMREMGenerator(R3.r); const old = R3.scene.environment; R3.scene.environment = pm.fromScene(R3.envScene, .04).texture; R3.scene.environmentIntensity = .55; pm.dispose(); if (old) old.dispose(); } catch (e) {}
 }
 function renderer3() {
   if (R3.r) return R3.r;
@@ -1803,7 +1805,7 @@ function renderer3() {
   r.shadowMap.enabled = true; r.shadowMap.type = T.PCFShadowMap;
   r.domElement.className = 'gl'; r.domElement.setAttribute('aria-hidden', 'true');
   r.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); R3.lost = true; });
-  r.domElement.addEventListener('webglcontextrestored', () => { R3.lost = false; });
+  r.domElement.addEventListener('webglcontextrestored', () => { R3.lost = false; rebuildEnv(); });
   return (R3.r = r);
 }
 const HEAD_PARTS = new Set(['head', 'face', 'crest', 'cheek', 'iris', 'ring', 'cere', 'acc']);
@@ -1868,19 +1870,19 @@ class View3D {
       if (this.flight) { this.flight.steer = steer(e); this.flight.sid = e.pointerId; return; }
       const h = this.hit(e.clientX, e.clientY);
       p = {x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, t: Date.now(), dist: 0, part: h && h.part, id: e.pointerId, multi: false};
-      if (this.ptrs = (this.ptrs || 0) + 1, this.ptrs > 1) { p.multi = true; this.ctl.enabled = true; return; }
-      if (this.mode === 'room' && h && HEAD_PARTS.has(h.part)) { this.ctl.enabled = false; p.pet = true; }
+      if (this.ptrs = (this.ptrs || 0) + 1, this.ptrs > 1) { if (p) p.multi = true; this.ctl.enableRotate = true; return; }
+      if (this.mode === 'room' && h && HEAD_PARTS.has(h.part)) { this.ctl.enableRotate = false; p.pet = true; }
     };
     this.pm = e => {
       if (this.flight && this.flight.sid === e.pointerId && this.flight.steer) { this.flight.steer = steer(e); return; }
       if (!p || e.pointerId !== p.id) return;
       p.dist += Math.hypot(e.clientX - p.x, e.clientY - p.y); p.x = e.clientX; p.y = e.clientY;
-      if (p.pet && p.dist > 40) { p.dist = 0; p.moved = true; if (typeof scratch === 'function') scratch(); }
+      if (p.pet && !p.multi && p.dist > 40) { p.dist = 0; p.moved = true; if (typeof scratch === 'function') scratch(); }
     };
     this.pu = e => {
       if (this.flight && this.flight.sid === e.pointerId) { this.flight.steer = null; this.flight.sid = null; }
       this.ptrs = Math.max(0, (this.ptrs || 1) - 1);
-      if (!p || e.pointerId !== p.id) { this.ctl.enabled = true; return; }
+      if (!p || e.pointerId !== p.id) { if (!this.ptrs) this.ctl.enableRotate = true; return; }
       const moved = Math.hypot(e.clientX - p.x0, e.clientY - p.y0), quick = Date.now() - p.t < 450;
       if (!p.multi && !p.moved && moved < 12 && quick) {
         const now = Date.now();
@@ -1891,9 +1893,9 @@ class View3D {
           else if (part) { clearTimeout(this.tapT); this.tapT = setTimeout(() => { if (this.alive && typeof tapBird === 'function') tapBird(part); }, 330); }
         }
       }
-      this.ctl.enabled = true; p = null;
+      this.ctl.enableRotate = true; p = null;
     };
-    this.pc = () => { this.ptrs = 0; this.ctl.enabled = true; p = null; };
+    this.pc = () => { this.ptrs = 0; this.ctl.enableRotate = true; p = null; };
     el.addEventListener('pointerdown', this.pd, true); window.addEventListener('pointermove', this.pm, true); window.addEventListener('pointerup', this.pu, true); window.addEventListener('pointercancel', this.pc, true);
   }
   showMillet() {
@@ -2042,6 +2044,7 @@ function thumb3D(b, w = 240, h = 300) {
     try { const pm = new T.PMREMGenerator(R3.tr); const es = new T.Scene(); es.background = new T.Color('#CFE6EE'); s.environment = pm.fromScene(es, .04).texture; s.environmentIntensity = .5; pm.dispose(); } catch (e) {}
     R3.tc = new T.PerspectiveCamera(30, 1, .05, 50);
   }
+  if (R3.tr.getContext().isContextLost()) throw new Error('thumbnail context lost');
   R3.tr.setSize(w, h, false);
   const bird = new Bird3D(b); bird.pose({crest: .35, wing: [0, 0], fan: 0}); R3.ts.add(bird.pivot);
   const cam = R3.tc; cam.aspect = w / h; cam.updateProjectionMatrix();
@@ -2653,7 +2656,7 @@ function renderTalk(p) {
   // one tap teaches: picking words starts the lesson right away
   const start = t => { if (isBusy()) { S.lesson = t; renderTalk(p); return; } S.lesson = t; renderTalk(p); sfx('pop'); teachWord(); };
   $$('[data-ph]', p).forEach(el => el.onclick = () => start(el.dataset.ph));
-  $('#customForm').onsubmit = e => { e.preventDefault(); const v = $('#customPhrase').value.trim().replace(/\s+/g, ' '); if (!v) return; $('#customPhrase').blur(); start(v); setTimeout(() => { const c = $('#lessonCard'); c && c.scrollIntoView({block: 'center', behavior: 'smooth'}); }, 60); };
+  $('#customForm').onsubmit = e => { e.preventDefault(); const v = $('#customPhrase').value.trim().replace(/\s+/g, ' '); if (!v) return; $('#customPhrase').blur(); start(v); };
   if (MIC) bindMic();
   if (L) $('#teachBtn').onclick = teachWord;
   $$('[data-say]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.say]; if (x.learned) { if (!isBusy()) { birdSays(x.t); addLove(1); } } else start(x.t); });
@@ -3431,8 +3434,8 @@ function renderDesign(id) {
   ${DZ.isNew ? '' : `<section class="sec"><button class="btn danger" id="dDelete">Let ${esc(D.name)} fly away</button></section>`}
   <div class="bar"><div class="inner"><button class="btn" id="dSurprise">${IC.sparkle} Surprise!</button><button class="btn go" id="dSave">${DZ.isNew ? 'Hatch!' : 'Save'}</button></div></div>`;
   drawD(); renderDesignControls();
-  if (has3D()) upgradeThumbs($$('#spList .sp').map(el => ({el, b: newBird(el.dataset.sp), w: 200, h: 172})));
-  $$('#spList .sp').forEach(el => el.onclick = () => { if (el.dataset.sp === D.species) return; D.species = el.dataset.sp; applyLook(D, Object.keys(SPECIES[D.species].looks)[0]); if (!SPECIES[D.species].parts.includes(S.part)) S.part = 'body'; dirty(); $$('#spList .sp').forEach(x => x.setAttribute('aria-pressed', x === el)); drawD(true); renderDesignControls(); });
+  if (has3D()) upgradeThumbs($$('#spList .sp').filter(el => R3.bodies[el.dataset.sp]).map(el => ({el, b: newBird(el.dataset.sp), w: 200, h: 172})));
+  $$('#spList .sp').forEach(el => el.onclick = () => { if (el.dataset.sp === D.species) return; D.species = el.dataset.sp; applyLook(D, Object.keys(SPECIES[D.species].looks)[0]); if (!SPECIES[D.species].parts.includes(S.part)) S.part = 'body'; dirty(); $$('#spList .sp').forEach(x => x.setAttribute('aria-pressed', x === el)); drawD(true); renderDesignControls(); if (has3D() && !el.querySelector('img.bird3d')) upgradeThumbs([{el, b: newBird(el.dataset.sp), w: 200, h: 172}]); });
   $('#dstage').addEventListener('click', e => { if (DZ.view) return; const el = e.target.closest('[data-part]'); if (el) selectPart(el.dataset.part); });
   $('#birdName').oninput = e => { D.name = e.target.value.slice(0, 16); dirty(); };
   $('#dice').onclick = () => { D.name = pick(NAMES.filter(n => n !== D.name)); $('#birdName').value = D.name; dirty(); sfx('pop'); };
