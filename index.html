@@ -98,6 +98,11 @@ p{margin:0}
 .flyhud > *{pointer-events:auto}
 .flycount{background:rgba(255,255,255,.92);border-radius:999px;padding:8px 16px;font-family:var(--display);font-weight:800;font-size:22px;color:var(--ink)}
 .flyhud .btn{padding:11px 20px}
+.ftag{position:absolute;left:0;top:0;z-index:3;border:0;border-radius:999px;padding:4px 11px 5px;background:rgba(255,255,255,.92);color:var(--ink);font-family:var(--display);font-weight:800;font-size:14px;box-shadow:0 4px 10px -6px rgba(0,0,0,.45);white-space:nowrap;margin-top:-6px}
+.ftag.me{background:var(--sun);pointer-events:none}
+.chat{position:absolute;left:0;top:0;z-index:4;max-width:46%;padding:7px 12px 8px;border-radius:16px;border-bottom-left-radius:5px;background:#fff;color:var(--ink);font-family:var(--display);font-weight:800;font-size:17px;line-height:1.15;box-shadow:0 8px 18px -10px rgba(0,0,0,.5);pointer-events:none;margin-top:-8px;overflow-wrap:anywhere}
+.friends{display:grid;gap:8px;margin-bottom:12px}
+.friends .chip small{font-weight:400;color:var(--ink2);font-size:13px}
 .sunspot{position:absolute;right:-18%;top:-22%;width:70%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,248,222,.95),rgba(255,231,168,.45) 42%,rgba(255,231,168,0) 70%);pointer-events:none}
 .bird-svg .ov{pointer-events:none}
 .flash{animation:flash .5s ease 2}
@@ -1683,12 +1688,12 @@ class Actor3D {
     if (now > L.until) { L.mode = Math.random() < .55 ? 1 : Math.random() < .5 ? 2 : 0; L.until = now + 1800 + Math.random() * 3500; L.rx = (Math.random() - .5) * 1.4; L.ry = (Math.random() - .3) * .5; L.side = Math.random() < .5 ? 1 : -1; }
     let ty = L.rx, tp = L.ry, tr = 0;
     if (this.noLook) { ty = 0; tp = 0; }
-    else if (L.mode && v && v.cam) {
+    else if ((L.mode || this.lookPt) && v && v.cam) {
       const hp = this.tmp.v; B.fx.localToWorld(hp.set(B.F.H[0], B.F.H[1], B.F.H[2]));
-      const c = v.cam.position; const dx = c.x - hp.x, dy = c.y - hp.y, dz = c.z - hp.z;
-      const yawW = Math.atan2(dx, dz) - (x.ry || 0);
+      const c = this.lookPt || v.cam.position; const dx = c.x - hp.x, dy = c.y - hp.y, dz = c.z - hp.z;
+      const yawW = Math.atan2(dx, dz) - (x.ry || 0) - B.pivot.rotation.y;
       ty = Math.max(-1.25, Math.min(1.25, Math.atan2(Math.sin(yawW), Math.cos(yawW)))); tp = Math.max(-.5, Math.min(.6, -Math.atan2(dy, Math.hypot(dx, dz)))) * .8;
-      if (L.mode === 2) { const sd = L.side || 1; ty += sd * .75; tr = -sd * .28; }
+      if (L.mode === 2 && !this.lookPt) { const sd = L.side || 1; ty += sd * .75; tr = -sd * .28; }
     }
     L.yaw += (ty - L.yaw) * e(5); L.pitch += (tp - L.pitch) * e(5); L.roll += (tr - L.roll) * e(5);
     // compose the pose
@@ -1779,6 +1784,15 @@ function buildScene() {
   const nz = (x, z) => Math.sin(x * .31 + Math.sin(z * .17) * 2) * Math.cos(z * .27 - Math.sin(x * .13) * 1.7);
   const groundH = (x, z) => GY + .28 * nz(x, z) * ss(2.9, 4.2, Math.hypot(x - PX, z - PZ)) + ss(17, 44, Math.hypot(x + 2, z)) * (3 + 3.5 * (nz(x * .35 + 9, z * .35 - 4) * .5 + .5));
   R3.groundH = groundH;
+  const FX = 7.5, FZ = 4.5;
+  // where other birds can sit: feet position on top of a branch, facing out toward the middle of the world
+  R3.spots = [];
+  const spotOn = (curve, t, rad) => {
+    const p = curve.getPoint(t), tg = curve.getTangent(t); tg.y = 0; tg.normalize();
+    let yaw = Math.atan2(-tg.z, tg.x); const fx = Math.sin(yaw), fz = Math.cos(yaw);
+    if (fx * -p.x + fz * (3 - p.z) < 0) yaw += Math.PI;
+    return {p: [p.x, p.y + rad, p.z], yaw, along: [tg.x, 0, tg.z], side: -1};
+  };
   const merge = list => {
     list.forEach(g => { if (!g.index) g.setIndex(Array.from({length: g.attributes.position.count}, (_, k) => k)); });
     let nv = 0, ni = 0; list.forEach(g => { nv += g.attributes.position.count; ni += g.index.count; });
@@ -1808,8 +1822,14 @@ function buildScene() {
     for (let i = 0; i < p.count; i++) { const y = p.getY(i); p.setX(i, p.getX(i) + Math.sin(y * .45) * .12 + TX); p.setY(i, y + GY); p.setZ(i, p.getZ(i) + TZ); }
     g.computeVertexNormals(); woodParts.push(tint(g, (x, y, z) => { const n = .82 + .16 * Math.sin(Math.atan2(z - TZ, x - TX) * 7 + y * 2.6); return [n, n * .96, n * .92]; }));
     for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2 + .4, root = new T.ConeGeometry(.28, 1.4, 8); root.translate(0, .7, 0); root.rotateZ(-1.05); root.rotateY(a); root.translate(TX, GY - .15, TZ); woodParts.push(tint(root, () => [.8, .77, .73])); }
-    [[[TX, 1.9, TZ], [-2.4, 2.6, -.9], [-1.1, 3.1, -1.8], .1], [[TX, 3.4, TZ], [-5, 4, .2], [-6.3, 4.5, .9], .11], [[TX, -1.7, TZ], [-4.7, -1.3, -1.1], [-5.6, -.9, -2], .08], [[TX, 4.6, TZ], [-2.7, 5.4, 1.1], [-1.9, 5.9, 1.9], .09]]
-      .forEach(([a, b, c, rad]) => { const tg = new T.TubeGeometry(new T.CatmullRomCurve3([new T.Vector3(...a), new T.Vector3(...b), new T.Vector3(...c)]), 16, rad, 8, false); woodParts.push(tint(tg, () => [.86, .82, .78])); });
+    const pcv = curve; R3.spots.push(Object.assign(spotOn(pcv, .15, PERCH_R), {yaw: 0, side: 1}));
+    const houseSpot = {p: [TX + .1 + Math.sin(.2) * .28, 1.265, TZ + .58 + Math.cos(.2) * .28], yaw: .2, along: [Math.cos(.2), 0, -Math.sin(.2)], house: true};
+    const branchSpots = [];
+    [[[TX, 1.9, TZ], [-2.4, 2.6, -.9], [-1.1, 3.1, -1.8], .1, .62], [[TX, -1.7, TZ], [-4.7, -1.3, -1.1], [-5.6, -.9, -2], .08, .62], [[TX, 3.4, TZ], [-5, 4, .2], [-6.3, 4.5, .9], .11, .58], [[TX, 4.6, TZ], [-2.7, 5.4, 1.1], [-1.9, 5.9, 1.9], .09, .6],
+     [[FX, GY + 5.8, FZ], [FX - 1.3, GY + 6.4, FZ + .7], [FX - 2.5, GY + 6.9, FZ + .5], .09, .62], [[FX, GY + 7.2, FZ], [FX + 1.2, GY + 7.8, FZ + .9], [FX + 2.2, GY + 8.2, FZ + .5], .08, .62]]
+      .forEach(([a, b, c, rad, st]) => { const cv = new T.CatmullRomCurve3([new T.Vector3(...a), new T.Vector3(...b), new T.Vector3(...c)]); const tg = new T.TubeGeometry(cv, 16, rad, 8, false); woodParts.push(tint(tg, () => [.86, .82, .78])); branchSpots.push(spotOn(cv, st, rad)); });
+    R3.spots.push(...branchSpots, houseSpot);
+    { const H2 = 9.2, g2 = new T.CylinderGeometry(.28, .5, H2, 16, 10); g2.translate(0, H2 / 2, 0); const p2 = g2.attributes.position; for (let i = 0; i < p2.count; i++) { const y = p2.getY(i); p2.setX(i, p2.getX(i) + Math.sin(y * .5) * .1 + FX); p2.setY(i, y + groundH(FX, FZ)); p2.setZ(i, p2.getZ(i) + FZ); } g2.computeVertexNormals(); woodParts.push(tint(g2, (x, y, z) => { const n = .82 + .16 * Math.sin(Math.atan2(z - FZ, x - FX) * 7 + y * 2.6); return [n, n * .96, n * .92]; })); }
     const wood = new T.Mesh(merge(woodParts), barkV); scene.add(wood);
   }
   // leafy canopy: soft lumpy blobs, lighter on top
@@ -1821,7 +1841,8 @@ function buildScene() {
       g.computeVertexNormals(); blobs.push(tint(g, (vx, vy, vz) => { const up = ss(-1, 1, (vy - y) / (s * sy)); const n = .72 + .32 * up + .05 * Math.sin(vx * 3 + vz * 2); return [n * .98, n, n * .9]; }));
     };
     [[TX, 6.6, TZ, 2.3], [TX + 1.7, 6.1, TZ + .8, 1.6], [TX - 1.8, 6.2, TZ - .4, 1.8], [TX + .4, 7.4, TZ - 1.2, 1.7], [TX - .6, 5.6, TZ + 1.5, 1.4], [TX + 1.1, 5.2, TZ - 1.7, 1.3],
-     [-1.1, 3.2, -1.8, 1.05], [-6.3, 4.6, .9, 1.25], [-5.6, -.8, -2, .8], [-1.9, 6, 1.9, 1.1]].forEach(([x, y, z, s]) => blob(x, y, z, s));
+     [-1.1, 3.2, -1.8, 1.05], [-6.3, 4.6, .9, 1.25], [-5.6, -.8, -2, .8], [-1.9, 6, 1.9, 1.1],
+     [FX, GY + 9.6, FZ, 1.9], [FX - 1.5, GY + 8.9, FZ + .5, 1.3], [FX + 1.5, GY + 9.2, FZ - .4, 1.4], [FX - 2.6, GY + 7.3, FZ + .5, .75], [FX + 2.3, GY + 8.6, FZ + .5, .75]].forEach(([x, y, z, s]) => blob(x, y, z, s));
     for (let i = 0; i < 9; i++) { const a = r() * Math.PI * 2; blob(TX + Math.cos(a) * 2.2, 6 + r() * 1.6, TZ + Math.sin(a) * 2.2, .7 + r() * .6); }
     scene.add(new T.Mesh(merge(blobs), new T.MeshStandardMaterial({color: '#5FAE5A', vertexColors: true, roughness: .85})));
   }
@@ -1919,7 +1940,7 @@ class View3D {
     host.appendChild(this.r.domElement);
     this.cam = new T.PerspectiveCamera(30, 1, .05, 260);
     this.ctl = new T.OrbitControls(this.cam, this.r.domElement);
-    Object.assign(this.ctl, {enablePan: false, enableDamping: true, dampingFactor: .09, rotateSpeed: .75, zoomSpeed: .9, minDistance: .95, maxDistance: 18, minPolarAngle: .3, maxPolarAngle: 1.95});
+    Object.assign(this.ctl, {enablePan: false, enableDamping: true, dampingFactor: .09, rotateSpeed: .75, zoomSpeed: .9, minDistance: .95, maxDistance: 22, minPolarAngle: .3, maxPolarAngle: 1.95});
     this.ray = new T.Raycaster(); this.parts = []; this.fx = [];
     this.home = {az: .45, el: .06, d: mode === 'design' ? 4.3 : 4.0};
     this.setHome(true);
@@ -1994,6 +2015,7 @@ class View3D {
           lastTap = now; const part = p.part;
           if (this.mode === 'design') { if (part && this.onPart) this.onPart(part); }
           else if (part) { clearTimeout(this.tapT); this.tapT = setTimeout(() => { if (this.alive && typeof tapBird === 'function') tapBird(part); }, 330); }
+          else if (this.mode === 'room') { const fi = this.hitFriend(e.clientX, e.clientY); if (fi >= 0 && typeof visitFriend === 'function') visitFriend(fi); }
         }
       }
       this.ctl.enableRotate = true; p = null;
@@ -2016,6 +2038,95 @@ class View3D {
   }
   eatMillet(k) { const g = this.millet; if (!g) return; const s = g.userData.seeds, m = new this.T.Matrix4().makeScale(0, 0, 0); for (let i = (k - 1) * 6; i < Math.min(30, k * 6); i++) s.setMatrixAt(i, m); s.instanceMatrix.needsUpdate = true; }
   hideMillet() { const g = this.millet; if (!g) return; this.scene.remove(g); g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); this.millet = null; }
+  // ---- friends: Havi's other birds live on other branches; tap one and this bird flies over to chat ----
+  setFriends(list) {
+    this.clearFriends(); if (!R3.spots) return;
+    this.friends = list.slice(0, Math.min(6, R3.spots.length)).map((fb, i) => {
+      const sp = R3.spots[i], bird = new Bird3D(fb);
+      bird.pivot.traverse(o => { if (o.isMesh) o.castShadow = false; });
+      bird.pivot.position.set(sp.p[0], sp.p[1] - PERCH_R, sp.p[2]); bird.pivot.rotation.y = sp.yaw;
+      this.scene.add(bird.pivot);
+      const actor = new Actor3D(this, bird); actor.isFriend = true;
+      const tag = document.createElement('button'); tag.className = 'ftag'; tag.textContent = fb.name || SPECIES[fb.species].label; tag.hidden = true;
+      tag.addEventListener('click', e => { e.stopPropagation(); if (typeof visitFriend === 'function') visitFriend(i); });
+      this.host.appendChild(tag);
+      try { preloadSpecies(fb.species); } catch (e) {}
+      return {b: fb, bird, actor, spot: sp, tag};
+    });
+    if (!this.myTag) { this.myTag = document.createElement('div'); this.myTag.className = 'ftag me'; this.myTag.hidden = true; this.host.appendChild(this.myTag); }
+  }
+  clearFriends() {
+    (this.friends || []).forEach(f => { f.actor.alive = false; f.actor.timers.forEach(clearTimeout); this.scene.remove(f.bird.pivot); f.bird.dispose(); f.tag.remove(); });
+    this.friends = [];
+    (this.chats || []).forEach(c => c.el.remove()); this.chats = [];
+  }
+  hitFriend(cx, cy) {
+    if (!this.friends || !this.friends.length) return -1;
+    const r = this.r.domElement.getBoundingClientRect();
+    this.ray.setFromCamera({x: (cx - r.left) / r.width * 2 - 1, y: -(cy - r.top) / r.height * 2 + 1}, this.cam);
+    let best = -1, bd = 1e9;
+    this.friends.forEach((f, i) => { const h = this.ray.intersectObject(f.bird.pivot, true); if (h.length && h[0].distance < bd) { bd = h[0].distance; best = i; } });
+    return best;
+  }
+  headWorld(bird, out) { bird.headBone.getWorldPosition(out); out.y += bird.F.S.head * 1.3 * bird.sc; return out; }
+  // a speech bubble that follows a bird's head
+  chat(bird, text, ms) {
+    const el = document.createElement('div'); el.className = 'chat pop'; el.textContent = text; this.host.appendChild(el);
+    const c = {el, bird, until: performance.now() + ms}; (this.chats = this.chats || []).push(c); return c;
+  }
+  placeLabels(now) {
+    const T = this.T, v = this.tmpL || (this.tmpL = new T.Vector3()), r = this.host.getBoundingClientRect(), d = this.cam.position.distanceTo(this.ctl.target);
+    const put = (el, bird, show) => {
+      if (!show) { el.hidden = true; return; }
+      this.headWorld(bird, v); v.project(this.cam);
+      if (v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05) { el.hidden = true; return; }
+      el.hidden = false; el.style.transform = `translate(${((v.x + 1) / 2 * r.width).toFixed(1)}px, ${((1 - v.y) / 2 * r.height).toFixed(1)}px) translate(-50%, -100%)`;
+    };
+    const far = d > 4.6 && !this.flight && !this.visit;
+    (this.friends || []).forEach(f => put(f.tag, f.bird, far));
+    if (this.myTag && this.bird) { this.myTag.textContent = this.bird.b.name || ''; put(this.myTag, this.bird, far); }
+    this.chats = (this.chats || []).filter(c => { if (now > c.until) { c.el.remove(); return false; } put(c.el, c.bird, true); return true; });
+  }
+  // fly to a friend, chat, fly home; returns false if it can't start
+  visitFriend(i, done) {
+    const T = this.T, f = this.friends && this.friends[i], a = this.actor, B = this.bird; if (!f || !a || this.visit || this.flight) return false;
+    const x = a.x, along = new T.Vector3(...f.spot.along), fp = new T.Vector3(...f.spot.p);
+    const gap = f.spot.house ? 0 : (f.bird.F.S.w * f.bird.sc + B.F.S.w * B.sc) * 1.35 + .12;
+    const land = f.spot.house ? fp.clone().add(new T.Vector3(0, .36, -.05)) : fp.clone().addScaledVector(along, gap * (f.spot.side || 1));
+    const home = new T.Vector3(0, 0, 0), faceYaw = Math.atan2(fp.x - land.x, fp.z - land.z);
+    const V = this.visit = {i, done};
+    const hop = (from, to, endYaw, then) => {
+      const mid = from.clone().lerp(to, .5); mid.y = Math.max(from.y, to.y) + 1 + from.distanceTo(to) * .18;
+      const dur = 1500 + from.distanceTo(to) * 420, p = new T.Vector3(), q = new T.Vector3();
+      a.follow = true; a.noLook = true; sfx('flap');
+      a.drive(dur, u => {
+        const e = easeIO(u), m1 = 1 - e;
+        p.set(m1 * m1 * from.x + 2 * m1 * e * mid.x + e * e * to.x, m1 * m1 * from.y + 2 * m1 * e * mid.y + e * e * to.y, m1 * m1 * from.z + 2 * m1 * e * mid.z + e * e * to.z);
+        q.set(2 * m1 * (mid.x - from.x) + 2 * e * (to.x - mid.x), 0, 2 * m1 * (mid.z - from.z) + 2 * e * (to.z - mid.z));
+        const flying = ss(0, .12, u) * (1 - ss(.86, 1, u)), heading = Math.atan2(q.x, q.z);
+        let dy = ((endYaw - heading + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+        x.px = p.x; x.py = p.y; x.pz = p.z; x.ry = heading + dy * ss(.8, 1, u);
+        x.rx = 1.05 * flying - .4 * bump(u, .8, .98); x.rz = 0; x.headPitch = -.8 * flying; x.tuck = flying > .4 ? 1 : 0;
+        x.wing = [Math.max(flying, bump(u, .78, 1)), Math.max(flying, bump(u, .78, 1))]; x.fan = Math.max(flying * .6, bump(u, .78, 1)); a.w.flapping = flying;
+      }, () => { a.w.flapping = 0; x.rx = 0; x.headPitch = 0; x.tuck = 0; x.wing = null; x.fan = 0; then(); });
+    };
+    hop(home, land, faceYaw, () => {
+      // side by side: look at each other and trade a few words (or tweets)
+      a.follow = false; a.noLook = false; this.focus = land.clone().lerp(fp, .5); this.focus.y += .5; this.focusDist = 3.4 + gap * 1.6;
+      const hv = new T.Vector3(), hf = new T.Vector3();
+      a.lookPt = this.headWorld(f.bird, hf).clone(); f.actor.lookPt = this.headWorld(B, hv).clone();
+      const lines = chatLines(B.b, f.b), step = k => {
+        if (!this.alive || this.visit !== V) return;
+        if (k >= lines.length) { hearts(2); const p1 = this.headWorld(B, new T.Vector3()); a.later(900, () => { a.lookPt = null; f.actor.lookPt = null; this.focus = null; this.focusDist = null; hop(new T.Vector3(x.px, x.py, x.pz), home, 0, () => { Object.keys(x).forEach(key => { x[key] = key === 'wing' ? null : 0; }); a.follow = false; this.visit = null; this.setHome(false); done && done(); }); }); return; }
+        const [who, text, kind] = lines[k], bird = who ? f.bird : B, act = who ? f.actor : a;
+        const dur = kind === 'song' ? whistleFor(bird.b, act) : voiceFor(bird.b, act, text);
+        this.chat(bird, text, Math.max(1400, dur * 1000 + 700)); act.excite(dur * 1000 + 500);
+        a.later(Math.max(1300, dur * 1000 + 450), () => step(k + 1));
+      };
+      a.later(350, () => step(0));
+    });
+    return true;
+  }
   // ---- free flight: she steers, the bird catches floating notes that play a song ----
   startFlight(tune, onDone) {
     const T = this.T, a = this.actor; if (!a || !this.bird || this.flight) return false;
@@ -2111,11 +2222,14 @@ class View3D {
     const dt = Math.min(.05, (now - this.last) / 1000); this.last = now;
     if (this.glide) { const g = this.glide, u = Math.min(1, (now - g.t0) / 700), k = easeIO(u); this.cam.position.lerpVectors(g.from, g.to, k); this.ctl.target.lerpVectors(g.tf, g.tt, k); if (u >= 1) this.glide = null; }
     if (this.actor) this.actor.update(dt, now);
+    if (this.friends) this.friends.forEach(f => f.actor.update(dt, now));
+    if (this.focus && !this.glide) { this.ctl.target.lerp(this.focus, 1 - Math.exp(-3 * dt)); if (this.focusDist) { const off = this.cam.position.clone().sub(this.ctl.target); const dd = off.length(); off.setLength(dd + (this.focusDist - dd) * (1 - Math.exp(-2.5 * dt))); this.cam.position.copy(this.ctl.target).add(off); } }
     if (this.actor && this.actor.follow && this.bird && !this.glide) { const bp = this.bird.bodyBone.getWorldPosition(this.tmpV || (this.tmpV = new this.T.Vector3())); this.ctl.target.lerp(bp, 1 - Math.exp(-4 * dt)); }
     if (this.bird) this.bird.mats.forEach(m => { if (m.userData.u) m.userData.u.uTime.value = now / 1000; });
     if (this.millet) { const k = Math.min(1, (now - this.milletIn) / 400); this.millet.scale.setScalar(Math.max(.01, easeIO(k))); }
     for (let i = this.fx.length - 1; i >= 0; i--) { const f = this.fx[i], u = (now - f.t0) / f.ms; if (u >= 1) { this.scene.remove(f.sp); f.sp.material.dispose(); this.fx.splice(i, 1); continue; } f.sp.position.x += f.vx * dt; f.sp.position.y += .55 * dt; f.sp.position.z += f.vz * dt; const s = .12 * Math.min(1, u * 6); f.sp.scale.set(s, s, s); f.sp.material.opacity = 1 - ss(.6, 1, u); }
     if (R3.anim) R3.anim.forEach(f => f(now / 1000, dt));
+    this.placeLabels(now);
     if (this.flight) this.flightTick(dt, now);
     else if (!this.glide) {
       // the bird stays in the middle at every zoom; far out, the camera just can't dip under the ground
@@ -2132,6 +2246,7 @@ class View3D {
     clearTimeout(this.tapT); if (this.flight) { this.flight.onDone = null; this.endFlight(); } this.ctl.dispose(); this.hideMillet();
     this.fx.forEach(f => { this.scene.remove(f.sp); f.sp.material.dispose(); }); this.fx = [];
     if (this.bird) { this.scene.remove(this.bird.pivot); this.bird.dispose(); this.bird = null; }
+    this.clearFriends(); if (this.myTag) { this.myTag.remove(); this.myTag = null; }
     if (this.r.domElement.parentNode === this.host) this.host.removeChild(this.r.domElement);
     if (R3.view === this) R3.view = null;
   }
@@ -2576,7 +2691,7 @@ function renderRoom(id) {
   <section class="panel" id="panel"></section>`;
   actor = null;
   if (use3D) {
-    try { const v = new View3D($('#stage'), 'room'); actor = v.setBird(b); $('#zoomBtn').onclick = () => { sfx('pop'); v.zoomFace(); }; }
+    try { const v = new View3D($('#stage'), 'room'); actor = v.setBird(b); v.setFriends(friendsOf(b)); $('#zoomBtn').onclick = () => { sfx('pop'); v.zoomFace(); }; }
     catch (e) { console.warn('3D room failed, drawing instead', e); if (R3.view) R3.view.dispose(); R3.state = 'off'; return renderRoom(id); }
   } else { actor = new Actor($('#birdLayer'), 'r'); bindStage(); }
   $('#btnBack').onclick = () => go('aviary');
@@ -2690,6 +2805,7 @@ function doTrick(k) {
 function renderPlay(p) {
   const b = cur(), sp = SPECIES[b.species];
   p.innerHTML = `
+  ${actor && actor.is3D && R3.view && R3.view.friends && R3.view.friends.length ? `<div class="friends"><span class="eyebrow">Visit a friend</span><div class="chips">${R3.view.friends.map((f, i) => `<button class="chip" data-visit="${i}">${esc(f.b.name)} <small>${esc(SPECIES[f.b.species].label)}</small></button>`).join('')}</div></div>` : ''}
   ${actor && actor.is3D ? `<button class="tile flyTile" id="aFly"><span class="em" aria-hidden="true">🪽♪</span><span>Fly &amp; catch the notes<small>Touch and hold to steer ${esc(b.name)}</small></span></button>` : ''}
   <div class="tiles">
     <button class="tile t1" id="aTreat">${IC.millet}<span>Millet treat<small>A crunchy snack</small></span></button>
@@ -2701,10 +2817,36 @@ function renderPlay(p) {
   <div class="stars"><span>Talking <b>${stars(sp.talk)}</b></span><span>Whistling <b>${stars(sp.sing)}</b></span></div>`;
   $('#aTreat').onclick = () => soon(giveTreat);
   const fly = $('#aFly'); if (fly) fly.onclick = () => soon(flyGame);
+  $$('[data-visit]', p).forEach(el => el.onclick = () => { sfx('pop'); visitFriend(+el.dataset.visit); });
   $('#aScratch').onclick = () => { scratch(); setTimeout(scratch, 900); setTimeout(scratch, 1800); };
   $('#aDance').onclick = () => soon(dance);
   $('#aFlap').onclick = () => soon(() => { if (isBusy() || !actor) return; actor.flapWings(5); actor.hop(); actor.later(700, () => actor && actor.hop()); sfx('flap'); setBusy(1400); addLove(1); });
   $('#nextFact').onclick = () => { S.factIx++; $('#factText').textContent = sp.facts[S.factIx % sp.facts.length]; sfx('pop'); };
+}
+function friendsOf(b) { return [...Store.birds.values()].filter(x => x.id !== b.id && SPECIES[x.species]).sort((p, q) => (p.created || 0) - (q.created || 0)); }
+// what two birds "say" to each other: their own learned words, or tweets and a bit of a song they know
+function chatLines(me, fr) {
+  const said = b => { const w = (b.words || []).filter(x => x.learned); return SPECIES[b.species].talk && w.length ? pick(w).t : pick(['♪', '♪ ♫', 'Tweet!', '♫ ♪ ♫']); };
+  const lines = [[0, said(me)], [1, said(fr)], [0, said(me)]];
+  const song = [[1, fr], [0, me]].find(([, b]) => (b.tunes || []).some(t => t.learned && t.notes && t.notes.length >= 3));
+  lines.push(song ? [song[0], '♪ ♫ ♪', 'song'] : [1, said(fr)]);
+  return lines;
+}
+function voiceFor(b, act, text) {
+  const sp = SPECIES[b.species], ctx = audio(); let dur = .3 + syllables(text) * .18;
+  if (ctx) { const t = ctx.currentTime + .03; dur = realChatter(b.species, t, dur) || (() => { let x = t; while (x - t < .5) x += CALLS[sp.call](x) + .06; return x - t; })(); }
+  act.talk(true); act.later(dur * 1000, () => act.talk(false)); return dur;
+}
+function whistleFor(b, act) {
+  const sp = SPECIES[b.species], tn = (b.tunes || []).find(t => t.learned && t.notes && t.notes.length >= 3), ctx = audio(); let dur = 1.5;
+  if (ctx && tn) dur = whistle(ctx.currentTime + .05, tn.notes.slice(0, 7), sp.whistleBase);
+  act.whistleMove(dur); return dur;
+}
+function visitFriend(i) {
+  const v = R3.view, b = cur(); if (!v || !b || !v.friends || !v.friends[i]) return;
+  if (isBusy()) { soon(() => visitFriend(i)); return; }
+  showStage();
+  if (v.visitFriend(i, () => { S.busyUntil = 0; addLove(2); })) { setBusy(120000); toast(`${b.name} is flying to visit ${v.friends[i].b.name}!`); }
 }
 function flyGame() {
   const v = R3.view, b = cur(); if (isBusy() || !v || !v.actor || !b) return;
