@@ -44,9 +44,14 @@ p{margin:0}
 .hero h1 em{font-style:normal;color:var(--cheek)}
 .lede{color:var(--ink2);max-width:36ch}
 .top{display:flex;align-items:center;gap:12px;padding-block:8px 12px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--paper);z-index:6}
-.top .ttl{flex:1;min-width:0}
+.top .ttl{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start}
 .top h1{font-size:clamp(26px,7.4vw,34px);overflow-wrap:anywhere}
 .top .sub{font-size:14px;color:var(--ink2)}
+.namebtn{border:0;background:none;padding:0;margin:0;display:inline-flex;align-items:center;gap:8px;text-align:left;max-width:100%;min-width:0}
+.namebtn h1{min-width:0}
+.namebtn .pen{flex:0 0 auto;width:30px;height:30px;border-radius:10px;background:#F2E7D2;color:var(--ink2);display:grid;place-items:center}
+.namebtn .pen svg{width:17px;height:17px}
+.namebtn:active .pen{background:var(--sun);color:var(--ink)}
 .icon-btn{flex:0 0 auto;width:50px;height:50px;border-radius:17px;border:2px solid var(--line);background:var(--card);display:grid;place-items:center;box-shadow:0 3px 0 var(--line)}
 .icon-btn svg{width:24px;height:24px}
 .icon-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
@@ -120,6 +125,10 @@ p{margin:0}
 .chip[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff;box-shadow:none}
 .chip i{width:14px;height:14px;border-radius:50%;display:inline-block;box-shadow:0 0 0 1.5px rgba(255,255,255,.9),0 0 0 2.5px rgba(31,48,71,.18)}
 .chip i + i{margin-left:-9px}
+.chip.knows{background:#E6F3DF;border-color:#BFDDB0;box-shadow:0 2px 0 #BFDDB0}
+.chip.knows::before{content:'✓';color:var(--leaf2);font-weight:800}
+.chip.knows[aria-pressed="true"]{background:var(--leaf2);border-color:var(--leaf2);color:#fff}
+.chip.knows[aria-pressed="true"]::before{color:#fff}
 
 /* teach */
 .lesson{background:var(--card);border-radius:26px;padding:16px;box-shadow:0 4px 0 var(--line);display:grid;gap:12px}
@@ -174,6 +183,8 @@ p{margin:0}
 /* sheet, toast, confetti */
 .sheet-back{position:fixed;inset:0;background:rgba(31,48,71,.4);z-index:30}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:31;background:var(--paper);border-radius:28px 28px 0 0;padding:20px 16px calc(20px + env(safe-area-inset-bottom,0px));display:grid;gap:14px;max-width:560px;margin:0 auto;box-shadow:0 -10px 40px -10px rgba(0,0,0,.3)}
+.sheet.at-top{top:calc(12px + env(safe-area-inset-top,0px));bottom:auto;left:12px;right:12px;border-radius:26px;padding-bottom:18px;box-shadow:0 18px 40px -12px rgba(0,0,0,.35)}
+.sheet .two{display:grid;grid-template-columns:1fr 1.4fr;gap:10px}
 .sheet h2{font-size:26px}
 .sheet label{font-weight:700}
 .sheet .srow{display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -228,7 +239,7 @@ const SPECIES = {
     label: 'Cockatiel', talk: 2, sing: 5,
     body: {rx: 40, ry: 62}, headR: 30, tail: {len: 140, w: 22, tip: 'point'}, beak: {type: 'hook', s: .78},
     crest: 'tiel', face: {dx: .35, dy: .2, rx: .85, ry: .85}, cheek: 'tiel', wingPatch: 'band', patch: null, scale: 1, tex: .1,
-    voice: {pitch: 1.9, rate: 1.1}, call: 'tiel', needs: {word: 5, tune: 2}, whistleBase: 1046.5,
+    voice: {pitch: 1.9, rate: 1.1}, call: 'tiel', needs: {word: 2, tune: 1}, whistleBase: 1046.5,
     parts: ['body','head','face','crest','cheek','belly','wing','wingPatch','wingTip','tail','beak','iris','feet'],
     looks: {
       normal: {label: 'Normal grey', colors: {body:'#8F8D8A', belly:'#9A9894', head:'#A09C94', face:'#F6D94B', crest:'#E8CF5C', cheek:'#F0873A', wing:'#86837F', wingPatch:'#F5F2EA', wingTip:'#57544F', tail:'#6E6B67', tailTip:'#55524E', beak:'#9C958F', feet:'#B8A8A0'}},
@@ -243,7 +254,7 @@ const SPECIES = {
     label: 'Budgie', talk: 5, sing: 3,
     body: {rx: 35, ry: 50}, headR: 26, tail: {len: 115, w: 12, tip: 'point'}, beak: {type: 'budgie', s: .62},
     crest: null, face: {dx: .45, dy: .05, rx: .85, ry: 1.1}, cheek: 'budgie', wingPatch: null, patch: null, scale: .95, tex: .08,
-    voice: {pitch: 2, rate: 1.35}, call: 'budgie', needs: {word: 3, tune: 3}, whistleBase: 1174.7,
+    voice: {pitch: 2, rate: 1.35}, call: 'budgie', needs: {word: 2, tune: 2}, whistleBase: 1174.7,
     parts: ['body','head','face','cheek','cere','wing','wingTip','tail','beak','iris','feet'],
     looks: {
       green: {label: 'Wild green', pattern: 'bars', pc: '#1F1F1F', colors: {body:'#79BF45', belly:'#86C94D', head:'#F2DE52', face:'#F6E35A', cheek:'#6A52C0', cere:'#4F74D1', wing:'#E9D65C', wingTip:'#3F4F2E', tail:'#2D5E9E', tailTip:'#243F6E', beak:'#E9D6A6', feet:'#A2A6C4'}},
@@ -257,7 +268,7 @@ const SPECIES = {
     label: 'African Grey', talk: 5, sing: 4,
     body: {rx: 50, ry: 70}, headR: 36, tail: {len: 58, w: 34, tip: 'square'}, beak: {type: 'hook', s: 1.15},
     crest: null, face: null, cheek: null, wingPatch: null, patch: 'grey', scale: 1, tex: .32,
-    voice: {pitch: 1.25, rate: .95}, call: 'grey', needs: {word: 2, tune: 2}, whistleBase: 987.8,
+    voice: {pitch: 1.25, rate: .95}, call: 'grey', needs: {word: 1, tune: 1}, whistleBase: 987.8,
     parts: ['body','head','face','wing','wingTip','tail','beak','iris','feet'],
     looks: {
       congo: {label: 'Congo grey', colors: {body:'#999A9C', belly:'#A2A3A5', head:'#A5A6A8', face:'#ECECEC', wing:'#8C8D8F', wingTip:'#4E4F52', tail:'#D42B2B', tailTip:'#C22525', beak:'#1D1D1F', feet:'#707072', iris:'#F1E6B6'}},
@@ -269,7 +280,7 @@ const SPECIES = {
     label: 'Macaw', talk: 4, sing: 2,
     body: {rx: 44, ry: 70}, headR: 34, tail: {len: 150, w: 24, tip: 'point'}, beak: {type: 'hook', s: 1.55},
     crest: null, face: null, cheek: null, wingPatch: 'coverts', patch: 'macaw', scale: .92, tex: .1,
-    voice: {pitch: 1.1, rate: .9}, call: 'macaw', needs: {word: 3, tune: 4}, whistleBase: 880,
+    voice: {pitch: 1.1, rate: .9}, call: 'macaw', needs: {word: 2, tune: 2}, whistleBase: 880,
     parts: ['body','belly','head','face','wing','wingPatch','wingTip','tail','tailTip','beak','lowerBeak','iris'],
     looks: {
       scarlet: {label: 'Scarlet', colors: {body:'#D52A1E', belly:'#D8301F', head:'#DC3224', face:'#F6F1EA', wing:'#D52A1E', wingPatch:'#F5C024', wingTip:'#1E5DB3', tail:'#C9271C', tailTip:'#2A68C1', beak:'#EFE5D3', lowerBeak:'#1C1C1C', iris:'#F2E7A6', feet:'#3E3E40'}},
@@ -282,7 +293,7 @@ const SPECIES = {
     label: 'Cockatoo', talk: 3, sing: 2,
     body: {rx: 48, ry: 70}, headR: 37, tail: {len: 70, w: 36, tip: 'square'}, beak: {type: 'hook', s: 1.15},
     crest: 'too', face: null, cheek: 'too', wingPatch: null, patch: null, scale: 1, tex: .07,
-    voice: {pitch: 1.55, rate: 1.05}, call: 'too', needs: {word: 4, tune: 4}, whistleBase: 987.8,
+    voice: {pitch: 1.55, rate: 1.05}, call: 'too', needs: {word: 2, tune: 2}, whistleBase: 987.8,
     parts: ['body','head','crest','cheek','ring','wing','wingTip','tail','beak','feet'],
     looks: {
       sulphur: {label: 'Sulphur-crested', colors: {body:'#F6F6F1', belly:'#F8F8F4', head:'#FAFAF6', crest:'#F4CF30', cheek:'#F5EAA6', ring:'#DCEAF4', wing:'#EFEEE8', wingTip:'#E6E3D8', tail:'#EDEBE3', tailTip:'#E3DFD2', beak:'#2A2A2C', feet:'#58585A', iris:'#161616'}},
@@ -295,7 +306,7 @@ const SPECIES = {
     label: 'Lovebird', talk: 1, sing: 2,
     body: {rx: 38, ry: 48}, headR: 28, tail: {len: 40, w: 26, tip: 'square'}, beak: {type: 'hook', s: 1},
     crest: null, face: {dx: .35, dy: .25, rx: .85, ry: 1}, cheek: null, wingPatch: null, patch: null, scale: .92, tex: .08,
-    voice: {pitch: 2, rate: 1.3}, call: 'love', needs: {word: 6, tune: 5}, whistleBase: 1318.5,
+    voice: {pitch: 2, rate: 1.3}, call: 'love', needs: {word: 3, tune: 2}, whistleBase: 1318.5,
     parts: ['body','head','face','belly','wing','wingTip','tail','ring','beak','feet'],
     looks: {
       peach: {label: 'Peach-faced', colors: {body:'#6CBD45', belly:'#8DCA54', head:'#6CBD45', face:'#F2866A', wing:'#5DA83C', wingTip:'#3D6D29', tail:'#3E8BD6', tailTip:'#5CA24A', beak:'#F0D3A6', feet:'#9A9A9A', ring:'none'}},
@@ -308,7 +319,7 @@ const SPECIES = {
     label: 'Canary', talk: 0, sing: 5,
     body: {rx: 34, ry: 46}, headR: 25, tail: {len: 72, w: 18, tip: 'notch'}, beak: {type: 'cone', s: .75},
     crest: null, face: null, cheek: null, wingPatch: null, patch: null, scale: .88, tex: .07,
-    voice: null, call: 'canary', needs: {word: Infinity, tune: 2}, whistleBase: 1568,
+    voice: null, call: 'canary', needs: {word: Infinity, tune: 1}, whistleBase: 1568,
     parts: ['body','head','belly','wing','wingTip','tail','beak','feet'],
     looks: {
       yellow: {label: 'Sunny yellow', colors: {body:'#FAD53A', belly:'#FDE56E', head:'#FBD943', wing:'#F1C52C', wingTip:'#D2A41A', tail:'#E7BC23', tailTip:'#CFA21A', beak:'#EFC6A4', feet:'#E8B9A0'}},
@@ -624,7 +635,9 @@ function tone(t0, dur, curve, o = {}) {
   if (o.shape) { const ws = ctx.createWaveShaper(); ws.curve = distCurve(o.shape); last.connect(ws); last = ws; }
   if (o.filter) { const fl = ctx.createBiquadFilter(); fl.type = o.filter.type || 'bandpass'; fl.frequency.value = o.filter.f; fl.Q.value = o.filter.q || 1; last.connect(fl); last = fl; }
   last.connect(AU.out);
+  const top = Math.max(...curve.map(c => c[1]));
   (o.harm || [[1, 1]]).forEach(([m, hg]) => {
+    if (m > 1 && top * m > Math.min(20000, ctx.sampleRate / 2 - 500)) return;
     const osc = ctx.createOscillator(); osc.type = o.type || 'sine';
     curve.forEach(([tf, f], i) => { const t = t0 + tf * dur; if (i === 0) osc.frequency.setValueAtTime(f * m, t); else osc.frequency.exponentialRampToValueAtTime(f * m, t); });
     if (o.fm) { const l = ctx.createOscillator(); l.frequency.value = o.fm.rate; const lg = ctx.createGain(); lg.gain.value = o.fm.depth * m; l.connect(lg).connect(osc.frequency); l.start(t0); l.stop(t0 + dur + .05); }
@@ -815,6 +828,8 @@ const IC = {
   mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>',
   play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z"/></svg>',
   speaker: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  palette: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3.5c-4.9 0-8.5 3.6-8.5 8.1 0 4.3 3.4 7.9 7.6 7.9 1.3 0 1.9-.8 1.9-1.7 0-1.3-1.2-1.6-1.2-2.8 0-1 .8-1.7 1.8-1.7h2.3c2.6 0 4.6-2 4.6-4.4 0-3-3.6-5.4-8.5-5.4z"/><circle cx="8" cy="10.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="11.6" cy="7.5" r="1.4" fill="currentColor" stroke="none"/><circle cx="15.6" cy="9" r="1.4" fill="currentColor" stroke="none"/></svg>',
+  pencil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>',
   dice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.3" fill="currentColor"/><circle cx="15" cy="15" r="1.3" fill="currentColor"/><circle cx="15" cy="9" r="1.3" fill="currentColor"/><circle cx="9" cy="15" r="1.3" fill="currentColor"/></svg>',
   sparkle: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.9 5.6 5.6 1.9-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.9zM18.5 15l.9 2.6 2.6.9-2.6.9-.9 2.6-.9-2.6-2.6-.9 2.6-.9z"/></svg>',
   millet: '<svg viewBox="0 0 40 40"><path d="M20 36 Q22 20 16 4" stroke="#9C7A2C" stroke-width="2" fill="none"/>' + [0, 1, 2, 3, 4, 5, 6, 7].map(i => `<ellipse cx="${18 + (i % 2 ? 3.6 : -3.4) - i * .3}" cy="${8 + i * 3.4}" rx="3.4" ry="2.6" fill="#E6C66A" stroke="#B89535" stroke-width=".8"/>`).join('') + '</svg>',
@@ -832,8 +847,11 @@ function setBusy(ms) { S.busyUntil = Math.max(S.busyUntil, Date.now() + ms); S.n
 function cur() { return Store.birds.get(S.id); }
 let toastT = 0;
 function toast(msg, win) { const el = $('#toast'); el.textContent = msg; el.className = win ? 'win' : ''; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, win ? 3200 : 2600); }
+// lessons happen on the stage: bring the bird back into view if the page is scrolled down
+function showStage() { const st = $('#stage'); if (!st) return; const r = st.getBoundingClientRect(); if (r.top < -r.height * .35) window.scrollTo({top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'}); }
 function bubble(who, text, ms) {
   const el = $('#bub-' + who); if (!el) return;
+  if (who === 'kid') { const h = $('#hint'); if (h) h.style.opacity = 0; }
   el.innerHTML = (who === 'kid' ? `<small>${esc(kid())}</small>` : '') + esc(text);
   el.hidden = false; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
   clearTimeout(el._t); el._t = setTimeout(() => { el.hidden = true; }, ms || 2600);
@@ -896,14 +914,50 @@ function renderAviary() {
 }
 
 /* ---------- bird room ---------- */
+// learning got faster: anything already practiced enough under the new, shorter lessons counts as learned
+function normalizeBird(b) {
+  const sp = SPECIES[b.species]; let changed = false;
+  b.words = b.words || []; b.tunes = b.tunes || [];
+  b.words.forEach(w => { if (!w.learned && isFinite(sp.needs.word) && (w.reps || 0) >= sp.needs.word) { w.learned = true; changed = true; } });
+  b.tunes.forEach(t => { if (!t.learned && (t.reps || 0) >= sp.needs.tune) { t.learned = true; changed = true; } });
+  if (changed) Store.save(b);
+}
+function openRename() {
+  const b = cur(); if (!b) return;
+  const sh = $('#sheet');
+  sh.innerHTML = `<div class="sheet-back" id="sheetBack"></div><form class="sheet at-top" id="renameForm" role="dialog" aria-label="Rename ${esc(b.name)}"><h2>Name your bird</h2>
+    <div class="namerow"><input id="renameInput" maxlength="16" value="${esc(b.name)}" autocomplete="off" autocapitalize="words" enterkeyhint="done" aria-label="Bird name"><button type="button" class="btn" id="renameDice" aria-label="Pick a random name">${IC.dice}</button></div>
+    <div class="two"><button type="button" class="btn" id="renameCancel">Cancel</button><button type="submit" class="btn go">Save name</button></div></form>`;
+  sh.hidden = false;
+  const inp = $('#renameInput');
+  setTimeout(() => { try { inp.focus(); inp.select(); } catch (e) {} }, 60);
+  $('#renameDice').onclick = () => { inp.value = pick(NAMES.filter(n => n !== inp.value)); sfx('pop'); };
+  $('#sheetBack').onclick = closeSheet; $('#renameCancel').onclick = closeSheet;
+  $('#renameForm').onsubmit = e => {
+    e.preventDefault();
+    const v = inp.value.trim().replace(/\s+/g, ' ').slice(0, 16);
+    if (!v) { inp.focus(); return; }
+    closeSheet();
+    if (v === b.name) return;
+    b.name = v; Store.save(b);
+    const h = $('#roomName'); if (h) h.textContent = v;
+    const nb = $('#btnName'); if (nb) nb.setAttribute('aria-label', `Rename ${v}`);
+    const eb = $('#btnEdit'); if (eb) eb.setAttribute('aria-label', `Change how ${v} looks`);
+    const hint = $('#hint'); if (hint) hint.textContent = `Tap ${v} · rub the head to scratch`;
+    renderTab();
+    toast(`Now I’m ${v}!`, true); hearts(2); addLove(1);
+    if (actor) { S.busyUntil = 0; if (SPECIES[b.species].talk) birdSays(`${v}!`); else birdSing(); actor.flapWings(2); }
+  };
+}
 function renderRoom(id) {
   const b = Store.birds.get(id); if (!b) return renderAviary();
+  normalizeBird(b);
   S.screen = 'room'; S.id = id; S.lesson = null; S.tune = null;
   const sp = SPECIES[b.species];
   app.innerHTML = `
   <header class="top"><button class="icon-btn" id="btnBack" aria-label="Back to the aviary">${IC.back}</button>
-    <div class="ttl"><h1>${esc(b.name)}</h1><span class="sub">${sp.label}</span></div>
-    <button class="icon-btn" id="btnEdit" aria-label="Change how ${esc(b.name)} looks">${IC.brush}</button></header>
+    <div class="ttl"><button class="namebtn" id="btnName" aria-label="Rename ${esc(b.name)}"><h1 id="roomName">${esc(b.name)}</h1><span class="pen">${IC.pencil}</span></button><span class="sub">${sp.label}</span></div>
+    <button class="icon-btn" id="btnEdit" aria-label="Change how ${esc(b.name)} looks">${IC.palette}</button></header>
   <div class="stage" id="stage">${SUN}${SCENE}<div class="layer" id="birdLayer">${birdSVG(b, 'r', {stage: true})}</div>
     <div class="love" id="love">♥ <span>${b.hearts || 0}</span></div>
     <div class="bubble bird" id="bub-bird" hidden></div><div class="bubble kid" id="bub-kid" hidden></div>
@@ -918,13 +972,14 @@ function renderRoom(id) {
   actor = new Actor($('#birdLayer'), 'r');
   $('#btnBack').onclick = () => go('aviary');
   $('#btnEdit').onclick = () => go('design', id);
+  $('#btnName').onclick = () => { sfx('pop'); openRename(); };
   $$('.tabs button').forEach(t => t.onclick = () => { S.tab = t.dataset.tab; $$('.tabs button').forEach(x => x.setAttribute('aria-selected', x === t)); sfx('pop'); renderTab(); });
   bindStage();
   preloadSpecies(b.species);
   renderTab();
   S.nextIdle = Date.now() + 7000;
   S.idle = setInterval(idleTick, 1000);
-  if (AU.unlocked) setTimeout(greet, 700);
+  if (AU.unlocked) { setTimeout(greet, 700); setTimeout(() => { const h = $('#hint'); if (h) h.style.opacity = 0; }, 5000); }
 }
 function greet() {
   const b = cur(); if (!b || !actor) return;
@@ -960,18 +1015,20 @@ function scratch() {
 }
 // The bird never speaks English: the bubble shows the words, the sound is its own species' calls.
 function birdSays(text, after) {
-  const b = cur(); if (!b || !actor) return; const sp = SPECIES[b.species]; const a = actor;
-  if (!sp.voice) { birdSing(after); return; }
+  const b = cur(); if (!b || !actor) return 0; const sp = SPECIES[b.species]; const a = actor;
+  if (!sp.voice) return birdSing(after);
   const target = .3 + syllables(text) * .2; const ctx = audio(); let dur = target;
   if (ctx) { const t = ctx.currentTime + .03; dur = realChatter(b.species, t, target); if (!dur) { let x = t; while (x - t < target) x += CALLS[sp.call](x) + .06; dur = x - t; } }
   bubble('bird', text, Math.max(1800, dur * 1000 + 1300)); setBusy(dur * 1000 + 400);
   a.excite(dur * 1000 + 600); a.talk(true); a.s.bobT = -3; a.later(150, () => a.s.bobT = 0);
   a.later(dur * 1000, () => { a.talk(false); after && after(); });
+  return dur;
 }
 function birdSing(after) {
   const ctx = audio(); let dur = 2; if (ctx) { const t = ctx.currentTime + .02; dur = realChatter('canary', t, 2) || CALLS.canary(t); }
   if (actor) actor.whistleMove(dur); bubble('bird', '♪ ♫ ♪', dur * 1000 + 300); setBusy(dur * 1000 + 300);
   setTimeout(() => after && after(), dur * 1000);
+  return dur;
 }
 function idleTick() {
   if (S.screen !== 'room' || !actor || document.hidden) return;
@@ -1030,12 +1087,13 @@ function dance() {
 }
 
 /* talk */
-function phrases() { return ['Hello!', `Hi ${kid()}!`, 'I love you', 'Pretty bird', 'Good morning!', 'Give me a kiss', "What's up?", 'Peek-a-boo!', 'Want a snack?', 'Good night', 'Yummy!', 'Uh oh!']; }
+function phrases() { return ['Hello!', `Hi ${kid()}!`, 'I love you', 'Pretty bird', 'Good morning!', 'Give me a kiss', "What's up?", 'Peek-a-boo!', 'Want a snack?', 'Bye-bye!', 'Good night', 'Yummy!', 'Uh oh!', 'Whatcha doing?']; }
 function dotsHTML(reps, need, learned) {
   if (!isFinite(need)) return '';
   let s = ''; for (let i = 0; i < need; i++) s += `<span class="dot ${learned || i < reps ? 'on' : ''}"></span>`;
-  return s + `<span class="lbl">${learned ? 'Learned!' : `${Math.min(reps, need)} of ${need}`}</span>`;
+  return s + `<span class="lbl">${learned ? 'Learned!' : reps ? `Practicing… ${Math.min(reps, need)} of ${need}` : `Needs ${need} tr${need === 1 ? 'y' : 'ies'}`}</span>`;
 }
+const findWord = (b, t) => b.words.find(x => x.t.toLowerCase() === String(t).toLowerCase());
 function renderTalk(p) {
   const b = cur(), sp = SPECIES[b.species];
   if (!sp.talk) {
@@ -1043,72 +1101,116 @@ function renderTalk(p) {
     $('#singNow').onclick = () => { if (!isBusy()) { birdSing(); addLove(1); } };
     return;
   }
-  const L = S.lesson, w = L ? b.words.find(x => x.t.toLowerCase() === L.toLowerCase()) : null, need = sp.needs.word;
+  const L = S.lesson, w = L ? findWord(b, L) : null, need = sp.needs.word;
   const known = b.words.slice().sort((x, y) => (y.learned ? 1 : 0) - (x.learned ? 1 : 0));
   p.innerHTML = `
-  <div class="lesson">
-    ${L ? `<span class="eyebrow">Teaching ${esc(b.name)}</span><p class="phrase">“${esc(L)}”</p><div class="dots">${dotsHTML(w ? w.reps : 0, need, w && w.learned)}</div>
-      <div class="row"><button class="btn go big" id="teachBtn">Say it to ${esc(b.name)}</button></div>
-      <p class="fine">Say it out loud, then tap the yellow button. ${sp.label}s need to hear something about ${need} time${need === 1 ? '' : 's'} to learn it.</p>`
-    : `<span class="eyebrow">Teach ${esc(b.name)} to talk</span><p class="phrase" style="font-size:24px">Pick some words below, or type your own.</p>`}
+  <div class="lesson" id="lessonCard">
+    ${L ? `<span class="eyebrow" id="lessonTag">${w && w.learned ? `${esc(b.name)} can say` : `Teaching ${esc(b.name)}`}</span><p class="phrase">“${esc(L)}”</p><div class="dots" id="wDots">${dotsHTML(w ? w.reps : 0, need, w && w.learned)}</div>
+      <div class="row"><button class="btn go big" id="teachBtn">${w && w.learned ? `${IC.play} Say it, ${esc(b.name)}!` : `Teach ${esc(b.name)}`}</button></div>`
+    : `<span class="eyebrow">Teach ${esc(b.name)} to talk</span><p class="phrase" style="font-size:24px">Tap some words, or type your own. ${esc(b.name)} will practice until it sticks!</p>`}
   </div>
-  ${MIC ? `<div class="lesson"><span class="eyebrow">Talk out loud</span><p>Hold the button, say something to ${esc(b.name)}, then let go. ${esc(b.name)} will try to copy you in bird talk!</p><div class="row"><button class="btn go big" id="micBtn">${IC.mic} Hold to talk</button></div></div>` : ''}
-  <div class="chips">${phrases().map(t => `<button class="chip" data-ph="${esc(t)}" aria-pressed="${L === t}">${esc(t)}</button>`).join('')}</div>
+  ${MIC ? `<div class="lesson"><span class="eyebrow">Talk out loud</span><p>Tap the button and say something to ${esc(b.name)}. ${esc(b.name)} will copy you in bird talk!</p><div class="row"><button class="btn go big" id="micBtn">${IC.mic}<span> Tap and talk</span></button></div></div>` : ''}
+  <div class="chips">${phrases().map(t => { const k = findWord(b, t); return `<button class="chip ${k && k.learned ? 'knows' : ''}" data-ph="${esc(t)}" aria-pressed="${L === t}">${esc(t)}</button>`; }).join('')}</div>
   <form class="custom" id="customForm"><input id="customPhrase" maxlength="40" placeholder="Type your own words…" autocomplete="off" enterkeyhint="done"><button class="btn go" type="submit">Teach</button></form>
   <h3>What ${esc(b.name)} can say</h3>
   <div class="known">${known.length ? known.map((x, i) => `<span class="word ${x.learned ? '' : 'learning'}"><button data-say="${i}">${x.learned ? IC.play : ''}${esc(x.t)}${x.learned ? '' : ` <small>(${Math.min(x.reps, need)}/${need})</small>`}</button><button class="x" data-forget="${i}" aria-label="Forget ${esc(x.t)}">×</button></span>`).join('') : `<p class="empty">Nothing yet — teach ${esc(b.name)} some words!</p>`}</div>`;
-  $$('[data-ph]', p).forEach(el => el.onclick = () => { S.lesson = el.dataset.ph; sfx('pop'); renderTalk(p); });
-  $('#customForm').onsubmit = e => { e.preventDefault(); const v = $('#customPhrase').value.trim().replace(/\s+/g, ' '); if (!v) return; S.lesson = v; renderTalk(p); setTimeout(() => { const t = $('#teachBtn'); t && t.scrollIntoView({block: 'center', behavior: 'smooth'}); }, 50); };
+  // one tap teaches: picking words starts the lesson right away
+  const start = t => { if (isBusy()) { S.lesson = t; renderTalk(p); return; } S.lesson = t; renderTalk(p); sfx('pop'); teachWord(); };
+  $$('[data-ph]', p).forEach(el => el.onclick = () => start(el.dataset.ph));
+  $('#customForm').onsubmit = e => { e.preventDefault(); const v = $('#customPhrase').value.trim().replace(/\s+/g, ' '); if (!v) return; $('#customPhrase').blur(); start(v); setTimeout(() => { const c = $('#lessonCard'); c && c.scrollIntoView({block: 'center', behavior: 'smooth'}); }, 60); };
   if (MIC) bindMic();
-  if (L) {
-    $('#teachBtn').onclick = teachWord;
-  }
-  $$('[data-say]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.say]; if (x.learned) { if (!isBusy()) { birdSays(x.t); addLove(1); } } else { S.lesson = x.t; renderTalk(p); } });
+  if (L) $('#teachBtn').onclick = teachWord;
+  $$('[data-say]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.say]; if (x.learned) { if (!isBusy()) { birdSays(x.t); addLove(1); } } else start(x.t); });
   $$('[data-forget]', p).forEach(el => el.onclick = () => { const x = known[+el.dataset.forget]; b.words = b.words.filter(y => y !== x); if (S.lesson && S.lesson.toLowerCase() === x.t.toLowerCase()) S.lesson = null; Store.save(b); renderTalk(p); });
+}
+// the bird's half-way attempt at a phrase: more of it comes out on each try
+function attemptText(t, p) {
+  const words = t.split(/\s+/); const k = Math.max(1, Math.round(p * words.length));
+  let s = words.slice(0, k).join(' ');
+  if (k >= words.length) s = s.slice(0, Math.max(2, Math.ceil(s.length * .6)));
+  return s.replace(/[!?.,…]+$/, '') + '…?';
 }
 function teachWord() {
   const b = cur(), sp = SPECIES[b.species], t = S.lesson; if (!t || isBusy() || !actor) return;
-  let w = b.words.find(x => x.t.toLowerCase() === t.toLowerCase());
+  let w = findWord(b, t);
   if (!w) { if (b.words.length >= 40) { toast(`${b.name} knows a lot already! Forget a word to teach a new one.`); return; } w = {t, reps: 0, learned: false}; b.words.push(w); }
-  const a = actor; bubble('kid', t, 1800); a.listen(); setBusy(3200); addLove(1);
-  a.later(1350, () => {
-    const need = sp.needs.word;
-    if (!w.learned) w.reps++;
-    const p = Math.min(1, w.reps / need);
-    if (w.learned || p >= 1) { const first = !w.learned; w.learned = true; birdSays(t, () => { if (first) celebrate(`${b.name} learned “${t}”!`); }); }
-    else if (w.reps === 1) { doCall(); bubble('bird', '?', 1200); }
-    else { const words = t.split(/\s+/); const k = Math.max(1, Math.floor(p * words.length)); let tryIt = words.slice(0, k).join(' '); if (k === words.length) tryIt = tryIt.slice(0, Math.max(2, Math.ceil(tryIt.length * .6))); birdSays(tryIt + '…?'); }
-    Store.save(b); if (S.tab === 'talk') renderTalk($('#panel'));
-  });
+  const a = actor, need = sp.needs.word;
+  bubble('kid', t, 1800); a.listen(); addLove(1);
+  if (w.learned) { setBusy(1500); a.later(1100, () => { S.busyUntil = 0; birdSays(t); }); return; }
+  const tb = $('#teachBtn'); if (tb) tb.disabled = true;
+  showStage();
+  const paint = () => { const d = $('#wDots'); if (d) d.innerHTML = dotsHTML(w.reps, need, w.learned); };
+  let tries = 0;
+  setBusy(60000);
+  const attempt = () => {
+    tries++; w.reps = Math.max(w.reps || 0, tries); paint();
+    S.busyUntil = 0;
+    if (tries >= need) {
+      w.learned = true; Store.save(b); paint();
+      birdSays(t, () => { celebrate(`${b.name} learned “${t}”!`); a.later(900, () => { if (S.tab === 'talk' && S.screen === 'room') renderTalk($('#panel')); }); });
+      setBusy(4000); return;
+    }
+    Store.save(b);
+    let dur = 1;
+    if (tries === 1 && need > 2) { doCall(); bubble('bird', '?', 1200); dur = .9; }
+    else dur = birdSays(attemptText(t, tries / need)) || 1;
+    setBusy(60000);
+    // say it again, the bird listens and has another go
+    a.later(dur * 1000 + 700, () => { bubble('kid', t, 1500); a.listen(); a.later(1200, attempt); });
+  };
+  a.later(1300, attempt);
 }
 
-/* talk out loud: the phone turns Havi's words into text for the bubbles, the bird answers in bird calls */
+/* talk out loud: tap once and talk (it stops by itself when you're done), or hold it like a walkie-talkie */
 const SRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-const Rec = {stream: null, node: null, chunks: null, pressing: false, sr: null, heard: '', srErr: null, srBroken: false};
-function micLabel(on) { const b = $('#micBtn'); if (!b) return; b.classList.toggle('rec', on); b.lastChild.textContent = on ? ' Listening…' : ' Hold to talk'; }
+const Rec = {active: false, stream: null, node: null, chunks: null, sr: null, heard: '', srErr: null, srBroken: false, downAt: 0, watch: 0, startAt: 0, lastHeard: 0};
+function micLabel(on) { const b = $('#micBtn'); if (!b) return; b.classList.toggle('rec', on); const s = b.querySelector('span'); if (s) s.textContent = on ? ' Listening… tap when done' : ' Tap and talk'; }
 function bindMic() {
   const btn = $('#micBtn'); if (!btn) return;
-  const down = e => { e.preventDefault(); if (Rec.pressing || isBusy() || Rec.sr) return; Rec.pressing = true; micLabel(true); if (actor) { actor.s.rotT = -13; actor.s.crestT = .8; } if (SRec && !Rec.srBroken) srStart(); else micStart(); };
-  const upH = e => { if (!Rec.pressing) return; e.preventDefault(); Rec.pressing = false; micLabel(false); if (Rec.sr) { try { Rec.sr.stop(); } catch (err) { srFinish(); } } else micStop(); };
-  btn.addEventListener('pointerdown', down); btn.addEventListener('pointerup', upH); btn.addEventListener('pointercancel', upH); btn.addEventListener('pointerleave', upH);
+  btn.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    if (Rec.active) { recStop(); return; }
+    if (isBusy()) return;
+    Rec.downAt = Date.now(); recStart();
+  });
+  const up = () => { if (Rec.active && Rec.downAt && Date.now() - Rec.downAt > 900) recStop(); Rec.downAt = 0; };
+  btn.addEventListener('pointerup', up); btn.addEventListener('pointercancel', up);
   btn.addEventListener('contextmenu', e => e.preventDefault());
+}
+function recStart() {
+  Rec.active = true; Rec.startAt = Date.now(); Rec.lastHeard = 0; micLabel(true);
+  if (actor) { actor.s.rotT = -13; actor.s.crestT = .8; }
+  clearInterval(Rec.watch);
+  // stop on its own: a moment of quiet after talking, or 9 seconds max
+  Rec.watch = setInterval(() => {
+    if (!Rec.active) { clearInterval(Rec.watch); return; }
+    const now = Date.now();
+    if (now - Rec.startAt > 9000 || (Rec.lastHeard && now - Rec.lastHeard > 1500) || (!Rec.lastHeard && now - Rec.startAt > 7000)) recStop();
+  }, 200);
+  if (SRec && !Rec.srBroken) srStart(); else micStart();
+}
+function recStop() {
+  if (!Rec.active) return;
+  Rec.active = false; clearInterval(Rec.watch); micLabel(false);
+  if (Rec.sr) { try { Rec.sr.stop(); } catch (err) { srFinish(); } } else micStop();
 }
 function srStart() {
   audio();
   let r; try { r = new SRec(); } catch (e) { Rec.srBroken = true; micStart(); return; }
   Rec.sr = r; Rec.heard = ''; Rec.srErr = null;
   r.lang = 'en-US'; r.continuous = true; r.interimResults = true; r.maxAlternatives = 1;
-  r.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; Rec.heard = t; if (t.trim()) bubble('kid', t.trim(), 4000); };
+  r.onresult = e => { let t = ''; for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript; Rec.heard = t; if (t.trim()) { Rec.lastHeard = Date.now(); bubble('kid', t.trim(), 4000); } };
   r.onerror = e => { Rec.srErr = e.error; };
   r.onend = () => { if (Rec.sr === r) srFinish(); };
   try { r.start(); } catch (e) { Rec.sr = null; Rec.srBroken = true; micStart(); }
 }
 function srFinish() {
-  const err = Rec.srErr, text = (Rec.heard || '').replace(/\s+/g, ' ').trim(); Rec.sr = null; Rec.pressing = false; micLabel(false);
+  const err = Rec.srErr, text = (Rec.heard || '').replace(/\s+/g, ' ').trim(); Rec.sr = null;
+  if (Rec.active) { Rec.active = false; clearInterval(Rec.watch); micLabel(false); }
   try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
   if (actor) { actor.s.rotT = 0; actor.s.crestT = actor.rest; }
   if (err === 'not-allowed') { toast('The microphone is off. A grown-up can turn it on in Settings.'); return; }
-  if (err === 'service-not-allowed' || err === 'language-not-supported') { Rec.srBroken = true; toast('Hold the button again and talk — the bird will chirp back.'); return; }
+  if (err === 'service-not-allowed' || err === 'language-not-supported') { Rec.srBroken = true; toast('Tap the button again and talk — the bird will chirp back.'); return; }
   if (!text) { if (actor) { doCall(); bubble('bird', '?', 1200); } return; }
   heardWords(text);
 }
@@ -1120,14 +1222,15 @@ function heardWords(text) {
 }
 // fallback when the phone can't turn speech into words: listen, then chirp back for as long as she talked
 async function micStart() {
-  const ctx = audio(); if (!ctx) { toast('Turn sounds on in Settings first.'); return; }
+  const ctx = audio(); if (!ctx) { recStop(); toast('Turn sounds on in Settings first.'); return; }
   try { if (navigator.audioSession) navigator.audioSession.type = 'play-and-record'; } catch (e) {}
   try { if (!Rec.stream) Rec.stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true, autoGainControl: true}}); }
-  catch (e) { Rec.pressing = false; micLabel(false); toast('The microphone is off. A grown-up can turn it on in Settings.'); return; }
+  catch (e) { Rec.active = false; clearInterval(Rec.watch); micLabel(false); micRelease(); toast('The microphone is off. A grown-up can turn it on in Settings.'); return; }
   if (ctx.state === 'suspended') await ctx.resume();
-  if (!Rec.pressing) { micRelease(); return; }
+  if (!Rec.active) { micRelease(); return; }
   const src = ctx.createMediaStreamSource(Rec.stream), proc = ctx.createScriptProcessor(4096, 1, 1), mute = ctx.createGain(); mute.gain.value = 0;
-  const lv = []; proc.onaudioprocess = e => { const d = e.inputBuffer.getChannelData(0); let m = 0; for (let i = 0; i < d.length; i += 8) m = Math.max(m, Math.abs(d[i])); lv.push(m); };
+  const lv = []; let floor = .004;
+  proc.onaudioprocess = e => { const d = e.inputBuffer.getChannelData(0); let m = 0; for (let i = 0; i < d.length; i += 8) m = Math.max(m, Math.abs(d[i])); lv.push(m); if (lv.length < 4) floor = Math.max(floor, m * 1.5); if (m > Math.max(.03, floor * 3)) Rec.lastHeard = Date.now(); };
   src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
   Rec.node = {src, proc, mute}; Rec.chunks = lv;
 }
@@ -1141,7 +1244,7 @@ function micStop() {
   if (actor) { actor.s.rotT = 0; actor.s.crestT = actor.rest; }
   if (!was || !lv) return;
   const ctx = AU.ctx, block = 4096 / ctx.sampleRate, peak = Math.max(0, ...lv);
-  if (lv.length * block < .35) { toast('Keep holding the button while you talk.'); return; }
+  if (lv.length * block < .35) { toast('Tap the button, then talk to your bird.'); return; }
   if (peak < .01) { toast(`${cur().name} couldn’t hear you. Try talking a little louder.`); return; }
   const loud = lv.filter(v => v > peak * .15).length * block;
   const b = cur(), sp = SPECIES[b.species], a = actor; if (!a) return;
@@ -1219,15 +1322,30 @@ function teachTune() {
   if (!tn.special && tn.notes.length < 2) { toast('Add at least two notes.'); return; }
   let rec = findTune(b, tn);
   if (!rec) { if (b.tunes.length >= 20) { toast(`${b.name} knows lots of songs! Forget one first.`); return; } const n = b.tunes.filter(x => !x.special && !TUNES[x.preset]).length + 1; rec = {id: uid(), name: tn.name || `${kid()}’s song ${n}`, preset: tn.preset || null, special: tn.special || null, notes: tn.notes ? clone(tn.notes) : null, reps: 0, learned: false}; b.tunes.push(rec); }
-  const dur = kidPlay(tn); const a = actor; a.listen(); setBusy(dur * 1000 + 3000); addLove(1);
-  a.later(dur * 1000 + 700, () => {
-    const need = sp.needs.tune; if (!rec.learned) rec.reps++;
-    const p = Math.min(1, rec.reps / need);
-    if (rec.learned || p >= 1) { const first = !rec.learned; rec.learned = true; const d = birdWhistle(rec, 1); if (first) a.later(d * 1000 + 200, () => celebrate(`${b.name} learned ${rec.name}!`)); }
-    else if (rec.reps === 1 && need > 2) { doCall(); bubble('bird', '?', 1200); }
-    else birdWhistle(rec, Math.max(.35, p));
-    Store.save(b); if (S.tab === 'whistle') { const ls = findTune(b, S.tune); const el = $('#tDots'); if (el) el.innerHTML = ls ? dotsHTML(ls.reps, need, ls.learned) : ''; a.later(1500, () => { if (S.tab === 'whistle' && S.screen === 'room') renderWhistle($('#panel')); }); }
-  });
+  const a = actor, need = sp.needs.tune;
+  const dots = () => { const el = $('#tDots'); if (el) el.innerHTML = dotsHTML(rec.reps, need, rec.learned); };
+  const refresh = () => { if (S.tab === 'whistle' && S.screen === 'room') renderWhistle($('#panel')); };
+  showStage();
+  const kd = kidPlay(tn); a.listen(); setBusy(60000); addLove(1);
+  if (rec.learned) { a.later(kd * 1000 + 600, () => { S.busyUntil = 0; birdWhistle(rec, 1); }); return; }
+  // one tap = a whole lesson: the bird has a go (a bit wrong at first), then gets it
+  let tries = 0;
+  const attempt = () => {
+    tries++; rec.reps = Math.max(rec.reps || 0, tries); S.busyUntil = 0;
+    if (tries >= need) {
+      rec.learned = true; Store.save(b); dots();
+      const d = birdWhistle(rec, 1); setBusy(d * 1000 + 2500);
+      a.later(d * 1000 + 200, () => { celebrate(`${b.name} learned ${rec.name}!`); a.later(1200, refresh); });
+      return;
+    }
+    Store.save(b); dots();
+    let d = 1;
+    if (tries === 1 && need > 2) { doCall(); bubble('bird', '?', 1200); }
+    else d = birdWhistle(rec, Math.max(.4, tries / need)) || 1;
+    setBusy(60000);
+    a.later(d * 1000 + 600, () => { bubble('kid', 'Again! ♪', 1200); a.listen(); a.later(1100, attempt); });
+  };
+  a.later(kd * 1000 + 700, attempt);
 }
 
 /* ---------- designer ---------- */
