@@ -1739,9 +1739,11 @@ function buildScene() {
   const sky = new T.Mesh(new T.SphereGeometry(120, 32, 16), skyMat); sky.renderOrder = -1; scene.add(sky);
   scene.fog = new T.Fog('#D6ECF0', 12, 80);
   // clouds
-  const cv = document.createElement('canvas'); cv.width = cv.height = 128; const cx = cv.getContext('2d');
-  const gr = cx.createRadialGradient(64, 64, 4, 64, 64, 62); gr.addColorStop(0, 'rgba(255,255,255,.95)'); gr.addColorStop(.55, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); cx.fillStyle = gr; cx.fillRect(0, 0, 128, 128);
-  const ctex = new T.CanvasTexture(cv); ctex.colorSpace = T.SRGBColorSpace;
+  // pure white with a soft alpha falloff, computed (not a canvas gradient: Safari dithers those, and the
+  // dither noise turns into bright specks where the cloud is nearly transparent)
+  const CS = 128, cdata = new Uint8Array(CS * CS * 4);
+  for (let y = 0; y < CS; y++) for (let x = 0; x < CS; x++) { const d = Math.hypot(x - CS / 2 + .5, y - CS / 2 + .5) / (CS / 2), a = d < .55 ? .95 - d / .55 * .4 : Math.max(0, .55 * (1 - (d - .55) / .45)), i = (y * CS + x) * 4; cdata[i] = cdata[i + 1] = cdata[i + 2] = 255; cdata[i + 3] = Math.round(a * 255); }
+  const ctex = new T.DataTexture(cdata, CS, CS); ctex.colorSpace = T.SRGBColorSpace; ctex.magFilter = ctex.minFilter = T.LinearFilter; ctex.needsUpdate = true;
   const cloudMat = new T.SpriteMaterial({map: ctex, depthWrite: false, toneMapped: false, fog: false});
   [[-9, 9, -30, 14], [-3, 11, -34, 11], [7, 8, -29, 16], [15, 10, -24, 11], [24, 7, 6, 13], [-24, 8, 4, 14], [3, 12, -38, 12], [-18, 9, 20, 13], [12, 11, 26, 12], [-8, 13, 30, 10]].forEach(([x, y, z, s]) => { const sp = new T.Sprite(cloudMat); sp.position.set(x, y, z); sp.scale.set(s, s * .45, 1); scene.add(sp); });
   // lights
@@ -1872,7 +1874,7 @@ function buildScene() {
   }
   // butterflies: two near the bird, a few over the meadow
   {
-    const tex = col => { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const x = cv.getContext('2d'); x.fillStyle = col; [[-1, -1], [1, -1]].forEach(([sx]) => { x.beginPath(); x.ellipse(32 + sx * 13, 24, 13, 15, sx * .5, 0, Math.PI * 2); x.fill(); x.beginPath(); x.ellipse(32 + sx * 10, 43, 9, 11, -sx * .4, 0, Math.PI * 2); x.fill(); }); x.fillStyle = '#2A2A2C'; x.fillRect(30, 16, 4, 34); const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; return t; };
+    const tex = col => { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const x = cv.getContext('2d'); x.fillStyle = col; [[-1, -1], [1, -1]].forEach(([sx]) => { x.beginPath(); x.ellipse(32 + sx * 13, 24, 13, 15, sx * .5, 0, Math.PI * 2); x.fill(); x.beginPath(); x.ellipse(32 + sx * 10, 43, 9, 11, -sx * .4, 0, Math.PI * 2); x.fill(); }); x.fillStyle = '#2A2A2C'; x.fillRect(30, 16, 4, 34); const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; t.generateMipmaps = false; t.minFilter = T.LinearFilter; return t; };
     const bf = [['#FFB836', 1.9, .5, .9, 0], ['#E27A9E', 2.4, .9, -.7, 2], ['#7FC6E6', 6, GY + 1.3, 3, 4], ['#FFD84A', 7.5, GY + 1.1, -2, 1], ['#C06BD9', 5, GY + 1.6, 8, 3]].map(([c, rad, y, cz, ph], i) => {
       const sp = new T.Sprite(new T.SpriteMaterial({map: tex(c), transparent: true, depthWrite: false})); sp.scale.set(.16, .16, 1); scene.add(sp); return {sp, rad, y, cz, ph, i};
     });
@@ -1937,7 +1939,7 @@ class View3D {
     return this.actor;
   }
   setHome(snap) {
-    const k = this.fit || 1, h = this.home, ty = .36 * k, d = h.d * (.35 + .65 * k); this.homeY = ty;
+    const k = this.fit || 1, h = this.home, ty = .52 * k, d = h.d * (.35 + .65 * k); this.homeY = ty;
     const pos = new this.T.Vector3(Math.sin(h.az) * Math.cos(h.el) * d, ty + Math.sin(h.el) * d, Math.cos(h.az) * Math.cos(h.el) * d);
     if (snap) { this.cam.position.copy(pos); this.ctl.target.set(0, ty, 0); this.ctl.update(); }
     else this.glide = {from: this.cam.position.clone(), to: pos, tf: this.ctl.target.clone(), tt: new this.T.Vector3(0, ty, 0), t0: performance.now()};
@@ -2116,10 +2118,9 @@ class View3D {
     if (R3.anim) R3.anim.forEach(f => f(now / 1000, dt));
     if (this.flight) this.flightTick(dt, now);
     else if (!this.glide) {
-      // zooming far out frames the tree and meadow instead of a tiny bird, and never dips under the ground
-      const d = this.cam.position.distanceTo(this.ctl.target), k = ss(4.8, 15, d);
+      // the bird stays in the middle at every zoom; far out, the camera just can't dip under the ground
+      const d = this.cam.position.distanceTo(this.ctl.target);
       this.ctl.maxPolarAngle = 1.95 - .33 * ss(3.5, 11, d);
-      if (k > 0 && !(this.actor && this.actor.follow)) { const want = this.tmpT || (this.tmpT = new this.T.Vector3()); want.set(-1.5 * k, (this.homeY || .36) * (1 - k) - 2.6 * k, 0); this.ctl.target.lerp(want, 1 - Math.exp(-2.5 * dt)); }
       this.ctl.update();
     }
     this.r.render(this.scene, this.cam);
@@ -2138,7 +2139,7 @@ class View3D {
 
 function noteTexture(col) {
   const T = R3.T; R3.noteTex = R3.noteTex || {};
-  if (!R3.noteTex[col]) { const cv = document.createElement('canvas'); cv.width = cv.height = 96; const x = cv.getContext('2d'); x.font = '800 78px system-ui, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineWidth = 8; x.strokeStyle = '#fff'; x.strokeText('♪', 48, 52); x.fillStyle = col; x.fillText('♪', 48, 52); const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; R3.noteTex[col] = t; }
+  if (!R3.noteTex[col]) { const cv = document.createElement('canvas'); cv.width = cv.height = 96; const x = cv.getContext('2d'); x.font = '800 78px system-ui, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineWidth = 8; x.strokeStyle = '#fff'; x.strokeText('♪', 48, 52); x.fillStyle = col; x.fillText('♪', 48, 52); const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; t.generateMipmaps = false; t.minFilter = T.LinearFilter; R3.noteTex[col] = t; }
   return R3.noteTex[col];
 }
 /* still pictures of birds for the aviary cards and the species picker */
@@ -2155,12 +2156,13 @@ function thumb3D(b, w = 240, h = 300) {
     const rim = new T.DirectionalLight('#E2F0FF', 1.3); rim.position.set(-2.8, 1.8, -3.2); s.add(rim);
     try { const pm = new T.PMREMGenerator(R3.tr); const es = new T.Scene(); es.background = new T.Color('#CFE6EE'); s.environment = pm.fromScene(es, .04).texture; s.environmentIntensity = .5; pm.dispose(); } catch (e) {}
     R3.tc = new T.PerspectiveCamera(30, 1, .05, 50);
+    const perch = new T.Mesh(new T.CylinderGeometry(PERCH_R, PERCH_R, 2.6, 16), new T.MeshStandardMaterial({color: '#8A5A3B', roughness: .9})); perch.rotation.z = Math.PI / 2; perch.position.set(-.2, -PERCH_R, 0); s.add(perch);
   }
   if (R3.tr.getContext().isContextLost()) throw new Error('thumbnail context lost');
   R3.tr.setSize(w, h, false);
   const bird = new Bird3D(b); bird.pose({crest: .35, wing: [0, 0], fan: 0}); R3.ts.add(bird.pivot);
   const cam = R3.tc; cam.aspect = w / h; cam.updateProjectionMatrix();
-  const top = (bird.F.H[1] + bird.F.S.head) * bird.sc, tY = top * .52, d = .45 + top * 2.05;
+  const top = (bird.F.H[1] + bird.F.S.head) * bird.sc, tY = top * .45, d = .55 + top * 2.75;
   cam.position.set(Math.sin(.42) * d, tY + .35, Math.cos(.42) * d); cam.lookAt(0, tY, 0);
   bird.headBone.rotation.set(.05, .35, -.1);
   R3.tr.render(R3.ts, cam);
