@@ -81,7 +81,8 @@ p{margin:0}
 .zoom{position:absolute;right:12px;bottom:12px;z-index:3;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:var(--ink);display:grid;place-items:center;box-shadow:0 6px 16px -8px rgba(0,0,0,.5)}
 .zoom svg{width:24px;height:24px}
 .zoom:active{transform:scale(.94)}
-.stage.is3d .hint{bottom:70px}
+.stage.is3d .hint{bottom:auto;top:14px;left:auto;right:12px;transform:none;max-width:60%}
+.stage.is3d{height:min(56vh,540px)}
 .thumb img.bird3d{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .sp img.bird3d{width:100%;height:86px;object-fit:cover;display:block}
 .tricks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -90,6 +91,13 @@ p{margin:0}
 .trick:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(31,48,71,.14)}
 .trick .em{font-size:34px;line-height:1}
 .trick .star{position:absolute;right:12px;top:10px;color:var(--sun-d);font-size:20px}
+.flyTile{width:100%;min-height:84px;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px;background:linear-gradient(120deg,#CDE9FF,#FFE6A8);margin-bottom:12px}
+.flyTile .em{font-size:32px;line-height:1}
+.stage.flying .hint,.stage.flying .zoom,.stage.flying .love{display:none}
+.flyhud{position:absolute;inset:auto 12px 12px 12px;z-index:4;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
+.flyhud > *{pointer-events:auto}
+.flycount{background:rgba(255,255,255,.92);border-radius:999px;padding:8px 16px;font-family:var(--display);font-weight:800;font-size:22px;color:var(--ink)}
+.flyhud .btn{padding:11px 20px}
 .sunspot{position:absolute;right:-18%;top:-22%;width:70%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,248,222,.95),rgba(255,231,168,.45) 42%,rgba(255,231,168,0) 70%);pointer-events:none}
 .bird-svg .ov{pointer-events:none}
 .flash{animation:flash .5s ease 2}
@@ -1535,7 +1543,8 @@ class Actor3D {
     const L = this.look, v = this.v;
     if (now > L.until) { L.mode = Math.random() < .55 ? 1 : Math.random() < .5 ? 2 : 0; L.until = now + 1800 + Math.random() * 3500; L.rx = (Math.random() - .5) * 1.4; L.ry = (Math.random() - .3) * .5; L.side = Math.random() < .5 ? 1 : -1; }
     let ty = L.rx, tp = L.ry, tr = 0;
-    if (L.mode && v && v.cam) {
+    if (this.noLook) { ty = 0; tp = 0; }
+    else if (L.mode && v && v.cam) {
       const hp = this.tmp.v; B.fx.localToWorld(hp.set(B.F.H[0], B.F.H[1], B.F.H[2]));
       const c = v.cam.position; const dx = c.x - hp.x, dy = c.y - hp.y, dz = c.z - hp.z;
       const yawW = Math.atan2(dx, dz) - (x.ry || 0);
@@ -1703,19 +1712,23 @@ class View3D {
   }
   bindPointer() {
     const el = this.host; let p = null, lastTap = 0;
+    const steer = e => { const r = this.r.domElement.getBoundingClientRect(); return {x: Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width - .5) * 2.4)), y: Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height - .5) * 2.4))}; };
     this.pd = e => {
       if (e.target !== this.r.domElement) return;
+      if (this.flight) { this.flight.steer = steer(e); this.flight.sid = e.pointerId; return; }
       const h = this.hit(e.clientX, e.clientY);
       p = {x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, t: Date.now(), dist: 0, part: h && h.part, id: e.pointerId, multi: false};
       if (this.ptrs = (this.ptrs || 0) + 1, this.ptrs > 1) { p.multi = true; this.ctl.enabled = true; return; }
       if (this.mode === 'room' && h && HEAD_PARTS.has(h.part)) { this.ctl.enabled = false; p.pet = true; }
     };
     this.pm = e => {
+      if (this.flight && this.flight.sid === e.pointerId && this.flight.steer) { this.flight.steer = steer(e); return; }
       if (!p || e.pointerId !== p.id) return;
       p.dist += Math.hypot(e.clientX - p.x, e.clientY - p.y); p.x = e.clientX; p.y = e.clientY;
       if (p.pet && p.dist > 40) { p.dist = 0; p.moved = true; if (typeof scratch === 'function') scratch(); }
     };
     this.pu = e => {
+      if (this.flight && this.flight.sid === e.pointerId) { this.flight.steer = null; this.flight.sid = null; }
       this.ptrs = Math.max(0, (this.ptrs || 1) - 1);
       if (!p || e.pointerId !== p.id) { this.ctl.enabled = true; return; }
       const moved = Math.hypot(e.clientX - p.x0, e.clientY - p.y0), quick = Date.now() - p.t < 450;
@@ -1748,12 +1761,87 @@ class View3D {
   }
   eatMillet(k) { const g = this.millet; if (!g) return; const s = g.userData.seeds, m = new this.T.Matrix4().makeScale(0, 0, 0); for (let i = (k - 1) * 6; i < Math.min(30, k * 6); i++) s.setMatrixAt(i, m); s.instanceMatrix.needsUpdate = true; }
   hideMillet() { const g = this.millet; if (!g) return; this.scene.remove(g); g.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); this.millet = null; }
+  // ---- free flight: she steers, the bird catches floating notes that play a song ----
+  startFlight(tune, onDone) {
+    const T = this.T, a = this.actor; if (!a || !this.bird || this.flight) return false;
+    const notes = (tune.notes || []).slice(0, 16); if (notes.length < 3) return false;
+    const n = notes.length, list = [];
+    for (let i = 0; i < n; i++) {
+      const ang = .9 + i / n * Math.PI * 2 * 1.15, r = 2.1 + .5 * Math.sin(i * 1.7);
+      const sp = new T.Sprite(new T.SpriteMaterial({map: noteTexture(semiColor(notes[i][0])), transparent: true, depthWrite: false, toneMapped: false, fog: false}));
+      sp.position.set(Math.sin(ang) * r, .75 + .75 * Math.sin(i * 1.3 + .4), Math.cos(ang) * r * .9 - .4); sp.scale.setScalar(.5);
+      sp.userData.y0 = sp.position.y; this.scene.add(sp); list.push(sp);
+    }
+    a.noLook = true; a.follow = false; this.ctl.enabled = false;
+    this.cam.fov = 52; this.cam.updateProjectionMatrix();
+    this.flight = {tune, notes, list, got: 0, pos: new T.Vector3(0, .05, 0), yaw: 0, pitch: .35, steer: null, t0: performance.now(), onDone, auto: false, land: null, speed: 1.55};
+    return true;
+  }
+  flightTick(dt, now) {
+    const T = this.T, F = this.flight, a = this.actor, x = a.x;
+    const age = (now - F.t0) / 1000;
+    // steering: toward her finger; otherwise level out
+    let turn = 0, climb = 0;
+    if (F.auto) {
+      const to = new T.Vector3(0, .5, 0).sub(F.pos), want = Math.atan2(to.x, to.z);
+      let d = want - F.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); turn = Math.max(-1, Math.min(1, d * 2));
+      climb = Math.max(-1, Math.min(1, to.y * 1.5));
+      if (to.length() < .55 && !F.land) F.land = {t0: now, from: F.pos.clone(), yaw: F.yaw};
+    } else if (F.steer) { turn = -F.steer.x; climb = -F.steer.y; }
+    // gently pull back toward the tree if she flies too far
+    const hc = new T.Vector3(F.pos.x, 0, F.pos.z); const far = hc.length();
+    if (far > 5.2) { const want = Math.atan2(-F.pos.x, -F.pos.z); let d = want - F.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); turn += Math.sign(d) * Math.min(1, (far - 5.2)); }
+    if (F.pos.y > 3.2) climb = Math.min(climb, -.6); if (F.pos.y < -1) climb = Math.max(climb, .6);
+    if (age < 1) { climb = .8; turn *= age; }
+    F.yaw += turn * 2.1 * dt; F.pitch += (climb * .55 - F.pitch) * (1 - Math.exp(-4 * dt));
+    const sp = F.speed * (1 + Math.max(0, -F.pitch) * .5);
+    F.pos.x += Math.sin(F.yaw) * Math.cos(F.pitch) * sp * dt; F.pos.z += Math.cos(F.yaw) * Math.cos(F.pitch) * sp * dt; F.pos.y += Math.sin(F.pitch) * sp * dt;
+    F.bank = (F.bank || 0) + (turn * .55 - (F.bank || 0)) * (1 - Math.exp(-5 * dt));
+    let lk = 0;
+    if (F.land) {
+      lk = Math.min(1, (now - F.land.t0) / 900); const e = easeIO(lk);
+      F.pos.lerpVectors(F.land.from, new T.Vector3(0, 0, 0), e); F.yaw = F.land.yaw * (1 - e);
+      if (lk >= 1) { this.endFlight(); return; }
+    }
+    const up = 1 - lk;
+    x.px = F.pos.x; x.py = F.pos.y; x.pz = F.pos.z;
+    x.ry = F.yaw; x.rx = (1.12 - F.pitch * .9) * up - .35 * bump(lk, 0, 1); x.rz = -F.bank * up;
+    x.headPitch = -.95 * up; x.tuck = up > .3 ? 1 : 0; x.fan = .55 * up + bump(lk, 0, 1) * .6; x.wing = [up, up];
+    a.w.flapping = F.pitch > -.15 ? up : up * .35;
+    // catch notes
+    const bp = this.bird.bodyBone.getWorldPosition(this.tmpV || (this.tmpV = new T.Vector3()));
+    F.list.forEach((s, i) => {
+      if (!s.visible) return;
+      s.position.y = s.userData.y0 + Math.sin(now / 520 + i) * .08;
+      const d = s.position.distanceTo(bp);
+      if (!F.auto && d < .75) s.position.lerp(bp, 1 - Math.exp(-6 * dt));      // a little magnet helps small hands
+      if (d < .42) {
+        s.visible = false; const semi = F.notes[F.got][0]; F.got++;
+        const ctx = audio(); if (ctx) mallet(ctx.currentTime + .01, 523.25 * Math.pow(2, semi / 12), .24);
+        this.emitNote(semi); if (typeof hearts === 'function') hearts(1);
+        const c = $('#flyN'); if (c) c.textContent = F.got;
+        if (F.got >= F.notes.length) { F.auto = true; F.won = true; toast('You caught every note!', true); }
+      }
+    });
+    // chase camera
+    const fw = new T.Vector3(Math.sin(F.yaw), 0, Math.cos(F.yaw));
+    const want = bp.clone().addScaledVector(fw, -3.1); want.y += 1.05 + Math.max(0, -F.pitch) * .6;
+    this.cam.position.lerp(want, 1 - Math.exp(-(F.land ? 2 : 3.2) * dt));
+    const look = bp.clone().addScaledVector(fw, 1.4); look.y += .05;
+    this.ctl.target.lerp(look, 1 - Math.exp(-5 * dt)); this.cam.lookAt(this.ctl.target);
+  }
+  endFlight() {
+    const F = this.flight; if (!F) return;
+    F.list.forEach(s => { this.scene.remove(s); s.material.dispose(); });
+    const a = this.actor; this.flight = null;
+    if (a) { a.noLook = false; a.w.flapping = 0; Object.keys(a.x).forEach(k => { a.x[k] = k === 'wing' ? null : 0; }); }
+    this.ctl.enabled = true; this.resize(); this.setHome(false);
+    if (F.onDone) F.onDone(!!F.won, F.got);
+  }
+  landFlight() { if (this.flight && !this.flight.auto) this.flight.auto = true; }
   emitNote(semi) {
     const T = this.T; if (!this.bird) return;
-    if (!R3.noteTex) R3.noteTex = {};
-    const col = typeof semiColor === 'function' ? semiColor(semi) : '#2E7FCE';
-    if (!R3.noteTex[col]) { const cv = document.createElement('canvas'); cv.width = cv.height = 96; const x = cv.getContext('2d'); x.font = '800 78px system-ui, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineWidth = 8; x.strokeStyle = '#fff'; x.strokeText('♪', 48, 52); x.fillStyle = col; x.fillText('♪', 48, 52); const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; R3.noteTex[col] = t; }
-    const sp = new T.Sprite(new T.SpriteMaterial({map: R3.noteTex[col], transparent: true, depthWrite: false, toneMapped: false, fog: false}));
+    const sp = new T.Sprite(new T.SpriteMaterial({map: noteTexture(semiColor(semi)), transparent: true, depthWrite: false, toneMapped: false, fog: false}));
     const bp = new T.Vector3(); this.bird.beak.getWorldPosition(bp); sp.position.copy(bp); sp.scale.setScalar(.001);
     this.scene.add(sp); this.fx.push({sp, t0: performance.now(), vx: (Math.random() - .5) * .35, vz: .1 + Math.random() * .2, ms: 1500});
   }
@@ -1768,14 +1856,15 @@ class View3D {
     if (this.bird) this.bird.mats.forEach(m => { if (m.userData.u) m.userData.u.uTime.value = now / 1000; });
     if (this.millet) { const k = Math.min(1, (now - this.milletIn) / 400); this.millet.scale.setScalar(Math.max(.01, easeIO(k))); }
     for (let i = this.fx.length - 1; i >= 0; i--) { const f = this.fx[i], u = (now - f.t0) / f.ms; if (u >= 1) { this.scene.remove(f.sp); f.sp.material.dispose(); this.fx.splice(i, 1); continue; } f.sp.position.x += f.vx * dt; f.sp.position.y += .55 * dt; f.sp.position.z += f.vz * dt; const s = .12 * Math.min(1, u * 6); f.sp.scale.set(s, s, s); f.sp.material.opacity = 1 - ss(.6, 1, u); }
-    if (!this.glide) this.ctl.update();
+    if (this.flight) this.flightTick(dt, now);
+    else if (!this.glide) this.ctl.update();
     this.r.render(this.scene, this.cam);
   }
   dispose() {
     if (!this.alive) return; this.alive = false; cancelAnimationFrame(this.raf);
     this.ro.disconnect(); document.removeEventListener('visibilitychange', this.onVis);
     this.host.removeEventListener('pointerdown', this.pd, true); window.removeEventListener('pointermove', this.pm, true); window.removeEventListener('pointerup', this.pu, true); window.removeEventListener('pointercancel', this.pc, true);
-    clearTimeout(this.tapT); this.ctl.dispose(); this.hideMillet();
+    clearTimeout(this.tapT); if (this.flight) { this.flight.onDone = null; this.endFlight(); } this.ctl.dispose(); this.hideMillet();
     this.fx.forEach(f => { this.scene.remove(f.sp); f.sp.material.dispose(); }); this.fx = [];
     if (this.bird) { this.scene.remove(this.bird.pivot); this.bird.dispose(); this.bird = null; }
     if (this.r.domElement.parentNode === this.host) this.host.removeChild(this.r.domElement);
@@ -1783,6 +1872,11 @@ class View3D {
   }
 }
 
+function noteTexture(col) {
+  const T = R3.T; R3.noteTex = R3.noteTex || {};
+  if (!R3.noteTex[col]) { const cv = document.createElement('canvas'); cv.width = cv.height = 96; const x = cv.getContext('2d'); x.font = '800 78px system-ui, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.lineWidth = 8; x.strokeStyle = '#fff'; x.strokeText('♪', 48, 52); x.fillStyle = col; x.fillText('♪', 48, 52); const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; R3.noteTex[col] = t; }
+  return R3.noteTex[col];
+}
 /* still pictures of birds for the aviary cards and the species picker */
 function thumbKey(b, w, h) { return [b.species, JSON.stringify(b.colors || {}), b.pattern, b.pc, b.patch, b.crestScale, b.accessory, w, h].join('|'); }
 function thumb3D(b, w = 240, h = 300) {
@@ -2069,6 +2163,9 @@ let actor = null;
 const S = {screen: 'loading', id: null, tab: 'play', lesson: null, tune: null, part: 'body', busyUntil: 0, idle: 0, nextIdle: 0, factIx: 0};
 function stopActor() { if (actor) { actor.stop(); actor = null; } }
 function isBusy() { return Date.now() < S.busyUntil; }
+// a tap while the bird finishes a short chirp waits its turn instead of being ignored
+let soonT = 0;
+function soon(fn) { const wait = S.busyUntil - Date.now(); if (wait <= 0) { clearTimeout(soonT); return fn(); } if (wait > 2500) return; clearTimeout(soonT); const room = S.id; soonT = setTimeout(() => { if (S.screen === 'room' && S.id === room && !isBusy()) fn(); }, wait + 60); }
 function setBusy(ms) { S.busyUntil = Math.max(S.busyUntil, Date.now() + ms); S.nextIdle = Math.max(S.nextIdle, Date.now() + ms + 6000); }
 function cur() { return Store.birds.get(S.id); }
 let toastT = 0;
@@ -2105,7 +2202,7 @@ function celebrate(msg) {
   hearts(4); addLove(3);
 }
 function go(screen, arg) {
-  stopActor(); closeSheet(); clearInterval(S.idle);
+  stopActor(); closeSheet(); clearInterval(S.idle); S.busyUntil = 0;
   if ('speechSynthesis' in window) { try { speechSynthesis.cancel(); } catch (e) {} }
   S.screen = screen;
   if (screen === 'aviary') renderAviary();
@@ -2191,7 +2288,7 @@ function renderRoom(id) {
   <div class="stage ${use3D ? 'is3d' : ''}" id="stage">${SUN}${SCENE}<div class="layer" id="birdLayer">${use3D ? '' : birdSVG(b, 'r', {stage: true})}</div>
     <div class="love" id="love">♥ <span>${b.hearts || 0}</span></div>
     <div class="bubble bird" id="bub-bird" hidden></div><div class="bubble kid" id="bub-kid" hidden></div>
-    <div class="hint" id="hint">${use3D ? 'Drag to look around · pinch to zoom · rub the head' : `Tap ${esc(b.name)} · rub the head to scratch`}</div>
+    <div class="hint" id="hint">${use3D ? 'Drag to spin around · pinch to zoom' : `Tap ${esc(b.name)} · rub the head to scratch`}</div>
     ${use3D ? `<button class="zoom" id="zoomBtn" aria-label="Zoom in on ${esc(b.name)}">${IC.zoom}</button>` : ''}
   </div>
   <nav class="tabs" role="tablist" style="--n:${use3D ? 4 : 3}">
@@ -2297,7 +2394,7 @@ function renderTricks(p) {
   const b = cur(); const known = new Set(b.tricks || []);
   p.innerHTML = `<p>Tap a trick and watch ${esc(b.name)} do it! Drag the picture to see from any side.</p>
   <div class="tricks">${TRICKS.map(t => `<button class="trick" data-trick="${t.k}"><span class="em" aria-hidden="true">${t.emoji}</span><span>${esc(t.name)}</span>${known.has(t.k) ? '<span class="star" aria-label="learned">★</span>' : ''}</button>`).join('')}</div>`;
-  $$('[data-trick]', p).forEach(el => el.onclick = () => doTrick(el.dataset.trick));
+  $$('[data-trick]', p).forEach(el => el.onclick = () => soon(() => doTrick(el.dataset.trick)));
 }
 function doTrick(k) {
   if (isBusy() || !actor || !actor.trick) return;
@@ -2317,6 +2414,7 @@ function doTrick(k) {
 function renderPlay(p) {
   const b = cur(), sp = SPECIES[b.species];
   p.innerHTML = `
+  ${actor && actor.is3D ? `<button class="tile flyTile" id="aFly"><span class="em" aria-hidden="true">🪽♪</span><span>Fly &amp; catch the notes<small>Touch and hold to steer ${esc(b.name)}</small></span></button>` : ''}
   <div class="tiles">
     <button class="tile t1" id="aTreat">${IC.millet}<span>Millet treat<small>A crunchy snack</small></span></button>
     <button class="tile t2" id="aScratch">${IC.hand}<span>Head scratch<small>Or rub the head on screen</small></span></button>
@@ -2325,11 +2423,31 @@ function renderPlay(p) {
   </div>
   <div class="fact"><span class="eyebrow">${sp.label} fact</span><p id="factText">${esc(sp.facts[S.factIx % sp.facts.length])}</p><button class="linkbtn" id="nextFact">Another fact</button></div>
   <div class="stars"><span>Talking <b>${stars(sp.talk)}</b></span><span>Whistling <b>${stars(sp.sing)}</b></span></div>`;
-  $('#aTreat').onclick = giveTreat;
+  $('#aTreat').onclick = () => soon(giveTreat);
+  const fly = $('#aFly'); if (fly) fly.onclick = () => soon(flyGame);
   $('#aScratch').onclick = () => { scratch(); setTimeout(scratch, 900); setTimeout(scratch, 1800); };
-  $('#aDance').onclick = dance;
-  $('#aFlap').onclick = () => { if (isBusy() || !actor) return; actor.flapWings(5); actor.hop(); actor.later(700, () => actor && actor.hop()); sfx('flap'); setBusy(1400); addLove(1); };
+  $('#aDance').onclick = () => soon(dance);
+  $('#aFlap').onclick = () => soon(() => { if (isBusy() || !actor) return; actor.flapWings(5); actor.hop(); actor.later(700, () => actor && actor.hop()); sfx('flap'); setBusy(1400); addLove(1); });
   $('#nextFact').onclick = () => { S.factIx++; $('#factText').textContent = sp.facts[S.factIx % sp.facts.length]; sfx('pop'); };
+}
+function flyGame() {
+  const v = R3.view, b = cur(); if (isBusy() || !v || !v.actor || !b) return;
+  const mine = (b.tunes || []).filter(t => t.learned && t.notes && t.notes.length >= 4);
+  const tn = mine.length ? pick(mine) : {name: TUNES.twinkle.name, notes: TUNES.twinkle.notes};
+  showStage();
+  const st = $('#stage');
+  const ok = v.startFlight(tn, (won, got) => {
+    const hud = $('#flyHud'); if (hud) hud.remove(); st && st.classList.remove('flying');
+    S.busyUntil = 0; setBusy(800);
+    if (won) { const d = birdWhistle(tn, 1); setBusy(d * 1000 + 600); actor.later(d * 1000 + 150, () => celebrate(`${b.name} and ${kid()} played ${tn.name}!`)); }
+    else if (got) { hearts(2); addLove(1); }
+  });
+  if (!ok) return;
+  setBusy(600000); sfx('flap');
+  st.classList.add('flying');
+  st.insertAdjacentHTML('beforeend', `<div class="flyhud" id="flyHud"><span class="flycount">♪ <b id="flyN">0</b> / ${Math.min(16, tn.notes.length)}</span><button class="btn go" id="flyLand">Land</button></div>`);
+  $('#flyLand').onclick = () => v.landFlight();
+  toast('Touch and hold to steer. Catch all the notes!');
 }
 function giveTreat() {
   if (isBusy() || !actor) return;
