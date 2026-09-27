@@ -1895,7 +1895,7 @@ class View3D {
       }
       this.ctl.enableRotate = true; p = null;
     };
-    this.pc = () => { this.ptrs = 0; this.ctl.enableRotate = true; p = null; };
+    this.pc = () => { this.ptrs = 0; this.ctl.enableRotate = true; p = null; if (this.flight) { this.flight.steer = null; this.flight.sid = null; } };
     el.addEventListener('pointerdown', this.pd, true); window.addEventListener('pointermove', this.pm, true); window.addEventListener('pointerup', this.pu, true); window.addEventListener('pointercancel', this.pc, true);
   }
   showMillet() {
@@ -1938,7 +1938,7 @@ class View3D {
       const to = new T.Vector3(0, .5, 0).sub(F.pos), want = Math.atan2(to.x, to.z);
       let d = want - F.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); turn = Math.max(-1, Math.min(1, d * 2));
       climb = Math.max(-1, Math.min(1, to.y * 1.5));
-      if (to.length() < .55 && !F.land) F.land = {t0: now, from: F.pos.clone(), yaw: F.yaw};
+      if ((to.length() < .9 || now - (F.autoT || now) > 6000) && !F.land) F.land = {t0: now, from: F.pos.clone(), yaw: F.yaw, ms: 900 + Math.min(1600, to.length() * 300)};
     } else if (F.steer) { turn = -F.steer.x; climb = -F.steer.y; }
     // gently pull back toward the tree if she flies too far
     const hc = new T.Vector3(F.pos.x, 0, F.pos.z); const far = hc.length();
@@ -1951,7 +1951,7 @@ class View3D {
     F.bank = (F.bank || 0) + (turn * .55 - (F.bank || 0)) * (1 - Math.exp(-5 * dt));
     let lk = 0;
     if (F.land) {
-      lk = Math.min(1, (now - F.land.t0) / 900); const e = easeIO(lk);
+      lk = Math.min(1, (now - F.land.t0) / (F.land.ms || 900)); const e = easeIO(lk);
       F.pos.lerpVectors(F.land.from, new T.Vector3(0, 0, 0), e); F.yaw = F.land.yaw * (1 - e);
       if (lk >= 1) { this.endFlight(); return; }
     }
@@ -1972,7 +1972,7 @@ class View3D {
         const ctx = audio(); if (ctx) mallet(ctx.currentTime + .01, 523.25 * Math.pow(2, semi / 12), .24);
         this.emitNote(semi); if (typeof hearts === 'function') hearts(1);
         const c = $('#flyN'); if (c) c.textContent = F.got;
-        if (F.got >= F.notes.length) { F.auto = true; F.won = true; toast('You caught every note!', true); }
+        if (F.got >= F.notes.length) { F.auto = true; F.autoT = now; F.won = true; toast('You caught every note!', true); }
       }
     });
     // chase camera
@@ -1990,7 +1990,11 @@ class View3D {
     this.ctl.enabled = true; this.resize(); this.setHome(false);
     if (F.onDone) F.onDone(!!F.won, F.got);
   }
-  landFlight() { if (this.flight && !this.flight.auto) this.flight.auto = true; }
+  landFlight() {
+    const F = this.flight, now = performance.now(); if (!F) return;
+    if (!F.auto) { F.auto = true; F.autoT = now; }
+    else if (!F.land) F.land = {t0: now, from: F.pos.clone(), yaw: F.yaw, ms: 900 + Math.min(1600, F.pos.length() * 300)};
+  }
   emitNote(semi) {
     const T = this.T; if (!this.bird) return;
     const sp = new T.Sprite(new T.SpriteMaterial({map: noteTexture(semiColor(semi)), transparent: true, depthWrite: false, toneMapped: false, fog: false}));
@@ -2354,7 +2358,16 @@ function celebrate(msg) {
   if (actor) { actor.flapWings(3); actor.excite(2000); actor.hop(); }
   hearts(4); addLove(3);
 }
+function stopListening() {
+  if (Rec.active || Rec.sr || Rec.node || Rec.stream) {
+    Rec.active = false; clearInterval(Rec.watch); Rec.chunks = null;
+    const r = Rec.sr; Rec.sr = null; if (r) { try { r.onend = null; r.onresult = null; r.abort(); } catch (e) {} }
+    micRelease(); micLabel(false);
+  }
+  try { if (Hum.on) humCancel(); } catch (e) {}
+}
 function go(screen, arg) {
+  stopListening(); try { if (S.game) endGame(S.game, true); } catch (e) {}
   stopActor(); closeSheet(); clearInterval(S.idle); S.busyUntil = 0;
   if ('speechSynthesis' in window) { try { speechSynthesis.cancel(); } catch (e) {} }
   S.screen = screen;
@@ -2425,7 +2438,7 @@ function openRename() {
     const hint = $('#hint'); if (hint) hint.textContent = `Tap ${v} · rub the head to scratch`;
     renderTab();
     toast(`Now I’m ${v}!`, true); hearts(2); addLove(1);
-    if (actor) { S.busyUntil = 0; if (SPECIES[b.species].talk) birdSays(`${v}!`); else birdSing(); actor.flapWings(2); }
+    if (actor && !isBusy()) { if (SPECIES[b.species].talk) birdSays(`${v}!`); else birdSing(); actor.flapWings(2); }
   };
 }
 function renderRoom(id) {
@@ -2459,7 +2472,7 @@ function renderRoom(id) {
   $('#btnBack').onclick = () => go('aviary');
   $('#btnEdit').onclick = () => go('design', id);
   $('#btnName').onclick = () => { sfx('pop'); openRename(); };
-  $$('.tabs button').forEach(t => t.onclick = () => { S.tab = t.dataset.tab; $$('.tabs button').forEach(x => x.setAttribute('aria-selected', x === t)); sfx('pop'); renderTab(); });
+  $$('.tabs button').forEach(t => t.onclick = () => { if (t.dataset.tab !== 'whistle') { try { if (S.game) endGame(S.game, true); if (Hum.on) humCancel(); } catch (e) {} } if (t.dataset.tab !== 'talk') stopListening(); S.tab = t.dataset.tab; $$('.tabs button').forEach(x => x.setAttribute('aria-selected', x === t)); sfx('pop'); renderTab(); });
   preloadSpecies(b.species);
   renderTab();
   S.nextIdle = Date.now() + 7000;
@@ -2670,7 +2683,7 @@ function attemptText(t, p) {
   return s.replace(/[!?.,…]+$/, '') + '…?';
 }
 function teachWord() {
-  const b = cur(), sp = SPECIES[b.species], t = S.lesson; if (!t || isBusy() || !actor) return;
+  const b = cur(); if (!b) return; const sp = SPECIES[b.species], t = S.lesson; if (!t || isBusy() || !actor || !isFinite(sp.needs.word)) return;
   let w = findWord(b, t);
   if (!w) { if (b.words.length >= 40) { toast(`${b.name} knows a lot already! Forget a word to teach a new one.`); return; } w = {t, reps: 0, learned: false}; b.words.push(w); }
   const a = actor, need = sp.needs.word;
@@ -2717,7 +2730,7 @@ function bindMic() {
   btn.addEventListener('contextmenu', e => e.preventDefault());
 }
 function recStart() {
-  Rec.active = true; Rec.startAt = Date.now(); Rec.lastHeard = 0; micLabel(true);
+  Rec.active = true; Rec.startAt = Date.now(); Rec.lastHeard = 0; Rec.bird = S.id; micLabel(true);
   if (actor) { actor.s.rotT = -13; actor.s.crestT = .8; }
   clearInterval(Rec.watch);
   // stop on its own: a moment of quiet after talking, or 9 seconds max
@@ -2750,6 +2763,7 @@ function srFinish() {
   if (actor) { actor.s.rotT = 0; actor.s.crestT = actor.rest; }
   if (err === 'not-allowed') { toast('The microphone is off. A grown-up can turn it on in Settings.'); return; }
   if (err === 'service-not-allowed' || err === 'language-not-supported') { Rec.srBroken = true; toast('Tap the button again and talk — the bird will chirp back.'); return; }
+  if (S.screen !== 'room' || S.id !== Rec.bird || S.tab !== 'talk') return;
   if (!text) { if (actor) { doCall(); bubble('bird', '?', 1200); } return; }
   heardWords(text);
 }
@@ -2781,7 +2795,7 @@ function micRelease() {
 function micStop() {
   const lv = Rec.chunks; Rec.chunks = null; const was = !!Rec.node; micRelease();
   if (actor) { actor.s.rotT = 0; actor.s.crestT = actor.rest; }
-  if (!was || !lv) return;
+  if (!was || !lv || S.screen !== 'room' || S.id !== Rec.bird) return;
   const ctx = AU.ctx, block = 4096 / ctx.sampleRate, peak = Math.max(0, ...lv);
   if (lv.length * block < .35) { toast('Tap the button, then talk to your bird.'); return; }
   if (peak < .01) { toast(`${cur().name} couldn’t hear you. Try talking a little louder.`); return; }
@@ -3545,7 +3559,7 @@ function openSettings() {
 function closeSheet() { const sh = $('#sheet'); if (sh) { sh.hidden = true; sh.innerHTML = ''; } }
 
 /* ---------- boot ---------- */
-if (/#dev/.test(location.hash)) window.__av = {SPECIES, newBird, applyLook, Store, go, S, R3, TRICKS, doTrick, thumb3D, get actor() { return actor; }, get D() { return D; }};
+if (/#dev/.test(location.hash)) window.__av = {SPECIES, newBird, applyLook, Store, go, S, R3, TRICKS, doTrick, thumb3D, Rec, Hum, get actor() { return actor; }, get D() { return D; }};
 (async function boot() {
   load3D().then(ok => { if (ok && S.screen === 'aviary') upgradeAviary(); });
   Store.loadLocal();
