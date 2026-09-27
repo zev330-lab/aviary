@@ -2117,6 +2117,9 @@ class View3D {
     hop(home, land, faceYaw, () => {
       // side by side: look at each other and trade a few words (or tweets)
       a.follow = false; a.noLook = false; this.focus = land.clone().lerp(fp, .5); this.focus.y += .5; this.focusDist = 3.4 + gap * 1.6;
+      // swing the camera round to the front of the pair so neither bird hides the other
+      const front = new T.Vector3(Math.sin(f.spot.yaw), 0, Math.cos(f.spot.yaw));
+      this.glide = {from: this.cam.position.clone(), to: this.focus.clone().addScaledVector(front, this.focusDist).add(new T.Vector3(0, .55, 0)), tf: this.ctl.target.clone(), tt: this.focus.clone(), t0: performance.now()};
       const hv = new T.Vector3(), hf = new T.Vector3();
       a.lookPt = this.headWorld(f.bird, hf).clone(); f.actor.lookPt = this.headWorld(B, hv).clone();
       const lines = chatLines(B.b, f.b), step = k => {
@@ -2124,6 +2127,7 @@ class View3D {
         if (k >= lines.length) { hearts(2); const p1 = this.headWorld(B, new T.Vector3()); a.later(900, () => { a.lookPt = null; f.actor.lookPt = null; this.focus = null; this.focusDist = null; hop(new T.Vector3(x.px, x.py, x.pz), home, 0, () => { Object.keys(x).forEach(key => { x[key] = key === 'wing' ? null : 0; }); a.follow = false; this.visit = null; this.setHome(false); done && done(); }); }); return; }
         const [who, text, kind] = lines[k], bird = who ? f.bird : B, act = who ? f.actor : a;
         const dur = kind === 'song' ? whistleFor(bird.b, act) : voiceFor(bird.b, act, text);
+        if (kind === 'wave') act.drive(1300, u => { const up = ss(0, .15, u) * (1 - ss(.85, 1, u)); act.x.foot = up; act.x.footWave = up * Math.sin(u * Math.PI * 6) * .45; }, () => { act.x.foot = 0; act.x.footWave = 0; });
         this.chat(bird, text, Math.max(1400, dur * 1000 + 700)); act.excite(dur * 1000 + 500);
         a.later(Math.max(1300, dur * 1000 + 450), () => step(k + 1));
       };
@@ -2861,12 +2865,18 @@ function renderPlay(p) {
   $('#nextFact').onclick = () => { S.factIx++; $('#factText').textContent = sp.facts[S.factIx % sp.facts.length]; sfx('pop'); };
 }
 function friendsOf(b) { return [...Store.birds.values()].filter(x => x.id !== b.id && SPECIES[x.species]).sort((p, q) => (p.created || 0) - (q.created || 0)); }
-// what two birds "say" to each other: their own learned words, or tweets and a bit of a song they know
+// what two birds say to each other: they greet each other by name (and wave), then chat with their
+// own learned words, talking to each other, not to Havi (her name becomes the other bird's name)
 function chatLines(me, fr) {
-  const said = b => { const w = (b.words || []).filter(x => x.learned); return SPECIES[b.species].talk && w.length ? pick(w).t : pick(['♪', '♪ ♫', 'Tweet!', '♫ ♪ ♫']); };
-  const lines = [[0, said(me)], [1, said(fr)], [0, said(me)]];
+  const talks = b => !!SPECIES[b.species].talk, nm = b => b.name || SPECIES[b.species].label;
+  const hi = (b, to) => talks(b) ? `Hi ${nm(to)}! 👋` : '👋 ♪';
+  const said = (b, to) => {
+    const w = (b.words || []).filter(x => x.learned).map(x => x.t.split(kid()).join(nm(to))).filter(t => !/^(hi|hello)\b/i.test(t));
+    return talks(b) && w.length ? pick(w) : pick(['♪', '♪ ♫', 'Tweet!', '♫ ♪ ♫']);
+  };
+  const lines = [[0, hi(me, fr), 'wave'], [1, hi(fr, me), 'wave'], [0, said(me, fr)], [1, said(fr, me)]];
   const song = [[1, fr], [0, me]].find(([, b]) => (b.tunes || []).some(t => t.learned && t.notes && t.notes.length >= 3));
-  lines.push(song ? [song[0], '♪ ♫ ♪', 'song'] : [1, said(fr)]);
+  if (song) lines.push([song[0], '♪ ♫ ♪', 'song']);
   return lines;
 }
 function voiceFor(b, act, text) {
