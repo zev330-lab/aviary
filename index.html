@@ -179,6 +179,61 @@ p{margin:0}
 .mc em{font-style:normal;font-size:13px;font-weight:700;line-height:1.15;color:var(--ink2);white-space:nowrap;padding:1px 3px;border-radius:6px}
 .mc.on .nd{transform:translateY(-3px) scale(1.12);box-shadow:0 0 0 2px #fff,0 0 0 4px var(--c),0 4px 10px -2px var(--c)}
 .mc.on em{background:var(--sun);color:var(--ink)}
+.mc em.hold{color:#B9A98C;font-weight:400}
+.mundo{flex:0 0 auto;width:50px;height:50px;border-radius:16px;border:2px solid var(--line);background:var(--paper);color:var(--ink2);display:grid;place-items:center;box-shadow:0 3px 0 var(--line)}
+.mundo svg{width:24px;height:24px}
+.mundo:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.songplay{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.songplay.one{grid-template-columns:1fr}
+.sgame{border:0;border-radius:22px;min-height:78px;padding:12px;display:flex;align-items:center;gap:10px;text-align:left;font-family:var(--display);font-weight:800;font-size:19px;line-height:1.1;color:var(--ink);box-shadow:0 4px 0 rgba(31,48,71,.14);min-width:0;overflow-wrap:anywhere}
+.sgame:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(31,48,71,.14)}
+.sgame .em{font-size:32px;line-height:1;flex:0 0 auto}
+.sgame small{display:block;font-family:var(--body);font-weight:700;font-size:13px;color:var(--ink2);margin-top:3px}
+.sgame.sing{background:#FFD6C4}.sgame.copy{background:#D3EBFA}
+.sgame.rec{background:#E4413B;color:#fff;box-shadow:0 4px 0 #8E1C16;animation:pulse 1s ease-in-out infinite}
+.sgame.rec small{color:#FFE3E0}
+#panel.hum-on > :not(.songplay):not(.xylo):not(.melody),#panel.hum-on .sgame.copy{opacity:.4;pointer-events:none}
+#panel.hum-on .xylo{pointer-events:none}
+.tgroup{display:grid;gap:8px}
+.tunes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.song{position:relative;border:2px solid var(--line);background:var(--card);border-radius:18px;min-height:58px;padding:8px 10px;display:flex;align-items:center;gap:9px;text-align:left;font-weight:700;font-size:16px;line-height:1.15;box-shadow:0 3px 0 var(--line);min-width:0}
+.song .em{font-size:26px;line-height:1;flex:0 0 auto}
+.song .nm{min-width:0;overflow-wrap:anywhere}
+.song:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.song[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff;box-shadow:none}
+.song.knows::after{content:'✓';position:absolute;top:-7px;right:-4px;width:22px;height:22px;border-radius:50%;background:var(--leaf);color:#fff;font-size:13px;font-weight:800;line-height:22px;text-align:center;box-shadow:0 0 0 2px var(--paper)}
+.word button span[aria-hidden]{font-size:17px}
+.cgame{background:var(--card);border-radius:24px;padding:14px 16px 16px;box-shadow:0 4px 0 var(--line);display:grid;gap:10px}
+.cg-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.cg-top b{font-family:var(--display);font-size:22px}
+.cg-best{background:#FFF1CF;border-radius:999px;padding:4px 12px;font-weight:800;white-space:nowrap}
+.cg-status{font-family:var(--display);font-weight:800;font-size:clamp(24px,7vw,30px);line-height:1.15;min-height:1.15em}
+.cgame[data-phase="kid"] .cg-status{color:var(--leaf2)}
+.cgame[data-phase="oops"] .cg-status{color:var(--rose)}
+.cg-dots{display:flex;flex-wrap:wrap;gap:8px;min-height:24px}
+.cg-dots i{width:24px;height:24px;border-radius:50%;background:#EFE4CE;transition:background .1s,transform .1s}
+.cg-dots i.on{background:var(--c);transform:scale(1.08)}
+.cg-dots i.miss{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--rose)}
+.cg-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.cg-row .btn{font-size:18px;padding:14px 10px;min-height:58px}
+@media (prefers-reduced-motion: reduce){.key.lit,.key.hit,.key:active,.mc.on .nd,.cg-dots i.on{transform:none}.key.want,.xylo.nudge,.melody.full,.sgame.rec{animation:none}}
+/* songs */
+.songs-lede{color:var(--ink2);font-size:16px}
+.key{transition:filter .08s,box-shadow .08s}
+.key.lit{filter:brightness(1.25) saturate(1.15);transform:translateY(2px);box-shadow:inset 0 -7px 0 rgba(0,0,0,.18),inset 0 5px 0 rgba(255,255,255,.3),0 0 0 3px #fff,0 0 18px 5px var(--c)}
+.key.want{animation:keyWant .6s ease-in-out 4}
+@keyframes keyWant{50%{box-shadow:0 0 0 4px #fff,0 0 0 8px var(--ink)}}
+.xylo.nudge,.melody.full{animation:nudge .3s}
+@keyframes nudge{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.melody{flex-wrap:nowrap;gap:8px;min-height:58px}
+.mbody{flex:1;min-width:0;display:grid;gap:7px}
+.mtitle,.mspecial{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.1;overflow-wrap:anywhere}
+.mcells{display:flex;flex-wrap:wrap;gap:7px 5px;align-items:flex-start}
+.mc{display:inline-flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.mc .nd{width:calc(8px + var(--w,1) * 14px);height:20px;border-radius:10px;background:var(--c);transition:transform .12s,box-shadow .12s}
+.mc em{font-style:normal;font-size:13px;font-weight:700;line-height:1.15;color:var(--ink2);white-space:nowrap;padding:1px 3px;border-radius:6px}
+.mc.on .nd{transform:translateY(-3px) scale(1.12);box-shadow:0 0 0 2px #fff,0 0 0 4px var(--c),0 4px 10px -2px var(--c)}
+.mc.on em{background:var(--sun);color:var(--ink)}
 .mundo{flex:0 0 auto;width:50px;height:50px;border-radius:16px;border:2px solid var(--line);background:var(--paper);color:var(--ink2);display:grid;place-items:center;box-shadow:0 3px 0 var(--line)}
 .mundo svg{width:24px;height:24px}
 .mundo:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
@@ -1313,20 +1368,34 @@ const KEYC = ['#E4413B', '#F0873A', '#F5C024', '#6CBD45', '#2BB3A8', '#2E7FCE', 
 const BEAT = .32, XYLO = 523.25;
 // lyrics: one syllable per note; words split on spaces, syllables on "-"
 const syl = s => s.split(/\s+/).flatMap(w => w.split('-').map((x, i, a) => i < a.length - 1 ? x + '-' : x));
-// every preset fits the 8 bars exactly (C D E F G A B C); beats are quarter notes, beat = seconds per quarter
+// every preset fits the 8 bars exactly (C D E F G A B C); notes are [semitone, quarter-note beats], beat = seconds per quarter.
+// melodies cross-checked against at least two published scores; "~" = the syllable before it keeps going
 const TUNES = {
   wolf: {name: 'Wolf whistle', special: 'wolf', icon: '😗', group: 'bird'},
   twinkle: {name: 'Twinkle Twinkle', icon: '⭐', group: 'sing', notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]], lyrics: syl('Twin-kle twin-kle lit-tle star, how I won-der what you are')},
-  birthday: {name: 'Happy Birthday', icon: '🎂', group: 'party', notes: [[0, .75], [0, .25], [2, 1], [0, 1], [5, 1], [4, 2], [0, .75], [0, .25], [2, 1], [0, 1], [7, 1], [5, 2]], lyrics: syl('Hap-py birth-day to you, hap-py birth-day to you')},
-  mac: {name: 'Old MacDonald', icon: '🐄', group: 'sing', notes: [[5, 1], [5, 1], [5, 1], [0, 1], [2, 1], [2, 1], [0, 2], [9, 1], [9, 1], [7, 1], [7, 1], [5, 2]], lyrics: syl('Old Mac-Don-ald had a farm, E-I-E-I-O')},
-  mary: {name: 'Mary’s Lamb', icon: '🐑', group: 'sing', notes: [[4, 1], [2, 1], [0, 1], [2, 1], [4, 1], [4, 1], [4, 2], [2, 1], [2, 1], [2, 2], [4, 1], [7, 1], [7, 2], [4, 1], [2, 1], [0, 1], [2, 1], [4, 1], [4, 1], [4, 1], [4, 1], [2, 1], [2, 1], [4, 1], [2, 1], [0, 4]], lyrics: syl('Ma-ry had a lit-tle lamb, lit-tle lamb, lit-tle lamb, Ma-ry had a lit-tle lamb, its fleece was white as snow')},
-  hotbuns: {name: 'Hot Cross Buns', icon: '🍞', group: 'sing', beat: .4, notes: [[4, 1], [2, 1], [0, 2], [4, 1], [2, 1], [0, 2], [0, .5], [0, .5], [0, .5], [0, .5], [2, .5], [2, .5], [2, .5], [2, .5], [4, 1], [2, 1], [0, 2]], lyrics: syl('Hot cross buns, hot cross buns, one a pen-ny, two a pen-ny, hot cross buns')},
+  abc: {name: 'ABC Song', icon: '🔤', group: 'sing', beat: .3, notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, .5], [2, .5], [2, .5], [2, .5], [0, 2], [7, 1], [7, 1], [5, 2], [4, 1], [4, 1], [2, 2], [7, .5], [7, .5], [7, 1], [5, 2], [4, 1], [4, 1], [2, 2], [0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]], lyrics: syl('A B C D E F G H I J K L M N O P Q R S T U V dou-ble-u X Y and Z. Now I know my A B C’s, next time won’t you sing with me?')},
   row: {name: 'Row Your Boat', icon: '🚣', group: 'sing', beat: .42, notes: [[0, 1.5], [0, 1.5], [0, 1], [2, .5], [4, 1.5], [4, 1], [2, .5], [4, 1], [5, .5], [7, 3], [12, .5], [12, .5], [12, .5], [7, .5], [7, .5], [7, .5], [4, .5], [4, .5], [4, .5], [0, .5], [0, .5], [0, .5], [7, 1], [5, .5], [4, 1], [2, .5], [0, 3]], lyrics: syl('Row row row your boat, gent-ly down the stream, mer-ri-ly mer-ri-ly mer-ri-ly mer-ri-ly, life is but a dream')},
   london: {name: 'London Bridge', icon: '🌉', group: 'sing', beat: .5, notes: [[7, .75], [9, .25], [7, .5], [5, .5], [4, .5], [5, .5], [7, 1], [2, .5], [4, .5], [5, 1], [4, .5], [5, .5], [7, 1], [7, .75], [9, .25], [7, .5], [5, .5], [4, .5], [5, .5], [7, 1], [2, 1], [7, 1], [4, .5], [0, 1.5]], lyrics: syl('Lon-don Bridge is fall-ing down, fall-ing down, fall-ing down, Lon-don Bridge is fall-ing down, my fair la-dy')},
+  hotbuns: {name: 'Hot Cross Buns', icon: '🍞', group: 'sing', beat: .4, notes: [[4, 1], [2, 1], [0, 2], [4, 1], [2, 1], [0, 2], [0, .5], [0, .5], [0, .5], [0, .5], [2, .5], [2, .5], [2, .5], [2, .5], [4, 1], [2, 1], [0, 2]], lyrics: syl('Hot cross buns, hot cross buns, one a pen-ny, two a pen-ny, hot cross buns')},
+  oldman: {name: 'This Old Man', icon: '🦴', group: 'sing', beat: .38, notes: [[7, 1], [4, 1], [7, 2], [7, 1], [4, 1], [7, 2], [9, 1], [7, 1], [5, 1], [4, 1], [2, 1], [4, 1], [5, 1], [4, .5], [5, .5], [7, 1], [0, 1], [0, .5], [0, .5], [0, 1], [0, .5], [2, .5], [4, .5], [5, .5], [7, 2], [7, 1], [2, 1], [2, 1], [5, 1], [4, 1], [2, 1], [0, 2]], lyrics: syl('This old man, he played one, he played knick-knack on my thumb, with a knick-knack pad-dy-whack, give a dog a bone, this old man came roll-ing home')},
+  rain: {name: 'Rain Rain Go Away', icon: '☔', group: 'sing', beat: .42, notes: [[7, 1], [4, 1], [7, .5], [7, .5], [4, 1], [7, .5], [7, .5], [4, .5], [9, .5], [7, .5], [7, .5], [4, 1], [5, .5], [5, .5], [2, .5], [2, .5], [5, .5], [5, .5], [2, 1], [7, .5], [5, .5], [4, .5], [2, .5], [4, .5], [0, .5], [0, 1]], lyrics: () => [...syl('Rain rain go a-way, come a-gain an-oth-er day, Lit-tle'), ...nameSyl(kid()), ...syl('wants to play, Rain ~ rain ~ go a-way')]},
+  mac: {name: 'Old MacDonald', icon: '🐄', group: 'animal', notes: [[5, 1], [5, 1], [5, 1], [0, 1], [2, 1], [2, 1], [0, 2], [9, 1], [9, 1], [7, 1], [7, 1], [5, 2]], lyrics: syl('Old Mac-Don-ald had a farm, E-I-E-I-O')},
+  mary: {name: 'Mary’s Lamb', icon: '🐑', group: 'animal', notes: [[4, 1], [2, 1], [0, 1], [2, 1], [4, 1], [4, 1], [4, 2], [2, 1], [2, 1], [2, 2], [4, 1], [7, 1], [7, 2], [4, 1], [2, 1], [0, 1], [2, 1], [4, 1], [4, 1], [4, 1], [4, 1], [2, 1], [2, 1], [4, 1], [2, 1], [0, 4]], lyrics: syl('Ma-ry had a lit-tle lamb, lit-tle lamb, lit-tle lamb, Ma-ry had a lit-tle lamb, its fleece was white as snow')},
+  baa: {name: 'Baa Baa Black Sheep', icon: '🧶', group: 'animal', beat: .38, notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, .5], [9, .5], [9, .5], [9, .5], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]], lyrics: syl('Baa baa black sheep, have you an-y wool? Yes sir, yes sir, three bags full')},
+  mice: {name: 'Three Blind Mice', icon: '🐭', group: 'animal', beat: .38, notes: [[4, 1.5], [2, 1.5], [0, 3], [4, 1.5], [2, 1.5], [0, 3], [7, 1.5], [5, 1], [5, .5], [4, 3], [7, 1.5], [5, 1], [5, .5], [4, 3]], lyrics: syl('Three blind mice, three blind mice, see how they run, see how they run')},
+  hickory: {name: 'Hickory Dickory Dock', icon: '🕰️', group: 'animal', beat: .4, notes: [[4, .5], [5, .5], [7, .5], [5, .5], [4, .5], [2, .5], [4, 2.5], [4, .5], [4, 1], [7, .5], [5, 1], [2, .5], [4, 2.5], [4, .5], [4, 1], [4, .5], [7, 1], [7, .5], [5, 1], [5, .5], [9, 1.5], [7, .5], [9, .5], [7, .5], [5, .5], [4, .5], [2, .5], [0, 3]], lyrics: syl('Hick-o-ry dick-o-ry dock, the mouse ran up the clock, the clock struck one, the mouse ran down, hick-o-ry dick-o-ry dock')},
+  birthday: {name: 'Happy Birthday', icon: '🎂', group: 'party', notes: [[0, .75], [0, .25], [2, 1], [0, 1], [5, 1], [4, 2], [0, .75], [0, .25], [2, 1], [0, 1], [7, 1], [5, 2]], lyrics: syl('Hap-py birth-day to you, hap-py birth-day to you')},
   jingle: {name: 'Jingle Bells', icon: '🔔', group: 'party', beat: .34, notes: [[4, 1], [4, 1], [4, 2], [4, 1], [4, 1], [4, 2], [4, 1], [7, 1], [0, 1.5], [2, .5], [4, 4], [5, 1], [5, 1], [5, 1.5], [5, .5], [5, 1], [4, 1], [4, 1], [4, .5], [4, .5], [7, 1], [7, 1], [5, 1], [2, 1], [0, 4]], lyrics: syl('Jin-gle bells, jin-gle bells, jin-gle all the way! Oh what fun it is to ride in a one-horse o-pen sleigh')},
+  hush: {name: 'Hush Little Baby', icon: '🍼', group: 'calm', beat: .45, notes: [[2, 1], [11, .5], [11, .5], [11, 1], [12, 1], [11, 1], [9, .5], [9, .5], [9, 2], [2, .5], [2, .5], [9, .5], [9, .5], [9, 1], [9, .5], [11, .5], [9, 1], [7, 1], [7, 2]], lyrics: syl('Hush lit-tle ba-by, don’t say a word, Pa-pa’s gon-na buy you a mock-ing-bird')},
+  brahms: {name: 'Brahms’ Lullaby', icon: '😴', group: 'calm', beat: .48, notes: [[4, .5], [4, .5], [7, 1.5], [4, .5], [4, 1], [7, 2], [4, .5], [7, .5], [12, 1], [11, 1.5], [9, .5], [9, 1], [7, 1], [2, .5], [4, .5], [5, 1], [2, 1], [2, .5], [4, .5], [5, 2], [2, .5], [5, .5], [11, .5], [9, .5], [7, 1], [11, 1], [12, 2]], lyrics: ['Lul-', 'la-', 'by', 'and', 'good', 'night,', 'with', '~', 'ro-', 'ses', 'be-', 'dight', '~', 'with', '~', 'lil-', 'ies', 'o’er-', '~', 'spread', 'is', '~', 'ba-', '~', 'by’s', 'wee', 'bed']},
   ode: {name: 'Ode to Joy', icon: '🎻', group: 'calm', beat: .36, notes: [[4, 1], [4, 1], [5, 1], [7, 1], [7, 1], [5, 1], [4, 1], [2, 1], [0, 1], [0, 1], [2, 1], [4, 1], [4, 1.5], [2, .5], [2, 2], [4, 1], [4, 1], [5, 1], [7, 1], [7, 1], [5, 1], [4, 1], [2, 1], [0, 1], [0, 1], [2, 1], [4, 1], [2, 1.5], [0, .5], [0, 2]], lyrics: syl('Mi mi fa sol sol fa mi re do do re mi mi re re, mi mi fa sol sol fa mi re do do re mi re do do')}
 };
-const TGROUPS = [['sing', '🎵 Sing-along'], ['party', '🎉 Party time'], ['calm', '🌙 Calm & classic'], ['bird', '🐦 Bird tricks']];
+// a two-syllable name sung in "Rain Rain": Havi -> Ha- vi (other names -> Johnny)
+function nameSyl(name) {
+  const w = String(name || '').trim(), m = /^([^aeiouy]*[aeiouy]+[^aeiouy]*?)([^aeiouy]?[aeiouy]+[^aeiouy]*)$/i.exec(w);
+  return m && /^[a-z]+$/i.test(w) && (w.match(/[aeiouy]+/gi) || []).length === 2 ? [m[1] + '-', m[2]] : ['John-', 'ny'];
+}
+const TGROUPS = [['sing', '🎵 Sing-along'], ['animal', '🐮 Animal songs'], ['party', '🎉 Party time'], ['calm', '🌙 Calm & sleepy'], ['bird', '🐦 Bird tricks']];
 const UNDO_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5L4 10l5 5"/><path d="M4 10h9.5a5.5 5.5 0 0 1 0 11H10"/></svg>';
 
 /* pitch: pure helpers (unit-tested; keep them free of DOM and app state) */
@@ -1457,7 +1526,7 @@ const semiKey = s => { let k = 0, d = 99; SCALE.forEach((x, i) => { const dd = M
 const semiColor = s => KEYC[semiKey(s)];
 const tuneBeat = tn => (tn && tn.preset && TUNES[tn.preset] && TUNES[tn.preset].beat) || BEAT;
 const hasNotes = tn => !!(tn && (tn.special || (tn.notes && tn.notes.length)));
-function tuneLyrics(tn) { const t = tn && tn.preset && TUNES[tn.preset], ly = t && t.lyrics; return ly && tn.notes && ly.length === tn.notes.length ? ly : null; }
+function tuneLyrics(tn) { const t = tn && tn.preset && TUNES[tn.preset]; let ly = t && t.lyrics; if (typeof ly === 'function') { try { ly = ly(); } catch (e) { ly = null; } } return ly && tn.notes && ly.length === tn.notes.length ? ly : null; }
 function tuneIcon(x) { if (!x) return '🎵'; if (x.special === 'wolf') return TUNES.wolf.icon; if (x.preset && TUNES[x.preset]) return TUNES[x.preset].icon; return x.hummed ? '🎤' : '🎹'; }
 // saved tunes: famous ones by their preset key (so corrected melodies still match), others by their notes
 function findTune(b, tn) {
@@ -1525,7 +1594,7 @@ function melodyHTML() {
   if (!hasNotes(tn)) return '<span class="empty">♪ Your tune will show up here</span>';
   if (tn.special) return `<span class="mspecial"><span aria-hidden="true">${tuneIcon(tn)}</span> ${esc(tn.name)}</span>`;
   const ly = tuneLyrics(tn), k = tuneBeat(tn) / BEAT;
-  const cells = tn.notes.map(([s, bt], i) => `<span class="mc" data-i="${i}" data-s="${s}" data-b="${bt}"><i class="nd" style="--c:${semiColor(s)};--w:${f1(Math.min(4, bt * k))}"></i>${ly ? `<em>${esc(ly[i])}</em>` : ''}</span>`).join('');
+  const cells = tn.notes.map(([s, bt], i) => `<span class="mc" data-i="${i}" data-s="${s}" data-b="${bt}"><i class="nd" style="--c:${semiColor(s)};--w:${f1(Math.min(4, bt * k))}"></i>${ly ? (ly[i] === '~' ? '<em class="hold">~</em>' : `<em>${esc(ly[i])}</em>`) : ''}</span>`).join('');
   const title = tn.name ? `<span class="mtitle"><span aria-hidden="true">${tuneIcon(tn)}</span> ${esc(tn.name)}</span>` : '';
   const undo = tn.kind === 'draft' ? `<button class="mundo" id="tUndo" aria-label="Take back the last note">${UNDO_IC}</button>` : '';
   return `<div class="mbody">${title}<div class="mcells">${cells}</div></div>${undo}`;
