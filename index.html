@@ -81,7 +81,7 @@ p{margin:0}
 .zoom{position:absolute;right:12px;bottom:12px;z-index:3;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:var(--ink);display:grid;place-items:center;box-shadow:0 6px 16px -8px rgba(0,0,0,.5)}
 .zoom svg{width:24px;height:24px}
 .zoom:active{transform:scale(.94)}
-.stage.is3d .hint{bottom:auto;top:14px;left:auto;right:12px;transform:none;max-width:60%}
+.stage.is3d .hint{bottom:14px;top:auto;left:12px;right:auto;transform:none;max-width:calc(100% - 86px)}
 .stage.is3d{height:min(56vh,540px)}
 .thumb img.bird3d{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .sp img.bird3d{width:100%;height:86px;object-fit:cover;display:block}
@@ -2044,7 +2044,7 @@ function thumb3D(b, w = 240, h = 300) {
   R3.tr.setSize(w, h, false);
   const bird = new Bird3D(b); bird.pose({crest: .35, wing: [0, 0], fan: 0}); R3.ts.add(bird.pivot);
   const cam = R3.tc; cam.aspect = w / h; cam.updateProjectionMatrix();
-  const top = (bird.F.H[1] + bird.F.S.head) * bird.sc, tY = top * .52, d = 1.9 + top * .95;
+  const top = (bird.F.H[1] + bird.F.S.head) * bird.sc, tY = top * .52, d = .45 + top * 2.05;
   cam.position.set(Math.sin(.42) * d, tY + .35, Math.cos(.42) * d); cam.lookAt(0, tY, 0);
   bird.headBone.rotation.set(.05, .35, -.1);
   R3.tr.render(R3.ts, cam);
@@ -3541,7 +3541,7 @@ function openSettings() {
 function closeSheet() { const sh = $('#sheet'); if (sh) { sh.hidden = true; sh.innerHTML = ''; } }
 
 /* ---------- boot ---------- */
-if (/#dev/.test(location.hash)) window.__av = {SPECIES, newBird, applyLook, Store, go, S, R3, TRICKS, doTrick, get actor() { return actor; }, get D() { return D; }};
+if (/#dev/.test(location.hash)) window.__av = {SPECIES, newBird, applyLook, Store, go, S, R3, TRICKS, doTrick, thumb3D, get actor() { return actor; }, get D() { return D; }};
 (async function boot() {
   load3D().then(ok => { if (ok && S.screen === 'aviary') upgradeAviary(); });
   Store.loadLocal();
