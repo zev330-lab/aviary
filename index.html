@@ -81,7 +81,11 @@ p{margin:0}
 .zoom{position:absolute;right:12px;bottom:12px;z-index:3;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:var(--ink);display:grid;place-items:center;box-shadow:0 6px 16px -8px rgba(0,0,0,.5)}
 .zoom svg{width:24px;height:24px}
 .zoom:active{transform:scale(.94)}
-.stage.is3d .hint{bottom:14px;top:auto;left:12px;right:auto;transform:none;max-width:calc(100% - 86px)}
+.dimbtn{position:absolute;right:68px;bottom:12px;z-index:3;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.9);color:var(--ink);font-family:var(--display);font-weight:800;font-size:16px;box-shadow:0 6px 16px -8px rgba(0,0,0,.5)}
+.dimbtn.solo{right:12px}
+.stage:not(.is3d) .hint{max-width:calc(100% - 140px)}
+.dimbtn:active{transform:scale(.94)}
+.stage.is3d .hint{bottom:14px;top:auto;left:12px;right:auto;transform:none;max-width:calc(100% - 140px)}
 .stage.is3d{height:min(56vh,540px)}
 .thumb img.bird3d{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .sp img.bird3d{width:100%;height:86px;object-fit:cover;display:block}
@@ -2628,7 +2632,7 @@ function renderAviary() {
   $('#btnSettings').onclick = openSettings;
 }
 
-function upgradeAviary() { if (has3D()) upgradeThumbs($$('.card[data-id]').map(el => ({el: el.querySelector('.thumb'), b: Store.birds.get(el.dataset.id), w: 240, h: 300})).filter(x => x.b)); }
+function upgradeAviary() { if (has3D() && !view2D()) upgradeThumbs($$('.card[data-id]').map(el => ({el: el.querySelector('.thumb'), b: Store.birds.get(el.dataset.id), w: 240, h: 300})).filter(x => x.b)); }
 
 /* ---------- bird room ---------- */
 // learning got faster: anything already practiced enough under the new, shorter lessons counts as learned
@@ -2670,30 +2674,29 @@ function renderRoom(id) {
   const b = Store.birds.get(id); if (!b) return renderAviary();
   normalizeBird(b);
   S.screen = 'room'; S.id = id; S.lesson = null; S.tune = null;
-  const sp = SPECIES[b.species], use3D = has3D();
-  if (!use3D && S.tab === 'tricks') S.tab = 'play';
+  const sp = SPECIES[b.species], can3D = has3D(), use3D = can3D && !view2D();
+  if (!can3D && S.tab === 'tricks') S.tab = 'play';
+  S.pop3D = false;
   app.innerHTML = `
   <header class="top"><button class="icon-btn" id="btnBack" aria-label="Back to the aviary">${IC.back}</button>
     <div class="ttl"><button class="namebtn" id="btnName" aria-label="Rename ${esc(b.name)}"><h1 id="roomName">${esc(b.name)}</h1><span class="pen">${IC.pencil}</span></button><span class="sub">${sp.label}</span></div>
     <button class="icon-btn" id="btnEdit" aria-label="Change how ${esc(b.name)} looks">${IC.palette}</button></header>
-  <div class="stage ${use3D ? 'is3d' : ''}" id="stage">${SUN}${SCENE}<div class="layer" id="birdLayer">${use3D ? '' : birdSVG(b, 'r', {stage: true})}</div>
+  <div class="stage" id="stage">${SUN}${SCENE}<div class="layer" id="birdLayer"></div>
     <div class="love" id="love">♥ <span>${b.hearts || 0}</span></div>
     <div class="bubble bird" id="bub-bird" hidden></div><div class="bubble kid" id="bub-kid" hidden></div>
-    <div class="hint" id="hint">${use3D ? 'Drag to spin around · pinch to zoom' : `Tap ${esc(b.name)} · rub the head to scratch`}</div>
-    ${use3D ? `<button class="zoom" id="zoomBtn" aria-label="Zoom in on ${esc(b.name)}">${IC.zoom}</button>` : ''}
+    <div class="hint" id="hint"></div>
+    ${can3D ? '<button class="dimbtn" id="dimBtn"></button>' : ''}
   </div>
-  <nav class="tabs" role="tablist" style="--n:${use3D ? 4 : 3}">
+  <nav class="tabs" role="tablist" style="--n:${can3D ? 4 : 3}">
     <button role="tab" data-tab="play" aria-selected="${S.tab === 'play'}">Play</button>
-    ${use3D ? `<button role="tab" data-tab="tricks" aria-selected="${S.tab === 'tricks'}">Tricks</button>` : ''}
+    ${can3D ? `<button role="tab" data-tab="tricks" aria-selected="${S.tab === 'tricks'}">Tricks</button>` : ''}
     <button role="tab" data-tab="talk" aria-selected="${S.tab === 'talk'}">${sp.talk ? 'Talk' : (sp.verb || 'Sing')}</button>
     <button role="tab" data-tab="whistle" aria-selected="${S.tab === 'whistle'}">Songs</button>
   </nav>
   <section class="panel" id="panel"></section>`;
   actor = null;
-  if (use3D) {
-    try { const v = new View3D($('#stage'), 'room'); actor = v.setBird(b); v.setFriends(friendsOf(b)); $('#zoomBtn').onclick = () => { sfx('pop'); v.zoomFace(); }; }
-    catch (e) { console.warn('3D room failed, drawing instead', e); if (R3.view) R3.view.dispose(); R3.state = 'off'; return renderRoom(id); }
-  } else { actor = new Actor($('#birdLayer'), 'r'); bindStage(); }
+  setStage(use3D);
+  const dim = $('#dimBtn'); if (dim) dim.onclick = () => { sfx('pop'); const to3D = !(actor && actor.is3D); Store.settings.view = to3D ? '3d' : '2d'; Store.saveSettings(); S.pop3D = false; S.busyUntil = 0; setStage(to3D); renderTab(); };
   $('#btnBack').onclick = () => go('aviary');
   $('#btnEdit').onclick = () => go('design', id);
   $('#btnName').onclick = () => { sfx('pop'); openRename(); };
@@ -2709,8 +2712,41 @@ function greet() {
   const hi = b.words.find(w => w.learned && w.t.toLowerCase().includes(kid().toLowerCase()));
   if (hi && SPECIES[b.species].talk) birdSays(hi.t); else doCall();
 }
+// Havi picks how her birds look: the original drawings (2D) or the 3D world
+function view2D() { return Store.settings.view === '2d'; }
+function setStage(threeD) {
+  const b = cur(), st = $('#stage'); if (!b || !st) return false;
+  stopActor(); st.querySelectorAll('.zoom').forEach(e => e.remove());
+  const hint = $('#hint'), dim = $('#dimBtn');
+  let is3 = false;
+  if (threeD && has3D()) {
+    try {
+      st.classList.add('is3d'); $('#birdLayer').innerHTML = '';
+      const v = new View3D(st, 'room'); actor = v.setBird(b); v.setFriends(friendsOf(b));
+      st.insertAdjacentHTML('beforeend', `<button class="zoom" id="zoomBtn" aria-label="Zoom in on ${esc(b.name)}">${IC.zoom}</button>`);
+      $('#zoomBtn').onclick = () => { sfx('pop'); v.zoomFace(); };
+      is3 = true;
+    } catch (e) { console.warn('3D room failed, drawing instead', e); if (R3.view) R3.view.dispose(); R3.state = 'off'; }
+  }
+  if (!is3) { st.classList.remove('is3d'); $('#birdLayer').innerHTML = birdSVG(b, 'r', {stage: true}); actor = new Actor($('#birdLayer'), 'r'); bindStage(); }
+  if (hint) hint.textContent = is3 ? 'Drag to spin around · pinch to zoom' : `Tap ${b.name} · rub the head`;
+  if (dim) { dim.textContent = is3 ? '2D' : '3D'; dim.setAttribute('aria-label', is3 ? 'Show the drawing (2D)' : 'Show in 3D'); dim.classList.toggle('solo', !is3); }
+  return is3;
+}
+// 3D-only fun from the drawn view: pop into 3D for it, then back to the drawing when it's done
+function in3D(run) {
+  if (!has3D() || S.screen !== 'room') return;
+  if (actor && actor.is3D) { run(); return; }
+  if (isBusy()) { soon(() => in3D(run)); return; }
+  S.pop3D = true; setStage(true); setBusy(500);
+  setTimeout(() => { if (S.screen === 'room' && actor && actor.is3D) { S.busyUntil = 0; run(); } }, 450);
+}
+function backTo2D(ms = 900) {
+  const room = S.id;
+  setTimeout(() => { if (S.pop3D && view2D() && S.screen === 'room' && S.id === room && !isBusy()) { S.pop3D = false; setStage(false); renderTab(); } else if (S.pop3D && isBusy() && S.screen === 'room' && S.id === room) backTo2D(700); }, ms);
+}
 function bindStage() {
-  const st = $('#stage'); let ptr = null;
+  const st = $('#stage'); if (!st || st.dataset.bound) return; st.dataset.bound = '1'; let ptr = null;
   const HEAD = new Set(['head', 'face', 'crest', 'cheek', 'iris', 'ring', 'cere']);
   st.addEventListener('pointerdown', e => { const el = e.target.closest('[data-part]'); ptr = {x: e.clientX, y: e.clientY, dist: 0, part: el ? el.dataset.part : null, t: Date.now()}; });
   st.addEventListener('pointermove', e => { if (!ptr) return; ptr.dist += Math.hypot(e.clientX - ptr.x, e.clientY - ptr.y); ptr.x = e.clientX; ptr.y = e.clientY; if (ptr.dist > 45 && ptr.part && HEAD.has(ptr.part)) { ptr.dist = 0; ptr.moved = true; scratch(); } });
@@ -2785,7 +2821,7 @@ function renderTricks(p) {
   const b = cur(); const known = new Set(b.tricks || []);
   p.innerHTML = `<p>Tap a trick and watch ${esc(b.name)} do it! Drag the picture to see from any side.</p>
   <div class="tricks">${TRICKS.map(t => `<button class="trick" data-trick="${t.k}"><span class="em" aria-hidden="true">${t.emoji}</span><span>${esc(t.name)}</span>${known.has(t.k) ? '<span class="star" aria-label="learned">★</span>' : ''}</button>`).join('')}</div>`;
-  $$('[data-trick]', p).forEach(el => el.onclick = () => soon(() => doTrick(el.dataset.trick)));
+  $$('[data-trick]', p).forEach(el => el.onclick = () => soon(() => in3D(() => doTrick(el.dataset.trick))));
 }
 function doTrick(k) {
   if (isBusy() || !actor || !actor.trick) return;
@@ -2798,6 +2834,7 @@ function doTrick(k) {
     S.busyUntil = 0;
     if (first) { b.tricks = (b.tricks || []).concat(k); Store.save(b); celebrate(`${b.name} learned a new trick: ${t.name}!`); if (S.tab === 'tricks') renderTricks($('#panel')); }
     else { hearts(2); if (SPECIES[b.species].talk) birdSays(t.say); else doCall(); }
+    backTo2D(1600);
   });
 }
 
@@ -2805,8 +2842,8 @@ function doTrick(k) {
 function renderPlay(p) {
   const b = cur(), sp = SPECIES[b.species];
   p.innerHTML = `
-  ${actor && actor.is3D && R3.view && R3.view.friends && R3.view.friends.length ? `<div class="friends"><span class="eyebrow">Visit a friend</span><div class="chips">${R3.view.friends.map((f, i) => `<button class="chip" data-visit="${i}">${esc(f.b.name)} <small>${esc(SPECIES[f.b.species].label)}</small></button>`).join('')}</div></div>` : ''}
-  ${actor && actor.is3D ? `<button class="tile flyTile" id="aFly"><span class="em" aria-hidden="true">🪽♪</span><span>Fly &amp; catch the notes<small>Touch and hold to steer ${esc(b.name)}</small></span></button>` : ''}
+  ${has3D() && friendsOf(b).length ? `<div class="friends"><span class="eyebrow">Visit a friend</span><div class="chips">${friendsOf(b).slice(0, 6).map((f, i) => `<button class="chip" data-visit="${i}">${esc(f.name)} <small>${esc(SPECIES[f.species].label)}</small></button>`).join('')}</div></div>` : ''}
+  ${has3D() ? `<button class="tile flyTile" id="aFly"><span class="em" aria-hidden="true">🪽♪</span><span>Fly &amp; catch the notes<small>Touch and hold to steer ${esc(b.name)}</small></span></button>` : ''}
   <div class="tiles">
     <button class="tile t1" id="aTreat">${IC.millet}<span>Millet treat<small>A crunchy snack</small></span></button>
     <button class="tile t2" id="aScratch">${IC.hand}<span>Head scratch<small>Or rub the head on screen</small></span></button>
@@ -2816,7 +2853,7 @@ function renderPlay(p) {
   <div class="fact"><span class="eyebrow">${sp.label} fact</span><p id="factText">${esc(sp.facts[S.factIx % sp.facts.length])}</p><button class="linkbtn" id="nextFact">Another fact</button></div>
   <div class="stars"><span>Talking <b>${stars(sp.talk)}</b></span><span>Whistling <b>${stars(sp.sing)}</b></span></div>`;
   $('#aTreat').onclick = () => soon(giveTreat);
-  const fly = $('#aFly'); if (fly) fly.onclick = () => soon(flyGame);
+  const fly = $('#aFly'); if (fly) fly.onclick = () => soon(() => in3D(flyGame));
   $$('[data-visit]', p).forEach(el => el.onclick = () => { sfx('pop'); visitFriend(+el.dataset.visit); });
   $('#aScratch').onclick = () => { scratch(); setTimeout(scratch, 900); setTimeout(scratch, 1800); };
   $('#aDance').onclick = () => soon(dance);
@@ -2843,10 +2880,11 @@ function whistleFor(b, act) {
   act.whistleMove(dur); return dur;
 }
 function visitFriend(i) {
+  if (!(actor && actor.is3D)) { in3D(() => visitFriend(i)); return; }
   const v = R3.view, b = cur(); if (!v || !b || !v.friends || !v.friends[i]) return;
   if (isBusy()) { soon(() => visitFriend(i)); return; }
   showStage();
-  if (v.visitFriend(i, () => { S.busyUntil = 0; addLove(2); })) { setBusy(120000); toast(`${b.name} is flying to visit ${v.friends[i].b.name}!`); }
+  if (v.visitFriend(i, () => { S.busyUntil = 0; addLove(2); backTo2D(900); })) { setBusy(120000); toast(`${b.name} is flying to visit ${v.friends[i].b.name}!`); }
 }
 function flyGame() {
   const v = R3.view, b = cur(); if (isBusy() || !v || !v.actor || !b) return;
@@ -2857,8 +2895,8 @@ function flyGame() {
   const ok = v.startFlight(tn, (won, got) => {
     const hud = $('#flyHud'); if (hud) hud.remove(); st && st.classList.remove('flying');
     S.busyUntil = 0; setBusy(800);
-    if (won) { const d = birdWhistle(tn, 1); setBusy(d * 1000 + 600); actor.later(d * 1000 + 150, () => celebrate(`${b.name} and ${kid()} played ${tn.name}!`)); }
-    else if (got) { hearts(2); addLove(1); }
+    if (won) { const d = birdWhistle(tn, 1); setBusy(d * 1000 + 600); actor.later(d * 1000 + 150, () => celebrate(`${b.name} and ${kid()} played ${tn.name}!`)); backTo2D(d * 1000 + 2600); }
+    else { if (got) { hearts(2); addLove(1); } backTo2D(1200); }
   });
   if (!ok) return;
   setBusy(600000); sfx('flap');
@@ -3690,7 +3728,7 @@ function renderDesign(id) {
   app.innerHTML = `
   <header class="top"><button class="icon-btn" id="dBack" aria-label="Back">${IC.back}</button>
     <div class="ttl"><h1>${DZ.isNew ? 'Hatch a bird' : 'Change ' + esc(D.name)}</h1><span class="sub">Tap any part of the bird to paint it</span></div></header>
-  <div class="stage small ${has3D() ? 'is3d' : ''}" id="dstage">${SUN}${SCENE}<div class="layer" id="dbird"></div></div>
+  <div class="stage small ${has3D() && !view2D() ? 'is3d' : ''}" id="dstage">${SUN}${SCENE}<div class="layer" id="dbird"></div>${has3D() ? `<button class="dimbtn solo" id="dDim">${view2D() ? '3D' : '2D'}</button>` : ''}</div>
   <section class="sec"><h2>Pick a bird</h2><div class="scroller" id="spList">${Object.keys(SPECIES).map(k => `<button class="sp" data-sp="${k}" aria-pressed="${k === D.species}">${birdSVG(newBird(k), 's' + k, {vb: '70 44 200 250'})}<span>${SPECIES[k].label}</span></button>`).join('')}</div><p class="fine" id="spBlurb"></p></section>
   <section class="sec"><h2>Real-life colors</h2><div class="chips" id="looks"></div></section>
   <section class="sec"><h2>Paint it</h2><div class="chips" id="parts"></div><div class="swatches" id="swatches"></div></section>
@@ -3700,9 +3738,10 @@ function renderDesign(id) {
   ${DZ.isNew ? '' : `<section class="sec"><button class="btn danger" id="dDelete">Let ${esc(D.name)} fly away</button></section>`}
   <div class="bar"><div class="inner"><button class="btn" id="dSurprise">${IC.sparkle} Surprise!</button><button class="btn go" id="dSave">${DZ.isNew ? 'Hatch!' : 'Save'}</button></div></div>`;
   drawD(); renderDesignControls();
-  if (has3D()) upgradeThumbs($$('#spList .sp').filter(el => R3.bodies[el.dataset.sp]).map(el => ({el, b: newBird(el.dataset.sp), w: 200, h: 172})));
-  $$('#spList .sp').forEach(el => el.onclick = () => { if (el.dataset.sp === D.species) return; D.species = el.dataset.sp; applyLook(D, Object.keys(SPECIES[D.species].looks)[0]); if (!SPECIES[D.species].parts.includes(S.part)) S.part = 'body'; dirty(); $$('#spList .sp').forEach(x => x.setAttribute('aria-pressed', x === el)); drawD(true); renderDesignControls(); if (has3D() && !el.querySelector('img.bird3d')) upgradeThumbs([{el, b: newBird(el.dataset.sp), w: 200, h: 172}]); });
-  $('#dstage').addEventListener('click', e => { if (DZ.view) return; const el = e.target.closest('[data-part]'); if (el) selectPart(el.dataset.part); });
+  if (has3D() && !view2D()) upgradeThumbs($$('#spList .sp').filter(el => R3.bodies[el.dataset.sp]).map(el => ({el, b: newBird(el.dataset.sp), w: 200, h: 172})));
+  $$('#spList .sp').forEach(el => el.onclick = () => { if (el.dataset.sp === D.species) return; D.species = el.dataset.sp; applyLook(D, Object.keys(SPECIES[D.species].looks)[0]); if (!SPECIES[D.species].parts.includes(S.part)) S.part = 'body'; dirty(); $$('#spList .sp').forEach(x => x.setAttribute('aria-pressed', x === el)); drawD(true); renderDesignControls(); if (has3D() && !view2D() && !el.querySelector('img.bird3d')) upgradeThumbs([{el, b: newBird(el.dataset.sp), w: 200, h: 172}]); });
+  const dd = $('#dDim'); if (dd) dd.onclick = e => { e.stopPropagation(); sfx('pop'); Store.settings.view = view2D() ? '3d' : '2d'; Store.saveSettings(); stopActor(); DZ.view = null; $('#dstage').classList.toggle('is3d', !view2D()); dd.textContent = view2D() ? '3D' : '2D'; drawD(); };
+  $('#dstage').addEventListener('click', e => { if (DZ.view && DZ.view.alive) return; const el = e.target.closest('[data-part]'); if (el) selectPart(el.dataset.part); });
   $('#birdName').oninput = e => { D.name = e.target.value.slice(0, 16); dirty(); };
   $('#dice').onclick = () => { D.name = pick(NAMES.filter(n => n !== D.name)); $('#birdName').value = D.name; dirty(); sfx('pop'); };
   $('#dSurprise').onclick = surprise;
@@ -3721,7 +3760,7 @@ function selectPart(part) {
 }
 function drawD(call) {
   let drawn = false;
-  if (has3D() && !DZ.no3d) {
+  if (has3D() && !DZ.no3d && !view2D()) {
     try {
       if (!DZ.view || !DZ.view.alive) { stopActor(); const host = $('#dstage'); host.classList.add('is3d'); DZ.view = new View3D(host, 'design'); DZ.view.onPart = selectPart; actor = DZ.view.setBird(D); DZ.sp = D.species; }
       else if (DZ.sp !== D.species) { actor = DZ.view.setBird(D); DZ.sp = D.species; }
@@ -3792,13 +3831,15 @@ function openSettings() {
   const sh = $('#sheet');
   sh.innerHTML = `<div class="sheet-back" id="sheetBack"></div><div class="sheet" role="dialog" aria-label="Settings"><h2>Settings</h2>
     <label for="kidName">Who keeps these birds?</label><input id="kidName" maxlength="20" value="${esc(kid())}" autocomplete="off">
+    ${has3D() ? `<div class="srow"><span><b>How birds look</b><br><span class="fine">Drawings (2D) or the 3D world</span></span><span class="chips"><button class="chip" id="look2d" aria-pressed="${view2D()}">2D</button><button class="chip" id="look3d" aria-pressed="${!view2D()}">3D</button></span></div>` : ''}
     <div class="srow"><span><b>Bird sounds</b><br><span class="fine">Turn up the volume. On iPhone, check the silent switch too.</span></span><button class="chip" id="soundToggle" aria-pressed="${AU.on}">${AU.on ? 'On' : 'Off'}</button></div>
     <p class="fine">${Store.mode === 'db' && !Store.readOnly ? 'Birds are saved to your Claude account, so they’re here on any device you sign in on.' : 'Birds are saved in this browser on this device.'}</p>
     <details id="credits"><summary class="fine" style="cursor:pointer;font-weight:700">Bird sound recordings &amp; credits</summary><div class="fine" id="creditList" style="max-height:34vh;overflow:auto;display:grid;gap:6px;padding-top:8px">Loading…</div></details>
     <button class="btn go" id="sheetDone">Done</button></div>`;
   sh.hidden = false;
-  const close = () => { const v = ($('#kidName').value || '').trim().slice(0, 20); if (v && v !== Store.settings.kidName) { Store.settings.kidName = v; Store.saveSettings(); } closeSheet(); if (S.screen === 'aviary') renderAviary(); };
+  const close = () => { const v = ($('#kidName').value || '').trim().slice(0, 20); if (v && v !== Store.settings.kidName) { Store.settings.kidName = v; Store.saveSettings(); } closeSheet(); if (S.screen === 'aviary') renderAviary(); else if (S.screen === 'room' && actor && !!actor.is3D === view2D()) { setStage(!view2D()); renderTab(); } };
   $('#sheetBack').onclick = close; $('#sheetDone').onclick = close;
+  [['look2d', '2d'], ['look3d', '3d']].forEach(([id, v]) => { const el = $('#' + id); if (el) el.onclick = () => { Store.settings.view = v; Store.saveSettings(); $('#look2d').setAttribute('aria-pressed', v === '2d'); $('#look3d').setAttribute('aria-pressed', v === '3d'); sfx('pop'); }; });
   $('#credits').addEventListener('toggle', () => {
     const box = $('#creditList'); if (box.dataset.done) return; box.dataset.done = 1;
     fetch('sounds/credits.json').then(r => r.json()).then(list => {

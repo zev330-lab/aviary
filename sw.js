@@ -1,4 +1,4 @@
-const CACHE = 'aviary-v11';
+const CACHE = 'aviary-v12';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './sounds/manifest.json', './vendor/three.js'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(async c => {
