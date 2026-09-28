@@ -109,6 +109,21 @@ p{margin:0}
 .friends .chip small{font-weight:400;color:var(--ink2);font-size:13px}
 .sunspot{position:absolute;right:-18%;top:-22%;width:70%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(255,248,222,.95),rgba(255,231,168,.45) 42%,rgba(255,231,168,0) 70%);pointer-events:none}
 .bird-svg .ov{pointer-events:none}
+/* the house and the cage */
+.stage.caged{background:linear-gradient(180deg,#F7E4D4,#F3DCCB);box-shadow:none}
+.stage:not(.caged) > svg.indoor,.stage:not(.caged) > svg.cage2d,.stage.is3d > svg.cage2d{display:none}
+.stage.caged > .sunspot,.stage.caged > svg.scene:not(.indoor),.stage.caged .bird-svg .perch{display:none}
+svg.cage2d{pointer-events:none}
+.door2d{transform-box:fill-box;transform-origin:0 50%;transition:transform .45s ease}
+.stage.dooropen .door2d{transform:scaleX(.14)}
+.fader{position:absolute;inset:0;z-index:5;background:#FFF3E3;opacity:0;pointer-events:none;transition:opacity .38s ease}
+.fader.on{opacity:1}
+.thumb.caged{background:#F7E4D4}
+.thumb.caged > .sunspot,.thumb.caged > svg.scene:not(.indoor),.thumb.caged .bird-svg .sprig{display:none}
+.homeTile{width:100%;min-height:84px;flex-direction:row;align-items:center;justify-content:flex-start;gap:14px;margin-bottom:12px;background:linear-gradient(120deg,#FFE0CC,#FFF1C9)}
+.homeTile.out{background:linear-gradient(120deg,#D8EFD0,#CDE9FF)}
+.tile > .em{font-size:34px;line-height:1}
+.t5{background:#EDE6FA}.t6{background:#FFF1C9}
 .flash{animation:flash .5s ease 2}
 @keyframes flash{50%{opacity:.35}}
 .bubble{position:absolute;max-width:64%;padding:10px 15px 11px;border-radius:22px;font-family:var(--display);font-weight:800;font-size:clamp(19px,5.4vw,25px);line-height:1.15;box-shadow:0 8px 20px -10px rgba(0,0,0,.45);z-index:3;overflow-wrap:anywhere;pointer-events:none}
@@ -648,6 +663,23 @@ ${leaf(-12, -14, 140, 38, 152, '#3D8C58')}${leaf(44, -24, 118, 32, 172, '#2F7A4A
 ${leaf(424, 524, 180, 50, -40, '#2F7A4A')}${leaf(380, 540, 160, 42, -14, '#3D8C58')}${leaf(436, 446, 124, 34, -72, '#4E9E66')}${leaf(420, 300, 96, 26, -104, '#5AAB70', .7)}
 </svg>`;
 const SUN = '<div class="sunspot"></div>';
+// the house, drawn: striped wallpaper, a window to the garden, a photo, a wood floor
+const INDOOR = `<svg class="scene indoor" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="inSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8FD0F0"/><stop offset=".7" stop-color="#D4EEF6"/><stop offset="1" stop-color="#FFF4D8"/></linearGradient></defs>
+<rect width="400" height="500" fill="#F7E4D4"/>${Array.from({length: 11}, (_, i) => `<rect x="${i * 40}" width="11" height="500" fill="#F2D8C5"/><rect x="${i * 40 + 22}" width="4" height="500" fill="#FBEFE4"/>`).join('')}
+<g transform="translate(40 76)"><rect x="-10" y="-10" width="160" height="170" rx="6" fill="#FFFDF8"/><rect width="140" height="150" fill="url(#inSky)"/><circle cx="108" cy="30" r="14" fill="#FFEFAA"/><ellipse cx="40" cy="36" rx="22" ry="8" fill="#fff"/><path d="M0 110 Q40 88 80 104 T140 96 V150 H0Z" fill="#9ACD72"/><path d="M0 128 Q60 112 140 124 V150 H0Z" fill="#7DBB5C"/><rect x="33" y="100" width="6" height="16" fill="#7A5234"/><circle cx="36" cy="92" r="16" fill="#4E9E5A"/><rect x="66" width="8" height="150" fill="#FFFDF8"/><rect y="70" width="140" height="8" fill="#FFFDF8"/><rect x="-18" y="158" width="176" height="12" rx="3" fill="#FFFDF8"/></g>
+<rect x="14" y="54" width="208" height="6" rx="3" fill="#C9A25A"/><path d="M22 58 q12 96 -4 192 h36 q-12 -96 4 -192z" fill="#F29C93"/><path d="M178 58 q-12 96 4 192 h36 q-14 -96 -4 -192z" fill="#F29C93"/>
+<g transform="translate(292 100)"><rect width="74" height="90" rx="4" fill="#C9A25A"/><rect x="7" y="7" width="60" height="76" fill="#DDF0FA"/><ellipse cx="35" cy="56" rx="14" ry="18" fill="#FAD53A"/><circle cx="41" cy="36" r="11" fill="#FAD53A"/><circle cx="44" cy="34" r="2.2" fill="#1A1A1A"/><path d="M51 37 l7 2 -7 3z" fill="#F0873A"/></g>
+<rect y="430" width="400" height="12" fill="#FFFDF8"/><rect y="442" width="400" height="58" fill="#D9A66C"/><path d="M0 461 H400 M0 481 H400 M60 442 V461 M190 461 V481 M300 442 V461 M120 481 V500 M340 481 V500" stroke="rgba(90,50,20,.25)" stroke-width="2"/></svg>`;
+// the cage, in two layers around the drawn bird (same frame as the bird): what's behind it, and the bars in front
+const CB = [...Array(12)].map((_, i) => 48 + i * 20), CF = [...Array(13)].map((_, i) => 38 + i * 20.33);
+const CAGE_BACK = `<svg class="cage2d" viewBox="0 0 320 400" aria-hidden="true"><ellipse cx="160" cy="384" rx="122" ry="10" fill="#F7F0DF"/><g stroke="#D6CBB5" stroke-width="1.4" fill="none" opacity=".75">${CB.map(x => `<path d="M${x} 384 V112 C${x} 72 ${f1(160 + (x - 160) * .4)} 46 160 42"/>`).join('')}</g>
+<g><path d="M74 94 V172 M112 94 V172" stroke="#C9A25A" stroke-width="1.6"/><circle cx="74" cy="122" r="3.6" fill="#E4413B"/><circle cx="112" cy="132" r="3.6" fill="#F5C024"/><circle cx="74" cy="144" r="3.6" fill="#2E7FCE"/><rect x="66" y="168" width="54" height="8" rx="4" fill="#C9A274"/></g>
+<g><path d="M270 70 V176" stroke="#C9A25A" stroke-width="1.4"/><circle cx="270" cy="192" r="15" fill="#DDEFF7" stroke="#FFB836" stroke-width="4"/><path d="M263 222 q7 -18 14 0 z" fill="#E8C24A"/><circle cx="270" cy="224" r="2.4" fill="#8A6A1A"/></g>
+<rect x="40" y="251" width="240" height="12" rx="6" fill="#C9A274"/><rect x="44" y="252.5" width="232" height="3" rx="1.5" fill="#E2C39A"/>
+<path d="M50 300 h34 l-3 22 h-28z" fill="#E4413B"/><ellipse cx="67" cy="300" rx="17" ry="4" fill="#F2D16B"/><path d="M236 300 h34 l-3 22 h-28z" fill="#2E7FCE"/><ellipse cx="253" cy="300" rx="17" ry="4" fill="#8AD3F2"/></svg>`;
+const CAGE_FRONT = `<svg class="cage2d front" viewBox="0 0 320 400" aria-hidden="true"><g stroke="#FBF7EE" stroke-width="2.2" fill="none" opacity=".66">${CF.map(x => x > 184 && x < 236 ? `<path d="M${f1(x)} 386 V300 M${f1(x)} 196 V112"/>` : `<path d="M${f1(x)} 386 V112"/>`).join('')}${CF.filter((x, i) => i % 2 === 0).map(x => `<path d="M${f1(x)} 112 C${f1(x)} 70 ${f1(160 + (x - 160) * .35)} 44 160 42"/>`).join('')}<ellipse cx="160" cy="112" rx="122" ry="9"/><ellipse cx="160" cy="350" rx="122" ry="9"/></g>
+<g class="door2d"><rect x="186" y="196" width="48" height="104" rx="3" fill="none" stroke="#E9C46A" stroke-width="2.6"/><path d="M198 196 V300 M210 196 V300 M222 196 V300" stroke="#FBF7EE" stroke-width="2" opacity=".7"/><circle cx="235" cy="248" r="3.6" fill="#E9C46A"/></g>
+<path d="M24 382 H296 L292 402 H28Z" fill="#F4F1EA"/><path d="M24 384 H296" stroke="#7FC6C0" stroke-width="5"/><circle cx="160" cy="40" r="5" fill="#E9C46A"/><circle cx="160" cy="27" r="8" fill="none" stroke="#E9C46A" stroke-width="3"/></svg>`;
 
 function birdSVG(b, pfx, o = {}) {
   const sp = SPECIES[b.species]; const c = completeColors(b.colors || {}); const G = geo(sp); GEOS[pfx] = G;
@@ -711,7 +743,7 @@ function birdSVG(b, pfx, o = {}) {
 
   // perch
   const y = F.y;
-  const perch = `<g class="perch"><path d="M-30 ${y + 1} Q160 ${y - 4} 350 ${y + 2} L350 ${y + 19} Q160 ${y + 14} -30 ${y + 18}Z" fill="${U('wood')}"/><path d="M10 ${y + 7} q20 -2 40 1 M90 ${y + 11} q26 -2 50 0 M200 ${y + 6} q24 -2 46 1 M262 ${y + 12} q20 -1 40 0" stroke="#5E3B25" stroke-opacity=".45" stroke-width="1.4" fill="none" stroke-linecap="round"/><ellipse cx="238" cy="${y + 9}" rx="5" ry="3" fill="#5E3B25" opacity=".5"/><path d="M46 ${y + 2} q-8 -18 -2 -36" stroke="#7A4E32" stroke-width="3.5" fill="none" stroke-linecap="round"/>${leaf(44, y - 32, 30, 9, -35, '#4E9E66')}${leaf(45, y - 26, 26, 8, 40, '#3D8C58')}</g>`;
+  const perch = `<g class="perch"><path d="M-30 ${y + 1} Q160 ${y - 4} 350 ${y + 2} L350 ${y + 19} Q160 ${y + 14} -30 ${y + 18}Z" fill="${U('wood')}"/><path d="M10 ${y + 7} q20 -2 40 1 M90 ${y + 11} q26 -2 50 0 M200 ${y + 6} q24 -2 46 1 M262 ${y + 12} q20 -1 40 0" stroke="#5E3B25" stroke-opacity=".45" stroke-width="1.4" fill="none" stroke-linecap="round"/><ellipse cx="238" cy="${y + 9}" rx="5" ry="3" fill="#5E3B25" opacity=".5"/><g class="sprig"><path d="M46 ${y + 2} q-8 -18 -2 -36" stroke="#7A4E32" stroke-width="3.5" fill="none" stroke-linecap="round"/>${leaf(44, y - 32, 30, 9, -35, '#4E9E66')}${leaf(45, y - 26, 26, 8, 40, '#3D8C58')}</g></g>`;
 
   // body
   const bodyG = `<g data-g="body"><ellipse data-part="body" ${bodyEl} fill="${U('body')}"/><ellipse data-part="body" ${neckEl} fill="${U('body')}"/><ellipse data-part="belly" cx="${f1(B.x + rx * .35)}" cy="${f1(B.y + ry * .15)}" rx="${f1(rx * .72)}" ry="${f1(ry * .8)}" transform="rotate(20 ${f1(B.x + rx * .35)} ${f1(B.y + ry * .15)})" fill="${U('belly')}" clip-path="${U('cbody')}"/>${ov('body', U('fx'))}${partPattern('body')}</g>`;
@@ -1692,7 +1724,7 @@ class Actor3D {
     if (k === 'wave') { this.drive(2400, u => { const up = ss(0, .15, u) * (1 - ss(.85, 1, u)); x.foot = up; x.footWave = up * Math.sin(u * Math.PI * 7) * .45; x.headRoll = up * .25; x.lean = -up * .08; x.wing = [up * .12, 0]; }, done); this.later(300, () => { s.crestT = .9; }); this.later(2300, () => { s.crestT = this.rest; }); return 2.4; }
     if (k === 'fly') {
       this.excite(6200); sfx('flap'); this.follow = true;
-      const R = 1.15, H = .75, dur = 6800;
+      const inCage = this.v && this.v.place === 'cage', kk = (this.v && this.v.fit) || 1, R = inCage ? .42 * kk : 1.15, H = inCage ? .45 * kk : .75, dur = inCage ? 5200 : 6800;
       this.drive(dur, u => {
         const tk = ss(0, .1, u), land = ss(.84, 1, u), flying = tk * (1 - land);
         const a = ss(.06, .9, u) * Math.PI * 2;
@@ -1775,12 +1807,14 @@ function leafGeo(len, wid, bend) {
 function buildScene() {
   if (R3.scene) return R3.scene;
   const T = R3.T, scene = new T.Scene();
+  // everything outdoors lives in one group, so the house can take its place
+  const out = R3.out = new T.Group(); scene.add(out);
   // sky
   const skyMat = new T.ShaderMaterial({side: T.BackSide, depthWrite: false, toneMapped: false, uniforms: {sun: {value: new T.Vector3(.45, .55, .7).normalize()}},
     vertexShader: 'varying vec3 vD; void main(){ vD = normalize(position); vec4 p = projectionMatrix * modelViewMatrix * vec4(position, 1.0); gl_Position = p.xyww; }',
     fragmentShader: 'uniform vec3 sun; varying vec3 vD; void main(){ float y = vD.y; vec3 top = vec3(.54,.8,.93), mid = vec3(.8,.92,.95), low = vec3(1.,.95,.84); vec3 c = mix(mid, top, smoothstep(.05,.7,y)); c = mix(c, low, smoothstep(.12,-.35,y)); float s = max(dot(vD, sun), 0.); c += vec3(1.,.93,.75) * (pow(s, 12.) * .45 + pow(s, 3.) * .1); gl_FragColor = vec4(c, 1.); }'});
-  const sky = new T.Mesh(new T.SphereGeometry(120, 32, 16), skyMat); sky.renderOrder = -1; scene.add(sky);
-  scene.fog = new T.Fog('#D6ECF0', 12, 80);
+  const sky = new T.Mesh(new T.SphereGeometry(120, 32, 16), skyMat); sky.renderOrder = -1; out.add(sky);
+  scene.fog = R3.fog = new T.Fog('#D6ECF0', 12, 80);
   // clouds
   // pure white with a soft alpha falloff, computed (not a canvas gradient: Safari dithers those, and the
   // dither noise turns into bright specks where the cloud is nearly transparent)
@@ -1788,13 +1822,13 @@ function buildScene() {
   for (let y = 0; y < CS; y++) for (let x = 0; x < CS; x++) { const d = Math.hypot(x - CS / 2 + .5, y - CS / 2 + .5) / (CS / 2), a = d < .55 ? .95 - d / .55 * .4 : Math.max(0, .55 * (1 - (d - .55) / .45)), i = (y * CS + x) * 4; cdata[i] = cdata[i + 1] = cdata[i + 2] = 255; cdata[i + 3] = Math.round(a * 255); }
   const ctex = new T.DataTexture(cdata, CS, CS); ctex.colorSpace = T.SRGBColorSpace; ctex.magFilter = ctex.minFilter = T.LinearFilter; ctex.needsUpdate = true;
   const cloudMat = new T.SpriteMaterial({map: ctex, depthWrite: false, toneMapped: false, fog: false});
-  [[-9, 9, -30, 14], [-3, 11, -34, 11], [7, 8, -29, 16], [15, 10, -24, 11], [24, 7, 6, 13], [-24, 8, 4, 14], [3, 12, -38, 12], [-18, 9, 20, 13], [12, 11, 26, 12], [-8, 13, 30, 10]].forEach(([x, y, z, s]) => { const sp = new T.Sprite(cloudMat); sp.position.set(x, y, z); sp.scale.set(s, s * .45, 1); scene.add(sp); });
+  [[-9, 9, -30, 14], [-3, 11, -34, 11], [7, 8, -29, 16], [15, 10, -24, 11], [24, 7, 6, 13], [-24, 8, 4, 14], [3, 12, -38, 12], [-18, 9, 20, 13], [12, 11, 26, 12], [-8, 13, 30, 10]].forEach(([x, y, z, s]) => { const sp = new T.Sprite(cloudMat); sp.position.set(x, y, z); sp.scale.set(s, s * .45, 1); out.add(sp); });
   // lights
-  scene.add(new T.HemisphereLight('#D2EBFA', '#EBDDC0', 1.15));
-  const key = new T.DirectionalLight('#FFF1DA', 2.5); key.position.set(2.2, 3.6, 2.9); key.castShadow = true;
+  const hemi = R3.hemi = new T.HemisphereLight('#D2EBFA', '#EBDDC0', 1.15); scene.add(hemi);
+  const key = R3.key = new T.DirectionalLight('#FFF1DA', 2.5); key.position.set(2.2, 3.6, 2.9); key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024); const sc = key.shadow.camera; sc.left = -1.6; sc.right = 1.6; sc.top = 1.8; sc.bottom = -1.6; sc.near = .5; sc.far = 12; key.shadow.bias = -.0004; key.shadow.normalBias = .025; key.shadow.radius = 3;
   scene.add(key); scene.add(key.target); key.target.position.set(0, .4, 0);
-  const rim = new T.DirectionalLight('#E2F0FF', 1.3); rim.position.set(-2.8, 1.8, -3.2); scene.add(rim);
+  const rim = R3.rim = new T.DirectionalLight('#E2F0FF', 1.3); rim.position.set(-2.8, 1.8, -3.2); scene.add(rim);
   // branch (perch) growing out of a trunk on the left
   const bark = new T.MeshStandardMaterial({color: '#8A5A3B', roughness: .92});
   const curve = new T.CatmullRomCurve3([new T.Vector3(-3.6, -.18, -.1), new T.Vector3(-1.6, -.03, 0), new T.Vector3(0, 0, 0), new T.Vector3(1.5, -.02, 0), new T.Vector3(2.6, .06, .05)].map(v => { v.y -= PERCH_R; return v; }));
@@ -1806,15 +1840,15 @@ function buildScene() {
   // taper toward the tip
   for (let i = 0; i < bp.count; i++) { const xx = bp.getX(i); if (xx > 1.2) { const k = 1 - ss(1.2, 2.6, xx) * .45; const cp = curve.getPoint(Math.max(0, Math.min(1, (xx + 3.6) / 6.2))); bp.setY(i, cp.y + (bp.getY(i) - cp.y) * k); bp.setZ(i, cp.z + (bp.getZ(i) - cp.z) * k); } }
   br.computeVertexNormals();
-  const branch = new T.Mesh(br, barkV); branch.receiveShadow = true; branch.castShadow = true; scene.add(branch);
-  const tip = new T.Mesh(new T.SphereGeometry(PERCH_R * .55, 10, 8), bark); tip.position.copy(curve.getPoint(1)); scene.add(tip);
+  const branch = new T.Mesh(br, barkV); branch.receiveShadow = true; branch.castShadow = true; out.add(branch);
+  const tip = new T.Mesh(new T.SphereGeometry(PERCH_R * .55, 10, 8), bark); tip.position.copy(curve.getPoint(1)); out.add(tip);
   // leaves
   const leafMats = ['#3D8C58', '#2F7A4A', '#4E9E66', '#5AAB70', '#6DB77F'].map(c => new T.MeshStandardMaterial({color: c, roughness: .7, side: T.DoubleSide}));
   // leaves are baked into one mesh per color (a handful of draw calls instead of ~100)
   const bins = leafMats.map(() => []);
   const L = (x, y, z, len, wid, rx, ry, rz, mi) => { const g = leafGeo(len, wid, .6); const o = new T.Object3D(); o.position.set(x, y, z); o.rotation.set(rx, ry, rz); o.updateMatrix(); g.applyMatrix4(o.matrix); bins[mi % leafMats.length].push(g); };
   // a sprig on the perch, like the drawing
-  const twig = new T.Mesh(new T.CylinderGeometry(.012, .018, .42, 6), bark); twig.position.set(-.95, .15, -.02); twig.rotation.z = .25; scene.add(twig);
+  const twig = new T.Mesh(new T.CylinderGeometry(.012, .018, .42, 6), bark); twig.position.set(-.95, .15, -.02); twig.rotation.z = .25; out.add(twig);
   L(-1.02, .36, -.02, .34, .1, -.2, .3, .7, 2); L(-.9, .32, 0, .3, .09, .2, -.4, -.8, 1);
   // ---- the world: the branch grows from a big tree in a flowery meadow, with hills and more trees beyond ----
   let seed = 7; const r = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
@@ -1850,7 +1884,7 @@ function buildScene() {
       col.push(t.r, t.g, t.b);
     }
     g.setAttribute('color', new T.Float32BufferAttribute(col, 3)); g.computeVertexNormals();
-    scene.add(new T.Mesh(g, new T.MeshStandardMaterial({vertexColors: true, roughness: 1})));
+    out.add(new T.Mesh(g, new T.MeshStandardMaterial({vertexColors: true, roughness: 1})));
   }
   // the big tree: trunk from the ground into a leafy canopy, a few more branches, roots
   const woodParts = [];
@@ -1868,7 +1902,7 @@ function buildScene() {
       .forEach(([a, b, c, rad, st]) => { const cv = new T.CatmullRomCurve3([new T.Vector3(...a), new T.Vector3(...b), new T.Vector3(...c)]); const tg = new T.TubeGeometry(cv, 16, rad, 8, false); woodParts.push(tint(tg, () => [.86, .82, .78])); branchSpots.push(spotOn(cv, st, rad)); });
     R3.spots.push(...branchSpots, houseSpot);
     { const H2 = 9.2, g2 = new T.CylinderGeometry(.28, .5, H2, 16, 10); g2.translate(0, H2 / 2, 0); const p2 = g2.attributes.position; for (let i = 0; i < p2.count; i++) { const y = p2.getY(i); p2.setX(i, p2.getX(i) + Math.sin(y * .5) * .1 + FX); p2.setY(i, y + groundH(FX, FZ)); p2.setZ(i, p2.getZ(i) + FZ); } g2.computeVertexNormals(); woodParts.push(tint(g2, (x, y, z) => { const n = .82 + .16 * Math.sin(Math.atan2(z - FZ, x - FX) * 7 + y * 2.6); return [n, n * .96, n * .92]; })); }
-    const wood = new T.Mesh(merge(woodParts), barkV); scene.add(wood);
+    const wood = new T.Mesh(merge(woodParts), barkV); out.add(wood);
   }
   // leafy canopy: soft lumpy blobs, lighter on top
   {
@@ -1882,7 +1916,7 @@ function buildScene() {
      [-1.1, 3.2, -1.8, 1.05], [-6.3, 4.6, .9, 1.25], [-5.6, -.8, -2, .8], [-1.9, 6, 1.9, 1.1],
      [FX, GY + 9.6, FZ, 1.9], [FX - 1.5, GY + 8.9, FZ + .5, 1.3], [FX + 1.5, GY + 9.2, FZ - .4, 1.4], [FX - 2.6, GY + 7.3, FZ + .5, .75], [FX + 2.3, GY + 8.6, FZ + .5, .75]].forEach(([x, y, z, s]) => blob(x, y, z, s));
     for (let i = 0; i < 9; i++) { const a = r() * Math.PI * 2; blob(TX + Math.cos(a) * 2.2, 6 + r() * 1.6, TZ + Math.sin(a) * 2.2, .7 + r() * .6); }
-    scene.add(new T.Mesh(merge(blobs), new T.MeshStandardMaterial({color: '#5FAE5A', vertexColors: true, roughness: .85})));
+    out.add(new T.Mesh(merge(blobs), new T.MeshStandardMaterial({color: '#5FAE5A', vertexColors: true, roughness: .85})));
   }
   // a birdhouse on the trunk and a bell toy on the perch
   {
@@ -1892,32 +1926,32 @@ function buildScene() {
     const hole = new T.Mesh(new T.CircleGeometry(.09, 20), M('#3A2A1E', {roughness: 1})); hole.position.set(0, .06, .222); g.add(hole);
     const peg = new T.Mesh(new T.CylinderGeometry(.015, .015, .14, 8), M('#8A5A3B')); peg.rotation.x = Math.PI / 2; peg.position.set(0, -.1, .28); g.add(peg);
     const heart = new T.Mesh(new T.CircleGeometry(.035, 12), M('#E4413B')); heart.position.set(0, .2, .222); g.add(heart);
-    g.position.set(TX + .1, 1.35, TZ + .58); g.rotation.y = .2; scene.add(g);
+    g.position.set(TX + .1, 1.35, TZ + .58); g.rotation.y = .2; out.add(g);
     const bell = new T.Group(); bell.position.set(1.15, -2 * PERCH_R + .01, 0);
     const gold = M('#F2C230', {metalness: .75, roughness: .28});
     for (let i = 0; i < 4; i++) { const l = new T.Mesh(new T.TorusGeometry(.018, .005, 6, 12), M('#C9C9C9', {metalness: .8, roughness: .3})); l.position.y = -.03 - i * .045; l.rotation.y = i % 2 ? Math.PI / 2 : 0; bell.add(l); }
     const prof = [[0, 0], [.07, .005], [.075, .03], [.055, .06], [.045, .1], [.03, .125], [0, .13]].map(([x, y]) => new T.Vector2(x, y - .13));
     const b = new T.Mesh(new T.LatheGeometry(prof, 24), gold); b.position.y = -.2; b.castShadow = true; bell.add(b);
     const clap = new T.Mesh(new T.SphereGeometry(.018, 10, 8), M('#8A6A1A', {metalness: .6})); clap.position.y = -.33; bell.add(clap);
-    scene.add(bell); (R3.anim = R3.anim || []).push(t => { bell.rotation.z = Math.sin(t * 1.3) * .07; bell.rotation.x = Math.sin(t * .9) * .04; });
+    out.add(bell); (R3.anim = R3.anim || []).push(t => { bell.rotation.z = Math.sin(t * 1.3) * .07; bell.rotation.x = Math.sin(t * .9) * .04; });
   }
   // pond, rocks, flowers, grass
   {
     const py = groundH(PX, PZ);
-    const pond = new T.Mesh(new T.CircleGeometry(2.4, 48), new T.MeshStandardMaterial({color: '#6CC2E8', roughness: .12, metalness: .15})); pond.rotation.x = -Math.PI / 2; pond.position.set(PX, py + .05, PZ); scene.add(pond);
-    const rim = new T.Mesh(new T.TorusGeometry(2.45, .16, 8, 48), new T.MeshStandardMaterial({color: '#D9C9A0', roughness: .9})); rim.rotation.x = -Math.PI / 2; rim.scale.z = .4; rim.position.set(PX, py + .03, PZ); scene.add(rim);
+    const pond = new T.Mesh(new T.CircleGeometry(2.4, 48), new T.MeshStandardMaterial({color: '#6CC2E8', roughness: .12, metalness: .15})); pond.rotation.x = -Math.PI / 2; pond.position.set(PX, py + .05, PZ); out.add(pond);
+    const rim = new T.Mesh(new T.TorusGeometry(2.45, .16, 8, 48), new T.MeshStandardMaterial({color: '#D9C9A0', roughness: .9})); rim.rotation.x = -Math.PI / 2; rim.scale.z = .4; rim.position.set(PX, py + .03, PZ); out.add(rim);
     const lily = new T.InstancedMesh(new T.CircleGeometry(.22, 14), new T.MeshStandardMaterial({color: '#4E9E5A', roughness: .7, side: T.DoubleSide}), 5); const m = new T.Matrix4(), q = new T.Quaternion().setFromEuler(new T.Euler(-Math.PI / 2, 0, 0));
-    for (let i = 0; i < 5; i++) { const a = i * 1.3 + .4, d = .6 + (i % 3) * .5; m.compose(new T.Vector3(PX + Math.cos(a) * d, py + .07, PZ + Math.sin(a) * d), q, new T.Vector3(1, 1, 1)); lily.setMatrixAt(i, m); } scene.add(lily);
+    for (let i = 0; i < 5; i++) { const a = i * 1.3 + .4, d = .6 + (i % 3) * .5; m.compose(new T.Vector3(PX + Math.cos(a) * d, py + .07, PZ + Math.sin(a) * d), q, new T.Vector3(1, 1, 1)); lily.setMatrixAt(i, m); } out.add(lily);
     const rocks = []; [[TX + 1.1, TZ + 1, .45], [TX - .9, TZ + .9, .32], [PX - 2.6, PZ + 1.4, .5], [7, 2, .38]].forEach(([x, z, s]) => { const g = new T.IcosahedronGeometry(s, 1); g.scale(1, .6, 1); g.translate(x, groundH(x, z) + s * .2, z); rocks.push(tint(g, (vx, vy) => { const n = .62 + .25 * ss(-.2, .4, vy - groundH(x, z)); return [n, n * 1.02, n * .96]; })); });
-    scene.add(new T.Mesh(merge(rocks), new T.MeshStandardMaterial({vertexColors: true, roughness: .95, flatShading: true})));
+    out.add(new T.Mesh(merge(rocks), new T.MeshStandardMaterial({vertexColors: true, roughness: .95, flatShading: true})));
     const NF = 240, stem = new T.InstancedMesh(new T.CylinderGeometry(.012, .012, .3, 4), new T.MeshStandardMaterial({color: '#4E9E4A'}), NF), bloom = new T.InstancedMesh(new T.SphereGeometry(.09, 7, 5), new T.MeshStandardMaterial({roughness: .6}), NF);
     const fcols = ['#FF8FB1', '#FFD84A', '#FFFFFF', '#C06BD9', '#F0873A', '#FF6B6B', '#7FC6E6'].map(C), v = new T.Vector3(), one = new T.Quaternion(), sc = new T.Vector3();
     let n = 0;
     while (n < NF) { const a = r() * Math.PI * 2, d = 2.2 + Math.pow(r(), .7) * 15, x = TX + 1 + Math.cos(a) * d, z = TZ + Math.sin(a) * d; if (Math.hypot(x - PX, z - PZ) < 3) continue; const y = groundH(x, z); m.compose(v.set(x, y + .15, z), one, sc.set(1, 1, 1)); stem.setMatrixAt(n, m); m.compose(v.set(x, y + .31, z), one, sc.set(1, .5, 1)); bloom.setMatrixAt(n, m); bloom.setColorAt(n, fcols[n % fcols.length]); n++; }
-    scene.add(stem, bloom);
+    out.add(stem, bloom);
     const NG = 420, blade = new T.InstancedMesh(new T.ConeGeometry(.045, .42, 4), new T.MeshStandardMaterial({color: '#5FA84A', roughness: 1}), NG), e = new T.Euler(), qq = new T.Quaternion();
     for (let i = 0; i < NG; i++) { const a = r() * Math.PI * 2, d = 1.2 + Math.pow(r(), .8) * 16, x = TX + 1 + Math.cos(a) * d, z = TZ + Math.sin(a) * d; if (Math.hypot(x - PX, z - PZ) < 2.7) { i--; continue; } const s = .7 + r() * .8; qq.setFromEuler(e.set((r() - .5) * .5, r() * 6.3, (r() - .5) * .5)); m.compose(v.set(x, groundH(x, z) + .18 * s, z), qq, sc.set(s, s, s)); blade.setMatrixAt(i, m); }
-    scene.add(blade);
+    out.add(blade);
   }
   // more trees on the far hills (always beyond the camera's reach)
   {
@@ -1929,18 +1963,18 @@ function buildScene() {
       m.compose(v.set(x, y + .9 * k, z), q.identity(), s.set(k, k, k)); trunkI.setMatrixAt(i, m);
       m.compose(v.set(x, y + 2.3 * k, z), q.setFromEuler(new T.Euler(0, r() * 6, 0)), s.set(1.25 * k, 1.5 * k, 1.25 * k)); crown.setMatrixAt(i, m); crown.setColorAt(i, greens[i % greens.length]);
     }
-    scene.add(trunkI, crown);
+    out.add(trunkI, crown);
   }
   // butterflies: two near the bird, a few over the meadow
   {
     const tex = col => { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const x = cv.getContext('2d'); x.fillStyle = col; [[-1, -1], [1, -1]].forEach(([sx]) => { x.beginPath(); x.ellipse(32 + sx * 13, 24, 13, 15, sx * .5, 0, Math.PI * 2); x.fill(); x.beginPath(); x.ellipse(32 + sx * 10, 43, 9, 11, -sx * .4, 0, Math.PI * 2); x.fill(); }); x.fillStyle = '#2A2A2C'; x.fillRect(30, 16, 4, 34); const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; t.generateMipmaps = false; t.minFilter = T.LinearFilter; return t; };
     const bf = [['#FFB836', 1.9, .5, .9, 0], ['#E27A9E', 2.4, .9, -.7, 2], ['#7FC6E6', 6, GY + 1.3, 3, 4], ['#FFD84A', 7.5, GY + 1.1, -2, 1], ['#C06BD9', 5, GY + 1.6, 8, 3]].map(([c, rad, y, cz, ph], i) => {
-      const sp = new T.Sprite(new T.SpriteMaterial({map: tex(c), transparent: true, depthWrite: false})); sp.scale.set(.16, .16, 1); scene.add(sp); return {sp, rad, y, cz, ph, i};
+      const sp = new T.Sprite(new T.SpriteMaterial({map: tex(c), transparent: true, depthWrite: false})); sp.scale.set(.16, .16, 1); out.add(sp); return {sp, rad, y, cz, ph, i};
     });
     R3.anim.push(t => bf.forEach(b => { const a = t * (.35 + b.i * .04) + b.ph; b.sp.position.set(Math.sin(a) * b.rad + (b.i > 1 ? TX + 3 : .3), b.y + Math.sin(a * 2.3) * .25, Math.cos(a * .8) * b.rad * .6 + b.cz * (b.i > 1 ? 1 : .2)); b.sp.scale.x = .16 * (.35 + .65 * Math.abs(Math.sin(t * 14 + b.ph))); }));
   }
   // clouds drift slowly
-  R3.anim.push((t, dt) => scene.children.forEach(o => { if (o.isSprite && o.material === cloudMat) { o.position.x += dt * .12; if (o.position.x > 26) o.position.x = -26; } }));
+  R3.anim.push((t, dt) => out.children.forEach(o => { if (o.isSprite && o.material === cloudMat) { o.position.x += dt * .12; if (o.position.x > 26) o.position.x = -26; } }));
   for (let i = 0; i < 7; i++) L(2.2 + r() * .5, .02 + r() * .15, (r() - .5) * .3, .3 + r() * .25, .1 + r() * .05, -.6 + r() * 1.2, r() * 6.3, -1.2 + r() * .8, i + 1);
   bins.forEach((list, mi) => {
     if (!list.length) return;
@@ -1948,7 +1982,7 @@ function buildScene() {
     const pos = new Float32Array(nv * 3), nor = new Float32Array(nv * 3), idx = new Uint32Array(ni); let vo = 0, io = 0;
     list.forEach(g => { pos.set(g.attributes.position.array, vo * 3); nor.set(g.attributes.normal.array, vo * 3); const src = g.index ? g.index.array : [...Array(g.attributes.position.count).keys()]; for (let k = 0; k < src.length; k++) idx[io + k] = src[k] + vo; vo += g.attributes.position.count; io += src.length; g.dispose(); });
     const mg = new T.BufferGeometry(); mg.setAttribute('position', new T.BufferAttribute(pos, 3)); mg.setAttribute('normal', new T.BufferAttribute(nor, 3)); mg.setIndex(new T.BufferAttribute(idx, 1));
-    scene.add(new T.Mesh(mg, leafMats[mi]));
+    out.add(new T.Mesh(mg, leafMats[mi]));
   });
   // soft reflections for eyes and beaks
   R3.envScene = new T.Scene(); R3.envScene.add(new T.Mesh(new T.SphereGeometry(10, 16, 8), skyMat));
@@ -1958,6 +1992,191 @@ function buildScene() {
 function rebuildEnv() {
   const T = R3.T; if (!R3.scene || !R3.r) return;
   try { const pm = new T.PMREMGenerator(R3.r); const old = R3.scene.environment; R3.scene.environment = pm.fromScene(R3.envScene, .04).texture; R3.scene.environmentIntensity = .55; pm.dispose(); if (old) old.dispose(); } catch (e) {}
+}
+/* the house: a cozy room with a big birdcage. The cage's perch sits exactly where the tree branch is, so the bird
+   never moves; the world around it is swapped instead. Everything is sized for the bird (scaled by its fit). */
+const CAGE = {R: 1.35, bot: -1.35, top: 1.5, apex: 2.32, doorA: .45, doorH: .3, doorLo: -.5, doorHi: .82};
+function cvTex(w, h, draw) { const T = R3.T, cv = document.createElement('canvas'); cv.width = w; cv.height = h; draw(cv.getContext('2d'), w, h); const t = new T.CanvasTexture(cv); t.colorSpace = T.SRGBColorSpace; t.anisotropy = 4; return t; }
+function mergeGeos(list) {
+  const T = R3.T; list.forEach(g => { if (!g.index) g.setIndex(Array.from({length: g.attributes.position.count}, (_, k) => k)); });
+  let nv = 0, ni = 0; list.forEach(g => { nv += g.attributes.position.count; ni += g.index.count; });
+  const pos = new Float32Array(nv * 3), nor = new Float32Array(nv * 3), col = new Float32Array(nv * 3), uv = new Float32Array(nv * 2), idx = new Uint32Array(ni); let vo = 0, io = 0;
+  list.forEach(g => {
+    const n = g.attributes.position.count; pos.set(g.attributes.position.array, vo * 3); nor.set(g.attributes.normal.array, vo * 3);
+    if (g.attributes.color) col.set(g.attributes.color.array, vo * 3); else col.fill(1, vo * 3, (vo + n) * 3);
+    if (g.attributes.uv) uv.set(g.attributes.uv.array, vo * 2);
+    const s = g.index.array; for (let k = 0; k < s.length; k++) idx[io + k] = s[k] + vo; vo += n; io += s.length; g.dispose();
+  });
+  const m = new T.BufferGeometry(); m.setAttribute('position', new T.BufferAttribute(pos, 3)); m.setAttribute('normal', new T.BufferAttribute(nor, 3)); m.setAttribute('color', new T.BufferAttribute(col, 3)); m.setAttribute('uv', new T.BufferAttribute(uv, 2)); m.setIndex(new T.BufferAttribute(idx, 1)); return m;
+}
+// paint one color on a piece before merging (so a whole bookshelf is one draw)
+function paintGeo(g, hex) { const T = R3.T, c = new T.Color(hex), n = g.attributes.position.count, a = new Float32Array(n * 3); for (let i = 0; i < n; i++) { a[i * 3] = c.r; a[i * 3 + 1] = c.g; a[i * 3 + 2] = c.b; } g.setAttribute('color', new T.BufferAttribute(a, 3)); return g; }
+function placed(g, x, y, z, rx = 0, ry = 0, rz = 0, s) { const T = R3.T, o = new T.Object3D(); o.position.set(x, y, z); o.rotation.set(rx, ry, rz); if (s) o.scale.set(s[0], s[1], s[2]); o.updateMatrix(); g.applyMatrix4(o.matrix); return g; }
+function buildHouse() {
+  if (R3.house) return R3.house;
+  const T = R3.T, house = R3.house = new T.Group(), room = R3.room = new T.Group(); house.add(room); house.visible = false; R3.scene.add(house);
+  const M = (c, o = {}) => new T.MeshStandardMaterial(Object.assign({color: c, roughness: .8}, o));
+  const VC = (o = {}) => new T.MeshStandardMaterial(Object.assign({vertexColors: true, roughness: .75}, o));
+  const put = (g, m, parent = room) => { const o = new T.Mesh(g, m); parent.add(o); return o; };
+  const FY = -3.4, W = 12, TOP = 9, WH = TOP - FY, C = CAGE;
+  // ---- floor: honey wood planks and a rainbow rug under the cage ----
+  const planks = cvTex(512, 512, (x, w) => { const cols = ['#D9A66C', '#CF9A60', '#DDAE77', '#D3A067']; for (let i = 0; i < 8; i++) { x.fillStyle = cols[i % 4]; x.fillRect(0, i * 64, w, 64); x.fillStyle = 'rgba(90,50,20,.28)'; x.fillRect(0, i * 64, w, 2); const off = (i * 173) % w; x.fillRect(off, i * 64, 2, 64); x.fillRect((off + 256) % w, i * 64, 2, 64); x.strokeStyle = 'rgba(120,70,30,.12)'; for (let k = 0; k < 6; k++) { x.beginPath(); const yy = i * 64 + 10 + k * 9; x.moveTo(0, yy); for (let xx = 0; xx <= w; xx += 32) x.lineTo(xx, yy + Math.sin(xx * .03 + i + k) * 2); x.stroke(); } } });
+  planks.wrapS = planks.wrapT = T.RepeatWrapping; planks.repeat.set(6, 6);
+  const floor = put(new T.PlaneGeometry(2 * W, 2 * W), M('#FFFFFF', {map: planks, roughness: .62})); floor.rotation.x = -Math.PI / 2; floor.position.y = FY; floor.receiveShadow = true;
+  const rugT = cvTex(512, 512, (x, w) => { ['#7FC6E6', '#FFD84A', '#FF8FB1', '#B5E3A8', '#C9A7F0', '#FFF6E8'].forEach((c, i) => { x.fillStyle = c; x.beginPath(); x.arc(w / 2, w / 2, w / 2 - 2 - i * 42, 0, Math.PI * 2); x.fill(); }); });
+  const rug = put(new T.CircleGeometry(3.1, 56), M('#FFFFFF', {map: rugT, roughness: 1})); rug.rotation.x = -Math.PI / 2; rug.position.y = FY + .012; rug.receiveShadow = true;
+  // ---- walls: striped wallpaper (the back one has a window hole), white skirting, a ceiling with a round light ----
+  const paper = cvTex(128, 128, (x, w, h) => { x.fillStyle = '#F7E4D4'; x.fillRect(0, 0, w, h); x.fillStyle = '#F2D8C5'; x.fillRect(0, 0, w * .28, h); x.fillStyle = '#FBEFE4'; x.fillRect(w * .5, 0, w * .1, h); x.fillStyle = '#EFC7B2'; for (let i = 0; i < 4; i++) { x.beginPath(); x.arc(w * .78, 16 + i * 32, 3.2, 0, 7); x.fill(); } });
+  paper.wrapS = paper.wrapT = T.RepeatWrapping;
+  const wallMat = M('#FFFFFF', {map: paper, roughness: .95}), U = 1.25;   // one wallpaper tile every 1.25 units
+  const uvWorld = g => { const p = g.attributes.position, uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, p.getX(i) / U, p.getY(i) / U); return g; };
+  const WX = -5.2, WY = 1.5, WW = 4.2, WHt = 3.3;   // window on the back wall: center and size
+  { const sh = new T.Shape(); sh.moveTo(-W, 0); sh.lineTo(W, 0); sh.lineTo(W, WH); sh.lineTo(-W, WH); sh.lineTo(-W, 0);
+    const hole = new T.Path(); const hx = WX, hy = WY - FY; hole.moveTo(hx - WW / 2, hy - WHt / 2); hole.lineTo(hx + WW / 2, hy - WHt / 2); hole.lineTo(hx + WW / 2, hy + WHt / 2); hole.lineTo(hx - WW / 2, hy + WHt / 2); hole.lineTo(hx - WW / 2, hy - WHt / 2); sh.holes.push(hole);
+    const back = put(uvWorld(new T.ShapeGeometry(sh)), wallMat); back.position.set(0, FY, -W); }
+  [[Math.PI, 0, W], [Math.PI / 2, -W, 0], [-Math.PI / 2, W, 0]].forEach(([ry, x, z]) => { const g = uvWorld(placed(new T.PlaneGeometry(2 * W, WH), 0, WH / 2, 0)); const m = put(g, wallMat); m.rotation.y = ry; m.position.set(x, FY, z); });
+  const ceil = put(new T.PlaneGeometry(2 * W, 2 * W), M('#FFF7EC', {roughness: 1})); ceil.rotation.x = Math.PI / 2; ceil.position.y = TOP;
+  const lamp = put(new T.CylinderGeometry(1.4, 1.4, .08, 40), M('#FFFFFF', {emissive: '#FFF4DC', emissiveIntensity: .9})); lamp.position.y = TOP - .04;
+  const white = [];
+  [[0, -W + .04, 0], [0, W - .04, Math.PI], [-W + .04, 0, Math.PI / 2], [W - .04, 0, -Math.PI / 2]].forEach(([x, z, ry]) => white.push(placed(new T.BoxGeometry(2 * W, .34, .08), x, FY + .17, z, 0, ry, 0)));
+  // the window: frame, cross bars, sill, curtain rod
+  const fz = -W + .06;
+  [[WX, WY + WHt / 2 + .07, WW + .34, .16], [WX, WY - WHt / 2 - .07, WW + .34, .16]].forEach(([x, y, w, h]) => white.push(placed(new T.BoxGeometry(w, h, .14), x, y, fz)));
+  [[WX - WW / 2 - .09, WY], [WX + WW / 2 + .09, WY]].forEach(([x, y]) => white.push(placed(new T.BoxGeometry(.18, WHt + .3, .14), x, y, fz)));
+  white.push(placed(new T.BoxGeometry(.09, WHt, .08), WX, WY, fz - .05), placed(new T.BoxGeometry(WW, .09, .08), WX, WY + .15, fz - .05));
+  white.push(placed(new T.BoxGeometry(WW + .7, .12, .5), WX, WY - WHt / 2 - .2, -W + .22));
+  put(mergeGeos(white.map(g => paintGeo(g, '#FFFDF8'))), VC({roughness: .6}));
+  // the view outside: sky, sun, hills, trees (a painting, always bright)
+  const view = cvTex(512, 420, (x, w, h) => {
+    const sky = x.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, '#8FD0F0'); sky.addColorStop(.62, '#D4EEF6'); sky.addColorStop(1, '#FFF4D8'); x.fillStyle = sky; x.fillRect(0, 0, w, h);
+    x.fillStyle = 'rgba(255,238,170,.9)'; x.beginPath(); x.arc(w * .78, h * .2, 34, 0, 7); x.fill();
+    x.fillStyle = '#fff'; [[.2, .2], [.48, .14], [.3, .32]].forEach(([cx, cy]) => { x.beginPath(); x.ellipse(w * cx, h * cy, 46, 15, 0, 0, 7); x.fill(); x.beginPath(); x.ellipse(w * cx + 22, h * cy - 8, 26, 14, 0, 0, 7); x.fill(); });
+    x.fillStyle = '#9ACD72'; x.beginPath(); x.moveTo(0, h * .66); x.bezierCurveTo(w * .3, h * .5, w * .55, h * .72, w, h * .58); x.lineTo(w, h); x.lineTo(0, h); x.fill();
+    x.fillStyle = '#7DBB5C'; x.beginPath(); x.moveTo(0, h * .8); x.bezierCurveTo(w * .4, h * .66, w * .7, h * .86, w, h * .74); x.lineTo(w, h); x.lineTo(0, h); x.fill();
+    const tree = (tx, ty, s) => { x.fillStyle = '#7A5234'; x.fillRect(tx - s * .08, ty - s * .2, s * .16, s * .5); x.fillStyle = '#4E9E5A'; x.beginPath(); x.arc(tx, ty - s * .45, s * .42, 0, 7); x.fill(); x.fillStyle = '#5FAE5A'; x.beginPath(); x.arc(tx - s * .15, ty - s * .55, s * .26, 0, 7); x.fill(); };
+    tree(w * .16, h * .74, 120); tree(w * .62, h * .66, 70); tree(w * .86, h * .7, 90);
+    x.fillStyle = '#FF8FB1'; for (let i = 0; i < 18; i++) { x.beginPath(); x.arc((i * 97) % w, h * .86 + (i * 37) % 40, 4, 0, 7); x.fill(); }
+  });
+  const vw = put(new T.PlaneGeometry(WW + 2, WHt + 1.4), new T.MeshBasicMaterial({map: view, toneMapped: false, fog: false})); vw.position.set(WX, WY, -W - .45);
+  // curtains: soft coral folds on a rod
+  { const cg = [];
+    [-1, 1].forEach(sd => { const g = new T.PlaneGeometry(1.05, WHt + 1.1, 14, 1), p = g.attributes.position; for (let i = 0; i < p.count; i++) p.setZ(i, Math.sin(p.getX(i) * 13) * .07); g.computeVertexNormals(); cg.push(placed(g, WX + sd * (WW / 2 + .25), WY + .15, -W + .2)); });
+    put(mergeGeos(cg.map(g => paintGeo(g, '#F29C93'))), VC({roughness: .9, side: T.DoubleSide}));
+    const rod = put(new T.CylinderGeometry(.035, .035, WW + 1.9, 10), M('#C9A25A', {metalness: .5, roughness: .35})); rod.rotation.z = Math.PI / 2; rod.position.set(WX, WY + WHt / 2 + .5, -W + .2); }
+  // ---- furniture: bookshelf, floor lamp, beanbag, a big plant, the door, a framed photo of the bird ----
+  { const s = [], wood = '#E8C9A0';
+    const bx = -W + .3, bz = -4.8, bw = 2.2, bh = 2.8, bd = .5;
+    [0, bh * .33, bh * .66, bh].forEach(y => s.push(paintGeo(placed(new T.BoxGeometry(bd, .07, bw), bx, FY + y + .035, bz), wood)));
+    [-1, 1].forEach(sd => s.push(paintGeo(placed(new T.BoxGeometry(bd, bh, .07), bx, FY + bh / 2, bz + sd * bw / 2), wood)));
+    s.push(paintGeo(placed(new T.BoxGeometry(.04, bh, bw), bx - bd / 2 + .02, FY + bh / 2, bz), '#DDB98E'));
+    const bookC = ['#E4413B', '#2E7FCE', '#F5C024', '#6CBD45', '#7A4FC9', '#F0873A', '#2BB3A8', '#E27A9E'];
+    [0, .33, .66].forEach((lv, row) => { let z = bz - bw / 2 + .1; let i = row * 3; while (z < bz + bw / 2 - .18) { const t = .09 + ((i * 37) % 5) * .018, h = .5 + ((i * 53) % 4) * .07; s.push(paintGeo(placed(new T.BoxGeometry(.34, h, t), bx + .03, FY + bh * lv + .07 + h / 2, z + t / 2, i % 7 === 3 ? .12 : 0, 0, 0), bookC[i % bookC.length])); z += t + .012; i++; } });
+    // a little toy bird on the top shelf
+    s.push(paintGeo(placed(new T.SphereGeometry(.16, 12, 10), bx + .02, FY + bh + .2, bz + .5, 0, 0, 0, [1, .9, 1.2]), '#FFD84A'), paintGeo(placed(new T.ConeGeometry(.05, .12, 8), bx + .02, FY + bh + .22, bz + .5 + .21, Math.PI / 2, 0, 0), '#F0873A'));
+    // floor lamp
+    const LX = W - 1.8, LZ = -W + 1.8; s.push(paintGeo(placed(new T.CylinderGeometry(.4, .45, .06, 24), LX, FY + .03, LZ), '#5E5B58'), paintGeo(placed(new T.CylinderGeometry(.04, .04, 3.4, 10), LX, FY + 1.7, LZ), '#5E5B58'));
+    put(mergeGeos(s), VC());
+    const shade = put(new T.CylinderGeometry(.42, .7, .7, 28, 1, true), M('#FFF1D6', {emissive: '#FFD9A0', emissiveIntensity: .55, side: T.DoubleSide})); shade.position.set(W - 1.8, FY + 3.5, -W + 1.8);
+    // beanbag: a squashy purple blob
+    const bb = new T.SphereGeometry(1, 28, 18), p = bb.attributes.position; for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i), f = 1 + .06 * Math.sin(x * 9) * Math.sin(z * 8) - (y > .2 ? .25 * (y - .2) : 0); p.setXYZ(i, x * f * 1.05, Math.max(-.62, y * .62 * f), z * f); } bb.computeVertexNormals();
+    const bean = put(bb, M('#9B7FD1', {roughness: .95})); bean.position.set(W * .45, FY + .6, W * .35);
+    // big plant in a pot by the window
+    const pot = put(new T.CylinderGeometry(.5, .36, .8, 24), M('#E27A5A', {roughness: .7})); pot.position.set(-W + 1.6, FY + .4, -W + 1.6);
+    const lv = [];
+    for (let i = 0; i < 16; i++) { const a = i * 2.4, g = leafGeo(1.3 + (i % 3) * .3, .34, .8); lv.push(placed(g, -W + 1.6 + Math.cos(a) * .12, FY + .78, -W + 1.6 + Math.sin(a) * .12, -.25 - (i % 4) * .18, a, 0)); }
+    put(mergeGeos(lv.map((g, i) => paintGeo(g, ['#3D8C58', '#4E9E66', '#2F7A4A'][i % 3]))), VC({roughness: .7, side: T.DoubleSide}));
+    // the door to outside, on the right wall
+    const dr = []; dr.push(paintGeo(placed(new T.BoxGeometry(.1, 3.4, 1.7), W - .05, FY + 1.7, 2.6), '#B97D4B'), paintGeo(placed(new T.BoxGeometry(.14, 3.6, .14), W - .06, FY + 1.8, 2.6 - .92), '#FFFDF8'), paintGeo(placed(new T.BoxGeometry(.14, 3.6, .14), W - .06, FY + 1.8, 2.6 + .92), '#FFFDF8'), paintGeo(placed(new T.BoxGeometry(.14, .14, 1.98), W - .06, FY + 3.55, 2.6), '#FFFDF8'), paintGeo(placed(new T.SphereGeometry(.08, 12, 8), W - .13, FY + 1.65, 2.6 - .6), '#E8C24A'));
+    [[.9, .55], [2.4, .55]].forEach(([y]) => dr.push(paintGeo(placed(new T.BoxGeometry(.02, 1.1, 1.3), W - .11, FY + y + .5, 2.6), '#A86E3E')));
+    put(mergeGeos(dr), VC({roughness: .6}));
+    // a framed photo of the bird (filled in when a bird moves in)
+    put(mergeGeos([paintGeo(placed(new T.BoxGeometry(1.5, 1.8, .08), 2.2, 1.9, -W + .05), '#C9A25A'), paintGeo(placed(new T.BoxGeometry(1.3, 1.6, .02), 2.2, 1.9, -W + .1), '#FFFDF8')]), VC({metalness: .3, roughness: .45}));
+    const pc = document.createElement('canvas'); pc.width = 256; pc.height = 320; const pt = new T.CanvasTexture(pc); pt.colorSpace = T.SRGBColorSpace;
+    const photo = put(new T.PlaneGeometry(1.1, 1.375), new T.MeshBasicMaterial({map: pt, toneMapped: false})); photo.position.set(2.2, 1.9, -W + .115);
+    R3.photo = {cv: pc, tex: pt, key: null};
+  }
+  // ---- the cage stand: a little round table ----
+  { const s = []; s.push(paintGeo(placed(new T.CylinderGeometry(1.8, 1.8, .12, 48), 0, C.bot - .31, 0), '#E8C9A0'), paintGeo(placed(new T.CylinderGeometry(.14, .2, (C.bot - .37) - FY, 16), 0, (C.bot - .37 + FY) / 2, 0), '#D9B58A'), paintGeo(placed(new T.CylinderGeometry(.9, 1, .1, 32), 0, FY + .05, 0), '#D9B58A'));
+    const t = put(mergeGeos(s), VC({roughness: .55})); t.receiveShadow = true; }
+  // ---- the cage ----
+  const cage = R3.cage = new T.Group(); room.add(cage);
+  const cu = R3.cageU = {uCam: {value: new T.Vector3(0, 0, 10)}, uFade: {value: 1}};
+  // cream bars; the ones between you and the bird fade away so you can always see it
+  const barMat = new T.MeshStandardMaterial({color: '#F7F2E6', metalness: .3, roughness: .38, transparent: true, depthWrite: false});
+  barMat.onBeforeCompile = sh => {
+    sh.uniforms.uCam = cu.uCam; sh.uniforms.uFade = cu.uFade;
+    sh.vertexShader = 'uniform vec3 uCam; uniform float uFade; varying float vFade;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n  vec4 wpF = modelMatrix * vec4(transformed, 1.0);\n  float frontF = dot(normalize(wpF.xz + vec2(1e-4)), normalize(uCam.xz + vec2(1e-4)));\n  vFade = mix(1.0, .14, smoothstep(.3, .78, frontF) * uFade);');
+    sh.fragmentShader = 'varying float vFade;\n' + sh.fragmentShader.replace('#include <dithering_fragment>', '#include <dithering_fragment>\n  gl_FragColor.a *= vFade;');
+  };
+  R3.barMat = barMat;
+  const brass = M('#D9B45A', {metalness: .75, roughness: .28});
+  const N = 40, br = .016, bars = [], dA = C.doorH;
+  const angDiff = (a, b) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
+  const vbar = (a, y0, y1) => bars.push(placed(new T.CylinderGeometry(br, br, y1 - y0, 6), Math.sin(a) * C.R, (y0 + y1) / 2, Math.cos(a) * C.R));
+  for (let i = 0; i < N; i++) {
+    const a = i / N * Math.PI * 2, inDoor = Math.abs(angDiff(a, C.doorA)) < dA;
+    if (inDoor) { vbar(a, C.bot, C.doorLo); vbar(a, C.doorHi, C.top); } else vbar(a, C.bot, C.top);
+    if (i % 2 === 0) { const pts = []; for (let k = 0; k <= 8; k++) { const f = k / 8 * Math.PI / 2, r = Math.cos(f) * C.R, y = C.top + (C.apex - C.top) * Math.sin(f); pts.push(new T.Vector3(Math.sin(a) * r, y, Math.cos(a) * r)); } bars.push(new T.TubeGeometry(new T.CatmullRomCurve3(pts), 10, br, 5, false)); }
+  }
+  [C.bot + .02, -.95, C.top].forEach(y => bars.push(placed(new T.TorusGeometry(C.R, .024, 6, 72), 0, y, 0, Math.PI / 2, 0, 0)));
+  // the door opening's top and bottom rails
+  [C.doorLo, C.doorHi].forEach(y => { const pts = []; for (let k = 0; k <= 8; k++) { const a = C.doorA - dA + k / 8 * dA * 2; pts.push(new T.Vector3(Math.sin(a) * C.R, y, Math.cos(a) * C.R)); } bars.push(new T.TubeGeometry(new T.CatmullRomCurve3(pts), 10, .022, 5, false)); });
+  const barMesh = put(mergeGeos(bars), barMat, cage); barMesh.renderOrder = 2;
+  // top: a brass knob and a hanging ring
+  const knob = put(new T.SphereGeometry(.09, 16, 12), brass, cage); knob.position.y = C.apex;
+  const hook = put(new T.TorusGeometry(.16, .025, 8, 24), brass, cage); hook.position.y = C.apex + .22;
+  // the door: its own little bars, hinged on one side, swings open
+  { const hinge = C.doorA - dA, door = R3.door = new T.Group(); door.position.set(Math.sin(hinge) * C.R, 0, Math.cos(hinge) * C.R); cage.add(door);
+    const g = [], o = door.position;
+    for (let k = 0; k <= 4; k++) { const a = hinge + k / 4 * dA * 2; g.push(placed(new T.CylinderGeometry(br, br, C.doorHi - C.doorLo, 6), Math.sin(a) * C.R - o.x, (C.doorLo + C.doorHi) / 2, Math.cos(a) * C.R - o.z)); }
+    [C.doorLo + .03, (C.doorLo + C.doorHi) / 2, C.doorHi - .03].forEach(y => { const pts = []; for (let k = 0; k <= 8; k++) { const a = hinge + k / 8 * dA * 2; pts.push(new T.Vector3(Math.sin(a) * C.R * 1.01 - o.x, y, Math.cos(a) * C.R * 1.01 - o.z)); } g.push(new T.TubeGeometry(new T.CatmullRomCurve3(pts), 10, .02, 5, false)); });
+    const dm = put(mergeGeos(g), barMat, door); dm.renderOrder = 2;
+    const latchA = hinge + dA * 2, latch = put(new T.SphereGeometry(.05, 12, 8), brass, door); latch.position.set(Math.sin(latchA) * C.R * 1.03 - o.x, (C.doorLo + C.doorHi) / 2, Math.cos(latchA) * C.R * 1.03 - o.z);
+    R3.doorOpen = 0; }
+  // tray: a pastel base with paper on the floor
+  { const s = []; s.push(paintGeo(placed(new T.CylinderGeometry(C.R + .14, C.R + .1, .26, 64), 0, C.bot - .12, 0), '#F4F1EA'), paintGeo(placed(new T.TorusGeometry(C.R + .13, .035, 8, 64), 0, C.bot + .01, 0, Math.PI / 2, 0, 0), '#7FC6C0'), paintGeo(placed(new T.CylinderGeometry(C.R - .02, C.R - .02, .02, 64), 0, C.bot + .012, 0), '#F7F0DF'));
+    const tray = put(mergeGeos(s), VC({roughness: .5}), cage); tray.receiveShadow = true; }
+  // a second, lower perch at the back
+  const p2 = put(new T.CylinderGeometry(PERCH_R * 1.1, PERCH_R * 1.1, 1.5, 12), M('#C9A274', {roughness: .9}), cage); p2.rotation.z = Math.PI / 2; p2.position.set(-.55, -.78, -.55);
+  // food and water cups on the side bars
+  { const prof = [[0, 0], [.16, 0], [.19, .03], [.2, .2], [.215, .22], [.19, .22], [.17, .04], [0, .04]].map(([x, y]) => new T.Vector2(x, y));
+    const cupG = new T.LatheGeometry(prof, 28);
+    [[-.98, '#E4413B'], [.98, '#2E7FCE']].forEach(([x, c]) => { const cup = put(cupG, M(c, {roughness: .35}), cage); cup.position.set(x, -.62, .55); cup.castShadow = true; });
+    const seeds = new T.InstancedMesh(new T.SphereGeometry(.028, 7, 5), M('#FFFFFF', {roughness: .8}), 46), m = new T.Matrix4(), sc = ['#F2D16B', '#E6C66A', '#8FBF5A', '#E4413B', '#F0873A', '#D9B26A', '#7A5A3A'].map(h => new T.Color(h));
+    for (let i = 0; i < 46; i++) { const a = i * 2.4, r = Math.sqrt(i / 46) * .16; m.makeTranslation(-.98 + Math.cos(a) * r, -.62 + .2 + (i % 5) * .006, .55 + Math.sin(a) * r); seeds.setMatrixAt(i, m); seeds.setColorAt(i, sc[i % sc.length]); }
+    cage.add(seeds);
+    const water = put(new T.CircleGeometry(.185, 28), M('#8AD3F2', {roughness: .05, metalness: .1, emissive: '#2E7FCE', emissiveIntensity: .15, transparent: true, opacity: .85}), cage); water.rotation.x = -Math.PI / 2; water.position.set(.98, -.62 + .19, .55); }
+  // the swing: two wires and a little wooden seat with beads, hanging from the dome
+  { const sw = R3.swing = new T.Group(); sw.position.set(-.62, 2.12, -.32); cage.add(sw); const L = R3.swingL = 1.42;
+    [-1, 1].forEach(sd => { const w = put(new T.CylinderGeometry(.009, .009, L, 5), brass, sw); w.position.set(sd * .24, -L / 2, 0); for (let k = 0; k < 3; k++) { const b = put(new T.SphereGeometry(.035, 10, 8), M(['#E4413B', '#F5C024', '#2E7FCE'][k], {roughness: .4}), sw); b.position.set(sd * .24, -L * (.35 + k * .12), 0); } });
+    const seat = put(new T.CylinderGeometry(PERCH_R * .85, PERCH_R * .85, .58, 12), M('#C9A274', {roughness: .9}), sw); seat.rotation.z = Math.PI / 2; seat.position.y = -L; }
+  // a mirror with a bell under it
+  { const mb = R3.mirror = new T.Group(); mb.position.set(.66, 2.05, .2); cage.add(mb);
+    const chain = put(new T.CylinderGeometry(.008, .008, .78, 5), brass, mb); chain.position.y = -.39;
+    const mir = put(new T.CircleGeometry(.19, 32), M('#FFFFFF', {metalness: 1, roughness: .04}), mb); mir.position.y = -.97; mir.rotation.y = -.5;
+    const back = put(new T.CircleGeometry(.19, 32), M('#E27A9E'), mb); back.position.y = -.97; back.rotation.y = -.5 + Math.PI;
+    const rimM = put(new T.TorusGeometry(.2, .03, 8, 32), M('#FFB836', {roughness: .4}), mb); rimM.position.y = -.97; rimM.rotation.y = -.5;
+    const bell = R3.cageBell = new T.Group(); bell.position.y = -1.19; mb.add(bell);
+    const prof = [[0, 0], [.07, .005], [.075, .03], [.055, .06], [.045, .1], [.03, .125], [0, .13]].map(([x, y]) => new T.Vector2(x, y - .13));
+    const bm = put(new T.LatheGeometry(prof, 20), brass, bell); bm.position.y = -.03;
+    const clap = put(new T.SphereGeometry(.016, 8, 6), M('#8A6A1A', {metalness: .6}), bell); clap.position.y = -.17; }
+  // a hanging toy: wooden blocks on a string
+  { const g = []; const tx = -.1, tz = -.78; g.push(paintGeo(placed(new T.CylinderGeometry(.008, .008, .9, 5), tx, 1.75, tz), '#B08A5A'));
+    ['#E4413B', '#F5C024', '#6CBD45', '#2E7FCE', '#7A4FC9'].forEach((c, k) => g.push(paintGeo(placed(k % 2 ? new T.BoxGeometry(.12, .12, .12) : new T.SphereGeometry(.075, 12, 8), tx, 1.25 - k * .15, tz, 0, k * .6, 0), c)));
+    put(mergeGeos(g), VC({roughness: .5}), cage); }
+  // the main perch (never scaled with the room: its thickness has to match the bird's grip)
+  const perch = R3.cagePerch = new T.Mesh(new T.CylinderGeometry(PERCH_R, PERCH_R, 1, 16), M('#C9A274', {roughness: .9})); perch.rotation.z = Math.PI / 2; perch.position.y = -PERCH_R; perch.castShadow = true; perch.receiveShadow = true; house.add(perch);
+  // gentle life: the swing sways a little, the bell tinkles in the breeze
+  R3.anim.push(t => { if (!house.visible) return; if (!R3.swingRide) R3.swing.rotation.x = Math.sin(t * .9) * .05; R3.cageBell.rotation.z = Math.sin(t * 1.7) * .06 + (R3.bellHit ? Math.sin((t - R3.bellHit) * 18) * .5 * Math.max(0, 1 - (t - R3.bellHit) * 1.2) : 0); });
+  return house;
+}
+// the cage door: 0 closed, 1 open
+function setCageDoor(u) { if (R3.door) { R3.doorOpen = u; R3.door.rotation.y = -1.9 * easeIO(Math.max(0, Math.min(1, u))); } }
+// a photo of the bird in the frame on the wall
+function setPhoto(b) {
+  const P = R3.photo; if (!P || !b) return; const key = thumbKey(b, 256, 320); if (P.key === key) return; P.key = key;
+  const x = P.cv.getContext('2d'); const g = x.createLinearGradient(0, 0, 0, 320); g.addColorStop(0, '#BFE3F4'); g.addColorStop(1, '#FFF1D6'); x.fillStyle = g; x.fillRect(0, 0, 256, 320); P.tex.needsUpdate = true;
+  try { const img = new Image(); img.onload = () => { if (P.key !== key) return; x.drawImage(img, 0, 0, 256, 320); P.tex.needsUpdate = true; }; img.src = thumb3D(b, 256, 320); } catch (e) {}
 }
 function renderer3() {
   if (R3.r) return R3.r;
@@ -1986,7 +2205,7 @@ class View3D {
     this.bindPointer();
     this.last = performance.now(); this.raf = requestAnimationFrame(t => this.tick(t));
     this.onVis = () => { if (!document.hidden && this.alive) { this.last = performance.now(); } }; document.addEventListener('visibilitychange', this.onVis);
-    R3.view = this;
+    R3.view = this; this.setPlace('tree');
   }
   setBird(b) {
     if (this.actor) { this.actor.alive = false; this.actor.timers.forEach(clearTimeout); this.actor.timers.clear(); }
@@ -1997,12 +2216,14 @@ class View3D {
     if (Math.abs(k - (this.fit || 1)) > .02) { this.fit = k; this.ctl.minDistance = .95 * Math.min(1, k * 1.1); this.setHome(true); }
     return this.actor;
   }
-  setHome(snap) {
+  setHome(snap, ms) {
     const k = this.fit || 1, h = this.home, ty = .52 * k, d = h.d * (.35 + .65 * k); this.homeY = ty;
     const pos = new this.T.Vector3(Math.sin(h.az) * Math.cos(h.el) * d, ty + Math.sin(h.el) * d, Math.cos(h.az) * Math.cos(h.el) * d);
     if (snap) { this.cam.position.copy(pos); this.ctl.target.set(0, ty, 0); this.ctl.update(); }
-    else this.glide = {from: this.cam.position.clone(), to: pos, tf: this.ctl.target.clone(), tt: new this.T.Vector3(0, ty, 0), t0: performance.now()};
+    else this.glide = {from: this.cam.position.clone(), to: pos, tf: this.ctl.target.clone(), tt: new this.T.Vector3(0, ty, 0), t0: performance.now(), ms};
   }
+  // the whole cage in its room, from further back
+  wideCage() { const k = this.fit || 1, T = this.T; return {pos: new T.Vector3(Math.sin(.45) * 8.6 * k, 2.1 * k, Math.cos(.45) * 8.6 * k), tgt: new T.Vector3(0, .55 * k, 0)}; }
   zoomFace() {
     const T = this.T; if (!this.bird) return;
     const hp = new T.Vector3(); this.bird.headBone.getWorldPosition(hp); hp.y += this.bird.F.S.head * .35;
@@ -2126,7 +2347,7 @@ class View3D {
       if (v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05) { el.hidden = true; return; }
       el.hidden = false; el.style.transform = `translate(${((v.x + 1) / 2 * r.width).toFixed(1)}px, ${((1 - v.y) / 2 * r.height).toFixed(1)}px) translate(-50%, -100%)`;
     };
-    const far = d > 4.6 && !this.flight && !this.visit;
+    const far = d > 4.6 && !this.flight && !this.visit && this.place !== 'cage';
     (this.friends || []).forEach(f => put(f.tag, f.bird, far));
     if (this.myTag && this.bird) { this.myTag.textContent = this.bird.b.name || ''; put(this.myTag, this.bird, far); }
     this.chats = (this.chats || []).filter(c => { if (now > c.until) { c.el.remove(); return false; } put(c.el, c.bird, true); return true; });
@@ -2174,6 +2395,105 @@ class View3D {
       a.later(350, () => step(0));
     });
     return true;
+  }
+  // ---- home: the tree outside, or a cage in the house (the world swaps around the bird; the lights just change mood) ----
+  setPlace(place) {
+    const cage = place === 'cage', k = this.fit || 1; this.place = cage ? 'cage' : 'tree';
+    if (R3.out) R3.out.visible = !cage;
+    if (cage) { buildHouse(); R3.house.visible = true; R3.room.scale.setScalar(k); R3.cagePerch.scale.y = 2 * (CAGE.R - .03) * k; setCageDoor(0); R3.cageU.uFade.value = 1; R3.swingRide = false; if (this.bird) setPhoto(this.bird.b); }
+    else if (R3.house) R3.house.visible = false;
+    if (R3.hemi) { R3.hemi.color.set(cage ? '#FFF1E2' : '#D2EBFA'); R3.hemi.groundColor.set(cage ? '#E6C9A6' : '#EBDDC0'); R3.hemi.intensity = cage ? 1.3 : 1.15; }
+    if (R3.key) R3.key.intensity = cage ? 2.1 : 2.5;
+    if (R3.rim) R3.rim.intensity = cage ? .8 : 1.3;
+    if (R3.fog) { R3.fog.near = cage ? 900 : 12; R3.fog.far = cage ? 1000 : 80; }
+    const hd = this.home.d * (.35 + .65 * k);
+    Object.assign(this.ctl, cage ? {maxDistance: Math.max(hd * 1.35, 9.5 * k), minPolarAngle: .75} : {maxDistance: 22, minPolarAngle: .3});
+  }
+  // fly along a curve (quadratic), wings out; the bird turns to face its way, then back to front when it lands
+  flyPath(ms, from, via, to, endYaw, then, glide) {
+    const a = this.actor, x = a.x, p = new this.T.Vector3(), q = new this.T.Vector3();
+    a.drive(ms, u => {
+      const e = easeIO(u), m1 = 1 - e;
+      p.set(m1 * m1 * from.x + 2 * m1 * e * via.x + e * e * to.x, m1 * m1 * from.y + 2 * m1 * e * via.y + e * e * to.y, m1 * m1 * from.z + 2 * m1 * e * via.z + e * e * to.z);
+      q.set(2 * m1 * (via.x - from.x) + 2 * e * (to.x - via.x), 0, 2 * m1 * (via.z - from.z) + 2 * e * (to.z - via.z));
+      const flying = 1 - ss(.84, 1, u), shut = glide ? glide(u) : 0, heading = Math.atan2(q.x, q.z), dy = Math.atan2(Math.sin(endYaw - heading), Math.cos(endYaw - heading));
+      x.px = p.x; x.py = p.y; x.pz = p.z; x.ry = heading + dy * ss(.8, 1, u);
+      x.rx = .95 * flying - .35 * bump(u, .8, .98); x.headPitch = -.7 * flying; x.tuck = flying > .4 ? 1 : 0;
+      const w = Math.max(flying * (1 - shut * .7), bump(u, .8, 1)); x.wing = [w, w]; x.fan = Math.max(flying * .6, bump(u, .8, 1)); a.w.flapping = flying * (1 - shut);
+    }, then);
+  }
+  rest() { const a = this.actor; if (!a) return; Object.keys(a.x).forEach(key => { a.x[key] = key === 'wing' ? null : 0; }); a.w.flapping = 0; a.noLook = false; a.follow = false; }
+  // take the bird into the house: off the branch, then in through the cage door (a quick fade hides the trip)
+  goCage(done) {
+    const T = this.T, a = this.actor; if (!a || this.flight || this.visit || this.place === 'cage') return false;
+    const x = a.x, k = this.fit || 1, dA = CAGE.doorA, host = this.host;
+    a.noLook = true; sfx('flap');
+    a.drive(900, u => { const e = easeIO(u); x.py = e * 1.2 * k; x.pz = e * .9 * k; x.rx = .9 * ss(0, .35, u); x.headPitch = -.6 * ss(0, .35, u); x.wing = [1, 1]; x.tuck = u > .25 ? 1 : 0; x.fan = .6; a.w.flapping = 1; });
+    a.later(420, () => stageFade(host, true, () => {
+      if (!this.alive || this.actor !== a) return;
+      a.drivers.length = 0; this.clearFriends(); this.setPlace('cage'); setCageDoor(1); R3.cageU.uFade.value = .3;
+      const wide = this.wideCage(); this.cam.position.copy(wide.pos); this.ctl.target.copy(wide.tgt); this.ctl.update(); this.setHome(false, 1700); this.glide.t0 += 500;
+      const at = (ang, d, y) => new T.Vector3(Math.sin(ang) * d * k, y * k, Math.cos(ang) * d * k);
+      this.flyPath(1900, at(dA - 1.25, 3.6, 1.5), at(dA - .05, 1.5, .34), new T.Vector3(0, 0, 0), 0, () => {
+        this.rest(); sfx('flap');
+        a.drive(650, u => setCageDoor(1 - u), () => { setCageDoor(0); sfx('latch'); R3.cageU.uFade.value = 1; done && done(); });
+      }, u => bump(u, .42, .75));
+      stageFade(host, false);
+    }));
+    return true;
+  }
+  // out of the cage door and back to the tree
+  leaveCage(done) {
+    const T = this.T, a = this.actor; if (!a || this.flight || this.visit || this.place !== 'cage') return false;
+    const k = this.fit || 1, dA = CAGE.doorA, host = this.host;
+    a.noLook = true; R3.cageU.uFade.value = .3; sfx('latch');
+    const wide = this.wideCage(); this.glide = {from: this.cam.position.clone(), to: wide.pos, tf: this.ctl.target.clone(), tt: wide.tgt, t0: performance.now(), ms: 1300};
+    a.drive(550, u => setCageDoor(u), () => {
+      sfx('flap');
+      const at = (ang, d, y) => new T.Vector3(Math.sin(ang) * d * k, y * k, Math.cos(ang) * d * k);
+      this.flyPath(1500, new T.Vector3(0, 0, 0), at(dA, 1.35, .3), at(dA + 1.1, 3.4, 1.5), dA, null, u => bump(u, .2, .5));
+      a.later(800, () => stageFade(host, true, () => {
+        if (!this.alive || this.actor !== a) return;
+        a.drivers.length = 0; this.setPlace('tree'); setCageDoor(0); this.setHome(true);
+        if (typeof friendsOf === 'function') this.setFriends(friendsOf(this.bird.b));
+        this.flyPath(1700, new T.Vector3(-3.4 * k, 2.1 * k, .5 * k), new T.Vector3(-1.2 * k, 1.1 * k, .6 * k), new T.Vector3(0, 0, 0), 0, () => { this.rest(); sfx('flap'); done && done(); });
+        stageFade(host, false);
+      }));
+    });
+    return true;
+  }
+  // hop onto the swing, swing a while, hop back
+  cageSwing(done) {
+    const T = this.T, a = this.actor; if (!a || this.place !== 'cage' || !R3.swing || a.drivers.length) return 0;
+    const x = a.x, k = this.fit || 1, S = R3.swing, L = R3.swingL, sr = PERCH_R * .85;
+    const seat = ang => new T.Vector3(S.position.x * k, (S.position.y - Math.cos(ang) * L) * k + sr, (S.position.z - Math.sin(ang) * L) * k);
+    const hopTo = (from, to, ms, then) => a.drive(ms, u => { const e = easeIO(u); x.px = from.x + (to.x - from.x) * e; x.py = from.y + (to.y - from.y) * e + .35 * k * Math.sin(u * Math.PI); x.pz = from.z + (to.z - from.z) * e; const w = bump(u, 0, 1); x.wing = [w, w]; x.fan = w; a.w.flapping = w > .2 ? 1 : 0; }, then);
+    a.excite(7000); sfx('flap'); R3.swingRide = true;
+    const home = new T.Vector3(0, 0, 0), A = .42, s0 = seat(0);
+    // the camera follows it up to the swing, and back down after
+    this.focus = new T.Vector3(s0.x * .7, s0.y + .42 * k, s0.z * .5); this.focusDist = this.cam.position.distanceTo(this.ctl.target) * 1.1;
+    hopTo(home, seat(0), 850, () => {
+      a.w.flapping = 0; x.wing = null; x.fan = 0; a.happyFor(2600);
+      a.drive(4600, u => { const ang = A * Math.sin(u * Math.PI * 2 * 2.5) * Math.min(1, u * 4) * (1 - ss(.85, 1, u)); S.rotation.x = ang; const p = seat(ang); x.px = p.x; x.py = p.y; x.pz = p.z; x.rx = -ang * .9; x.fan = .3 * Math.abs(Math.sin(u * 30)); }, () => {
+        S.rotation.x = 0; sfx('flap');
+        this.focus = null; this.focusDist = null; this.setHome(false, 900);
+        hopTo(seat(0), home, 850, () => { R3.swingRide = false; this.rest(); done && done(); });
+      });
+    });
+    return 6.4;
+  }
+  // walk over to the bell and peck it: ding, ding, ding!
+  cageBell(done) {
+    const a = this.actor; if (!a || this.place !== 'cage' || a.drivers.length) return 0;
+    const x = a.x, k = this.fit || 1, ms = 3800;
+    a.excite(ms); a.faceCam(600);
+    a.drive(ms, u => {
+      const go = ss(0, .16, u) * (1 - ss(.84, 1, u)), pk = u > .22 && u < .8 ? Math.max(0, Math.sin((u - .22) / .58 * Math.PI * 3)) : 0;
+      x.px = .34 * k * go; x.py = .04 * k * (bump(u, 0, .16) + bump(u, .84, 1));
+      x.headYaw = 1.05 * go; x.headPitch = -.15 * go + .5 * pk; x.lean = .15 * pk; a.s.beakT = pk > .75 ? .45 : 0;
+    }, () => { this.rest(); done && done(); });
+    [0, 1, 2].forEach(i => a.later(ms * (.22 + (i + .5) * .58 / 3), () => { sfx('ding'); R3.bellHit = performance.now() / 1000; }));
+    return ms / 1000;
   }
   // ---- free flight: she steers, the bird catches floating notes that play a song ----
   startFlight(tune, onDone) {
@@ -2268,7 +2588,7 @@ class View3D {
     this.raf = requestAnimationFrame(t => this.tick(t));
     if (document.hidden) return;
     const dt = Math.min(.05, (now - this.last) / 1000); this.last = now;
-    if (this.glide) { const g = this.glide, u = Math.min(1, (now - g.t0) / 700), k = easeIO(u); this.cam.position.lerpVectors(g.from, g.to, k); this.ctl.target.lerpVectors(g.tf, g.tt, k); if (u >= 1) this.glide = null; }
+    if (this.glide) { const g = this.glide, u = Math.max(0, Math.min(1, (now - g.t0) / (g.ms || 700))), k = easeIO(u); this.cam.position.lerpVectors(g.from, g.to, k); this.ctl.target.lerpVectors(g.tf, g.tt, k); if (u >= 1) this.glide = null; }
     if (this.actor) this.actor.update(dt, now);
     if (this.friends) this.friends.forEach(f => f.actor.update(dt, now));
     if (this.focus && !this.glide) { this.ctl.target.lerp(this.focus, 1 - Math.exp(-3 * dt)); if (this.focusDist) { const off = this.cam.position.clone().sub(this.ctl.target); const dd = off.length(); off.setLength(dd + (this.focusDist - dd) * (1 - Math.exp(-2.5 * dt))); this.cam.position.copy(this.ctl.target).add(off); } }
@@ -2277,6 +2597,7 @@ class View3D {
     if (this.millet) { const k = Math.min(1, (now - this.milletIn) / 400); this.millet.scale.setScalar(Math.max(.01, easeIO(k))); }
     for (let i = this.fx.length - 1; i >= 0; i--) { const f = this.fx[i], u = (now - f.t0) / f.ms; if (u >= 1) { this.scene.remove(f.sp); f.sp.material.dispose(); this.fx.splice(i, 1); continue; } f.sp.position.x += f.vx * dt; f.sp.position.y += .55 * dt; f.sp.position.z += f.vz * dt; const s = .12 * Math.min(1, u * 6); f.sp.scale.set(s, s, s); f.sp.material.opacity = 1 - ss(.6, 1, u); }
     if (R3.anim) R3.anim.forEach(f => f(now / 1000, dt));
+    if (this.place === 'cage' && R3.cageU) R3.cageU.uCam.value.copy(this.cam.position);
     this.placeLabels(now);
     if (this.flight) this.flightTick(dt, now);
     else if (!this.glide) {
@@ -2526,6 +2847,8 @@ function sfx(kind) {
   if (kind === 'purr') { for (let i = 0; i < 28; i++) noise(t + i * .03, .012, {f: 4200, q: 3, vol: .05}); tone(t, .7, [[0, 1800], [1, 1700]], {fm: {rate: 45, depth: 250}, vol: .045}); }
   if (kind === 'flap') for (let i = 0; i < 5; i++) noise(t + i * .23, .1, {type: 'lowpass', f: 800, q: .5, vol: .22});
   if (kind === 'win') [0, 4, 7, 12, 16].forEach((s, i) => mallet(t + i * .09, 1046.5 * Math.pow(2, s / 12), .14));
+  if (kind === 'ding') [[2093, .15], [2637, .06]].forEach(([f, v]) => tone(t, 1.1, [[0, f], [1, f]], {harm: [[1, 1], [2.76, .35], [5.4, .12]], vol: v, env: [[0, 0], [.004, 1], [.25, .32], [1, 0]]}));
+  if (kind === 'latch') { noise(t, .03, {f: 3200, q: 2, vol: .16}); tone(t + .005, .06, [[0, 900], [1, 700]], {vol: .06, env: [[0, 0], [.1, 1], [1, 0]]}); }
 }
 function unlock() {
   if (AU.unlocked) return; AU.unlocked = true; audio();
@@ -2710,7 +3033,7 @@ function renderAviary() {
     <p class="lede">${birds.length ? `${birds.length === 1 ? 'One bird lives' : birds.length + ' birds live'} here. Tap a bird to visit, or hatch a brand-new one.` : 'No birds yet — hatch your first one!'}</p>
   </header>
   <section class="grid">
-    ${birds.map((b, i) => `<button class="card" data-id="${b.id}"><div class="thumb">${SUN}${SCENE}${birdSVG(b, 'c' + i)}</div><div class="meta"><b>${esc(b.name)}</b><span>${SPECIES[b.species].label}</span><span class="knows">${knowsLine(b)}</span></div></button>`).join('')}
+    ${birds.map((b, i) => `<button class="card" data-id="${b.id}"><div class="thumb${b.home === 'cage' ? ' caged' : ''}">${SUN}${SCENE}${b.home === 'cage' ? INDOOR : ''}${birdSVG(b, 'c' + i)}${b.home === 'cage' ? CAGE_FRONT : ''}</div><div class="meta"><b>${esc(b.name)}</b><span>${SPECIES[b.species].label}</span><span class="knows">${knowsLine(b)}</span></div></button>`).join('')}
     <button class="card new" id="btnNew"><div class="thumb">${EGG}</div><div class="meta"><b>Hatch a bird</b><span>Design your own</span></div></button>
   </section>`;
   $$('.card[data-id]').forEach(el => el.onclick = () => { sfx('pop'); go('room', el.dataset.id); });
@@ -2768,7 +3091,7 @@ function renderRoom(id) {
   <header class="top"><button class="icon-btn" id="btnBack" aria-label="Back to the aviary">${IC.back}</button>
     <div class="ttl"><button class="namebtn" id="btnName" aria-label="Rename ${esc(b.name)}"><h1 id="roomName">${esc(b.name)}</h1><span class="pen">${IC.pencil}</span></button><span class="sub">${sp.label}</span></div>
     <button class="icon-btn" id="btnEdit" aria-label="Change how ${esc(b.name)} looks">${IC.palette}</button></header>
-  <div class="stage" id="stage">${SUN}${SCENE}<div class="layer" id="birdLayer"></div>
+  <div class="stage${b.home === 'cage' ? ' caged' : ''}" id="stage">${SUN}${SCENE}${INDOOR}${CAGE_BACK}<div class="layer" id="birdLayer"></div>${CAGE_FRONT}
     <div class="love" id="love">♥ <span>${b.hearts || 0}</span></div>
     <div class="bubble bird" id="bub-bird" hidden></div><div class="bubble kid" id="bub-kid" hidden></div>
     <div class="hint" id="hint"></div>
@@ -2803,13 +3126,13 @@ function greet() {
 function view2D() { return Store.settings.view === '2d'; }
 function setStage(threeD) {
   const b = cur(), st = $('#stage'); if (!b || !st) return false;
-  stopActor(); st.querySelectorAll('.zoom').forEach(e => e.remove());
+  stopActor(); st.querySelectorAll('.zoom').forEach(e => e.remove()); st.classList.toggle('caged', b.home === 'cage'); st.classList.remove('dooropen');
   const hint = $('#hint'), dim = $('#dimBtn');
   let is3 = false;
   if (threeD && has3D()) {
     try {
       st.classList.add('is3d'); $('#birdLayer').innerHTML = '';
-      const v = new View3D(st, 'room'); actor = v.setBird(b); v.setFriends(friendsOf(b));
+      const v = new View3D(st, 'room'); actor = v.setBird(b); v.setPlace(b.home === 'cage' ? 'cage' : 'tree'); if (b.home !== 'cage') v.setFriends(friendsOf(b));
       st.insertAdjacentHTML('beforeend', `<button class="zoom" id="zoomBtn" aria-label="Zoom in on ${esc(b.name)}">${IC.zoom}</button>`);
       $('#zoomBtn').onclick = () => { sfx('pop'); v.zoomFace(); };
       is3 = true;
@@ -2892,6 +3215,8 @@ function idleTick() {
   const b = cur(); if (!b) return; const sp = SPECIES[b.species]; const r = Math.random();
   const learned = b.words.filter(w => w.learned), tunes = b.tunes.filter(t => t.learned);
   if (!AU.unlocked) { if (r < .5) actor.preen(); else actor.listen(); return; }
+  // in the cage it sometimes plays with its toys by itself
+  if (b.home === 'cage' && actor.is3D && R3.view && R3.view.place === 'cage' && r > .9) { if (r > .95) cageBell(); else cageSwing(); return; }
   if (r < .32 && learned.length && sp.talk) birdSays(pick(learned).t);
   else if (r < .52) doCall();
   else if (r < .66 && tunes.length) birdWhistle(pick(tunes), 1);
@@ -2927,19 +3252,24 @@ function doTrick(k) {
 
 /* play */
 function renderPlay(p) {
-  const b = cur(), sp = SPECIES[b.species];
+  const b = cur(), sp = SPECIES[b.species], caged = b.home === 'cage';
   p.innerHTML = `
-  ${has3D() && friendsOf(b).length ? `<div class="friends"><span class="eyebrow">Visit a friend</span><div class="chips">${friendsOf(b).slice(0, 6).map((f, i) => `<button class="chip" data-visit="${i}">${esc(f.name)} <small>${esc(SPECIES[f.species].label)}</small></button>`).join('')}</div></div>` : ''}
-  ${has3D() ? `<button class="tile flyTile" id="aFly"><span class="em" aria-hidden="true">🪽♪</span><span>Fly &amp; catch the notes<small>Touch and hold to steer ${esc(b.name)}</small></span></button>` : ''}
+  <button class="tile homeTile${caged ? ' out' : ''}" id="aHome"><span class="em" aria-hidden="true">${caged ? '🌳' : '🏠'}</span><span>${caged ? `Let ${esc(b.name)} out` : `Take ${esc(b.name)} to the cage`}<small>${caged ? 'Fly back to the tree outside' : 'A cozy cage in the house'}</small></span></button>
+  ${!caged && has3D() && friendsOf(b).length ? `<div class="friends"><span class="eyebrow">Visit a friend</span><div class="chips">${friendsOf(b).slice(0, 6).map((f, i) => `<button class="chip" data-visit="${i}">${esc(f.name)} <small>${esc(SPECIES[f.species].label)}</small></button>`).join('')}</div></div>` : ''}
+  ${!caged && has3D() ? `<button class="tile flyTile" id="aFly"><span class="em" aria-hidden="true">🪽♪</span><span>Fly &amp; catch the notes<small>Touch and hold to steer ${esc(b.name)}</small></span></button>` : ''}
   <div class="tiles">
     <button class="tile t1" id="aTreat">${IC.millet}<span>Millet treat<small>A crunchy snack</small></span></button>
     <button class="tile t2" id="aScratch">${IC.hand}<span>Head scratch<small>Or rub the head on screen</small></span></button>
     <button class="tile t3" id="aDance">${IC.music}<span>Dance party<small>${esc(b.name)} bobs along</small></span></button>
     <button class="tile t4" id="aFlap">${IC.wing}<span>Flap &amp; hop<small>Big wing stretch</small></span></button>
+    ${caged && has3D() ? `<button class="tile t5" id="aSwing"><span class="em" aria-hidden="true">🎠</span><span>Swing<small>Whee, back and forth</small></span></button><button class="tile t6" id="aBell"><span class="em" aria-hidden="true">🔔</span><span>Ring the bell<small>Ding, ding, ding!</small></span></button>` : ''}
   </div>
   <div class="fact"><span class="eyebrow">${sp.label} fact</span><p id="factText">${esc(sp.facts[S.factIx % sp.facts.length])}</p><button class="linkbtn" id="nextFact">Another fact</button></div>
   <div class="stars"><span>Talking <b>${stars(sp.talk)}</b></span><span>Whistling <b>${stars(sp.sing)}</b></span></div>`;
   $('#aTreat').onclick = () => soon(giveTreat);
+  $('#aHome').onclick = () => { sfx('pop'); soon(toggleHome); };
+  const sw = $('#aSwing'); if (sw) sw.onclick = () => soon(() => in3D(cageSwing));
+  const bl = $('#aBell'); if (bl) bl.onclick = () => soon(() => in3D(cageBell));
   const fly = $('#aFly'); if (fly) fly.onclick = () => soon(() => in3D(flyGame));
   $$('[data-visit]', p).forEach(el => el.onclick = () => { sfx('pop'); visitFriend(+el.dataset.visit); });
   $('#aScratch').onclick = () => { scratch(); setTimeout(scratch, 900); setTimeout(scratch, 1800); };
@@ -2947,7 +3277,7 @@ function renderPlay(p) {
   $('#aFlap').onclick = () => soon(() => { if (isBusy() || !actor) return; actor.flapWings(5); actor.hop(); actor.later(700, () => actor && actor.hop()); sfx('flap'); setBusy(1400); addLove(1); });
   $('#nextFact').onclick = () => { S.factIx++; $('#factText').textContent = sp.facts[S.factIx % sp.facts.length]; sfx('pop'); };
 }
-function friendsOf(b) { return [...Store.birds.values()].filter(x => x.id !== b.id && SPECIES[x.species]).sort((p, q) => (p.created || 0) - (q.created || 0)); }
+function friendsOf(b) { return [...Store.birds.values()].filter(x => x.id !== b.id && SPECIES[x.species] && x.home !== 'cage').sort((p, q) => (p.created || 0) - (q.created || 0)); }
 // what two birds say to each other: they greet each other by name (and wave), then chat with their
 // own learned words, talking to each other, not to Havi (her name becomes the other bird's name)
 function chatLines(me, fr) {
@@ -2978,6 +3308,52 @@ function visitFriend(i) {
   if (isBusy()) { soon(() => visitFriend(i)); return; }
   showStage();
   if (v.visitFriend(i, () => { S.busyUntil = 0; addLove(2); backTo2D(900); })) { setBusy(120000); toast(`${b.name} is flying to visit ${v.friends[i].b.name}!`); }
+}
+// take the bird to its cage in the house, or back out to the tree (saved right away)
+function toggleHome() {
+  const b = cur(); if (!b || !actor || isBusy() || S.game) return;
+  const toCage = b.home !== 'cage', a = actor;
+  if (toCage) b.home = 'cage'; else delete b.home;
+  Store.save(b); showStage(); setBusy(12000);
+  const after = () => {
+    if (actor !== a || cur() !== b) return;
+    S.busyUntil = 0; setBusy(700); hearts(2); addLove(1); doCall();
+    toast(toCage ? `${b.name} is cozy in the cage!` : `${b.name} flew back to the tree!`, true);
+    if (S.tab === 'play') renderTab();
+  };
+  if (a.is3D) { const v = R3.view; if (!v || !(toCage ? v.goCage(after) : v.leaveCage(after))) { S.busyUntil = 0; setStage(true); renderTab(); } }
+  else homeIn2D(toCage, after);
+}
+// the drawing's version: the door opens, a soft fade, and the bird is in (or out)
+function homeIn2D(toCage, after) {
+  const st = $('#stage'), a = actor; if (!st || !a) return;
+  a.flapWings(4); a.hop(); sfx('flap'); if (!toCage) { st.classList.add('dooropen'); sfx('latch'); }
+  setTimeout(() => stageFade(st, true, () => {
+    if (actor !== a) return;
+    st.classList.toggle('caged', toCage); st.classList.toggle('dooropen', toCage);
+    stageFade(st, false); a.flapWings(3);
+    setTimeout(() => { if (actor !== a) return; if (toCage) { st.classList.remove('dooropen'); sfx('latch'); } after(); }, 750);
+  }), 380);
+}
+// a soft curtain over the stage while the bird moves between the tree and the house
+function stageFade(host, on, cb) {
+  if (!host) { if (cb) cb(); return; }
+  let f = host.querySelector(':scope > .fader'); if (!f) { f = document.createElement('div'); f.className = 'fader'; host.appendChild(f); void f.offsetWidth; }
+  f.classList.toggle('on', !!on);
+  if (cb) setTimeout(cb, 400);
+}
+// cage fun (3D; from the drawing it pops into 3D and back)
+function cageSwing() {
+  const v = R3.view, b = cur(); if (!v || !b || isBusy()) return;
+  const d = v.cageSwing(() => { S.busyUntil = 0; setBusy(500); hearts(2); addLove(2); backTo2D(700); }); if (!d) return;
+  setBusy(d * 1000 + 400); showStage();
+  const tunes = b.tunes.filter(t => t.learned && t.notes && t.notes.length >= 3);
+  actor.later(1000, () => { if (tunes.length) { const dd = birdWhistle(pick(tunes), 1); setBusy(Math.max(d * 1000 - 600, dd * 1000 + 300)); } else doCall(); });
+}
+function cageBell() {
+  const v = R3.view; if (!v || isBusy()) return;
+  const d = v.cageBell(() => { S.busyUntil = 0; setBusy(400); hearts(1); addLove(1); backTo2D(700); }); if (!d) return;
+  setBusy(d * 1000 + 300); showStage();
 }
 function flyGame() {
   const v = R3.view, b = cur(); if (isBusy() || !v || !v.actor || !b) return;
