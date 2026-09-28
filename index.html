@@ -219,6 +219,7 @@ svg.cage2d{pointer-events:none}
 .melody{flex-wrap:nowrap;gap:8px;min-height:58px}
 .mbody{flex:1;min-width:0;display:grid;gap:7px}
 .mtitle,.mspecial{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.1;overflow-wrap:anywhere}
+.mtitle .by{font-family:var(--body);font-weight:400;font-size:14px;color:var(--ink2)}
 .mcells{display:flex;flex-wrap:wrap;gap:7px 5px;align-items:flex-start}
 .mc{display:inline-flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
 .mc .nd{width:calc(8px + var(--w,1) * 14px);height:20px;border-radius:10px;background:var(--c);transition:transform .12s,box-shadow .12s}
@@ -245,6 +246,8 @@ svg.cage2d{pointer-events:none}
 .song{position:relative;border:2px solid var(--line);background:var(--card);border-radius:18px;min-height:58px;padding:8px 10px;display:flex;align-items:center;gap:9px;text-align:left;font-weight:700;font-size:16px;line-height:1.15;box-shadow:0 3px 0 var(--line);min-width:0}
 .song .em{font-size:26px;line-height:1;flex:0 0 auto}
 .song .nm{min-width:0;overflow-wrap:anywhere}
+.song .nm small{display:block;font-weight:400;font-size:12.5px;color:var(--ink2);margin-top:1px}
+.song[aria-pressed="true"] .nm small{color:#C9D3E0}
 .song:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
 .song[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff;box-shadow:none}
 .song.knows::after{content:'✓';position:absolute;top:-7px;right:-4px;width:22px;height:22px;border-radius:50%;background:var(--leaf);color:#fff;font-size:13px;font-weight:800;line-height:22px;text-align:center;box-shadow:0 0 0 2px var(--paper)}
@@ -274,6 +277,7 @@ svg.cage2d{pointer-events:none}
 .melody{flex-wrap:nowrap;gap:8px;min-height:58px}
 .mbody{flex:1;min-width:0;display:grid;gap:7px}
 .mtitle,.mspecial{font-family:var(--display);font-weight:800;font-size:18px;line-height:1.1;overflow-wrap:anywhere}
+.mtitle .by{font-family:var(--body);font-weight:400;font-size:14px;color:var(--ink2)}
 .mcells{display:flex;flex-wrap:wrap;gap:7px 5px;align-items:flex-start}
 .mc{display:inline-flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
 .mc .nd{width:calc(8px + var(--w,1) * 14px);height:20px;border-radius:10px;background:var(--c);transition:transform .12s,box-shadow .12s}
@@ -299,6 +303,8 @@ svg.cage2d{pointer-events:none}
 .song{position:relative;border:2px solid var(--line);background:var(--card);border-radius:18px;min-height:58px;padding:8px 10px;display:flex;align-items:center;gap:9px;text-align:left;font-weight:700;font-size:16px;line-height:1.15;box-shadow:0 3px 0 var(--line);min-width:0}
 .song .em{font-size:26px;line-height:1;flex:0 0 auto}
 .song .nm{min-width:0;overflow-wrap:anywhere}
+.song .nm small{display:block;font-weight:400;font-size:12.5px;color:var(--ink2);margin-top:1px}
+.song[aria-pressed="true"] .nm small{color:#C9D3E0}
 .song:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
 .song[aria-pressed="true"]{border-color:var(--ink);background:var(--ink);color:#fff;box-shadow:none}
 .song.knows::after{content:'✓';position:absolute;top:-7px;right:-4px;width:22px;height:22px;border-radius:50%;background:var(--leaf);color:#fff;font-size:13px;font-weight:800;line-height:22px;text-align:center;box-shadow:0 0 0 2px var(--paper)}
@@ -2794,50 +2800,15 @@ function whistle(t0, notes, base, beat = .32, vol = .2, dest) {
   [osc, osc2, lfo].forEach(x => { x.start(t0); x.stop(t + .4); });
   return t - t0;
 }
-/* the pop songs' backing band: a little drum machine and a bass line, made up on the spot */
-// 16 steps a bar: kick (k), snare or clap (s), hi-hat (h: x closed, o open)
-const GROOVES = {
-  strut: {k: 'x.....x.x.......', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.'},
-  disco: {k: 'x...x...x...x...', s: '....x.......x...', h: '..o...o...o...o.', clap: 1},
-  funk: {k: 'x.....x...x.....', s: '....x..x....x...', h: 'xxxxxxxxxxxxxxxx'},
-  rock: {k: 'x.......x.x.....', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.'},
-  spooky: {k: 'x.......x.......', s: '....x.......x...', h: '..x...x...x...x.', clap: 1},
-  smooth: {k: 'x......x..x.....', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.', soft: 1},
-  robot: {k: 'x..x..x.x.......', s: '....x.......x...', h: 'xxxxxxxxxxxxxxxx', clap: 1},
-  bounce: {k: 'x...x...x...x...', s: '....x.......x...', h: 'x.xxx.xxx.xxx.xx', clap: 1}
-};
-// the band sits under the bird's whistle: the whistle is the star
-// (a punchy kick that phone speakers can play: not much deep rumble, plus a little click)
-function kick(t, v, dest) { tone(t, .16, [[0, 190], [.35, 95], [1, 70]], {vol: .3 * v, env: [[0, 0], [.02, 1], [.4, .45], [1, 0]], dest}); tone(t, .03, [[0, 1500], [1, 600]], {vol: .05 * v, env: [[0, 0], [.1, 1], [1, 0]], dest}); }
-function snare(t, v, dest) { noise(t, .17, {f: 2000, q: .6, vol: .14 * v, dest}); tone(t, .08, [[0, 240], [1, 180]], {vol: .09 * v, env: [[0, 0], [.05, 1], [1, 0]], dest}); }
-function clap(t, v, dest) { [0, .011, .023].forEach(d => noise(t + d, .045, {f: 1400, q: 1.1, vol: .1 * v, dest})); noise(t + .03, .15, {f: 1250, q: .9, vol: .06 * v, dest}); }
-function hat(t, open, v, dest) { noise(t, open ? .18 : .035, {type: 'highpass', f: 7200, q: .7, vol: (open ? .05 : .035) * v, dest}); }
-function bassNote(t, semi, d, v, dest) { const f = 130.81 * Math.pow(2, semi / 12); tone(t, Math.max(.06, d), [[0, f], [1, f]], {type: 'sawtooth', harm: [[1, 1], [2, .3]], vol: .075 * v, filter: {type: 'lowpass', f: 1100, q: 2}, env: [[0, 0], [.03, 1], [.45, .6], [1, 0]], dest}); }
-// g = a song's groove: {kind, key, bass: bars of [step, semitone from C3, steps long]}
-function playGroove(t0, g, beat, beats, dest) {
-  const G = g && GROOVES[g.kind]; if (!G || !AU.ctx) return;
-  const step = beat / 4, n = Math.round(beats * 4), v = G.soft ? .7 : 1;
-  for (let i = 0; i < n; i++) {
-    const t = t0 + i * step, j = i % 16;
-    if (G.k[j] === 'x') kick(t, v, dest);
-    if (G.s[j] === 'x') (G.clap ? clap : snare)(t, v, dest);
-    if (G.h[j] !== '.') hat(t, G.h[j] === 'o', v * (j % 4 ? .75 : 1), dest);
-  }
-  const bars = g.bass || [];
-  for (let b = 0; b * 16 < n && bars.length; b++) bars[b % bars.length].forEach(([st, semi, len]) => { const i = b * 16 + st; if (i < n) bassNote(t0 + i * step, semi, Math.min(len, n - i) * step * .9, v, dest); });
-  // the big finish: a kick, a cymbal and the home note
-  const te = t0 + n * step; kick(te, v, dest); noise(te, .6, {type: 'highpass', f: 5200, q: .5, vol: .045 * v, dest}); bassNote(te, g.key || 0, beat * 2, v, dest);
-}
 // each song plays through its own volume knob, so leaving the room can hush it right away
 function songBus() { stopSong(); const ctx = AU.ctx; if (!ctx) return null; const g = ctx.createGain(); g.connect(AU.out); AU.song = g; return g; }
 function stopSong() { const g = AU.song, ctx = AU.ctx; AU.song = null; if (!g || !ctx) return; try { g.gain.setTargetAtTime(0, ctx.currentTime, .04); } catch (e) {} setTimeout(() => { try { g.disconnect(); } catch (e) {} }, 500); }
 const tuneBeats = notes => notes.reduce((a, n) => a + n[1], 0);
-// a pop song with its band and a synth playing the tune (the dance party, when the bird doesn't know one yet)
+// a lively piece on a plucked string, for the dance party when the bird doesn't know one yet
 function playSong(k) {
-  const t = TUNES[k], beats = tuneBeats(t.notes), ctx = audio(); if (!ctx) return beats * t.beat;
+  const t = TUNES[k], beat = t.beat || BEAT, beats = tuneBeats(t.notes), ctx = audio(); if (!ctx) return beats * beat;
   const bus = songBus(), t0 = ctx.currentTime + .08; let x = t0;
-  t.notes.forEach(([s, bt, sh]) => { pluck(x, 523.25 * Math.pow(2, s / 12), sh ? Math.min(bt * t.beat, .16) : bt * t.beat * .9, .13, bus); x += bt * t.beat; });
-  playGroove(t0, t.groove, t.beat, beats, bus);
+  t.notes.forEach(([s, bt, sh]) => { pluck(x, 523.25 * Math.pow(2, s / 12), sh ? Math.min(bt * beat, .16) : bt * beat * .9, .14, bus); x += bt * beat; });
   return x - t0;
 }
 function sfx(kind) {
@@ -3358,7 +3329,7 @@ function cageBell() {
 function flyGame() {
   const v = R3.view, b = cur(); if (isBusy() || !v || !v.actor || !b) return;
   const mine = (b.tunes || []).filter(t => t.learned && t.notes && t.notes.length >= 4);
-  const tn = mine.length ? pick(mine) : {name: TUNES.moonwalk.name, notes: TUNES.moonwalk.notes};
+  const tn = mine.length ? pick(mine) : {name: TUNES.cancan.name, notes: TUNES.cancan.notes};
   showStage();
   const st = $('#stage');
   const ok = v.startFlight(tn, (won, got) => {
@@ -3389,13 +3360,13 @@ function giveTreat() {
   };
   a.later(850, peck);
 }
-// dance party: a pop song with its band; if the bird knows one, it sings it while it dances
+// dance party: a lively piece of music; if the bird knows one, it whistles it while it dances
 function dance() {
   if (isBusy() || !actor) return;
-  const a = actor, b = cur(), pops = Object.keys(TUNES).filter(k => TUNES[k].group === 'pop');
-  const mine = b.tunes.filter(t => t.learned && tuneGroove(t)), tn = mine.length ? pick(mine) : null, song = TUNES[tn ? tn.preset : pick(pops)];
-  const dur = tn ? birdWhistle(tn, 1) : playSong(Object.keys(TUNES).find(k => TUNES[k] === song));
-  a.startDance(60 / song.beat); setBusy(dur * 1000 + 700);
+  const a = actor, b = cur(), lively = Object.keys(TUNES).filter(k => TUNES[k].dance && TUNES[k].group !== 'old');
+  const mine = b.tunes.filter(t => t.learned && t.preset && TUNES[t.preset] && TUNES[t.preset].dance), tn = mine.length ? pick(mine) : null, key = tn ? tn.preset : pick(lively), song = TUNES[key];
+  const dur = tn ? birdWhistle(tn, 1) : playSong(key);
+  a.startDance(60 / (song.beat || BEAT) * (song.bob || 1)); setBusy(dur * 1000 + 700);
   if (!tn) bubble('kid', `♪ ${song.name}`, dur * 1000 + 300);
   a.later(dur * 1000 + 250, () => { a.stopDance(); a.flapWings(2); if (!tn) doCall(); hearts(2); addLove(2); });
 }
@@ -3576,45 +3547,43 @@ const BEAT = .32, XYLO = 523.25;
 // lyrics: one syllable per note; words split on spaces, syllables on "-"
 const syl = s => s.split(/\s+/).flatMap(w => w.split('-').map((x, i, a) => i < a.length - 1 ? x + '-' : x));
 // songs written as notes: a letter (C D E F G A B, and c for the high C), how many beats it lasts,
-// and "!" for a short, punchy note with a little gap after it (that's what makes the pop songs groove)
+// and "!" for a short note with a little gap after it
 const NL = {C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11, c: 12};
 const N = s => s.trim().split(/\s+/).map(w => { const m = /^([A-Gc])(\d*\.?\d+)(!?)$/.exec(w); return m[3] ? [NL[m[1]], +m[2], 1] : [NL[m[1]], +m[2]]; });
-// bass lines: one bar (16 steps) per chord, as [step, semitone from C3, steps long]
-const OCT = r => [0, 2, 4, 6, 8, 10, 12, 14].map((s, i) => [s, r + (i % 2 ? 12 : 0), 1]);
-const R8 = (r, ap) => [0, 2, 4, 6, 8, 10, 12, 14].map(s => [s, s === 14 ? ap : r, 2]);
-const BNC = r => [[0, r, 2], [2, r + 12, 1], [4, r + 7, 2], [6, r + 12, 1], [8, r, 2], [10, r + 12, 1], [12, r + 7, 2], [14, r + 4, 2]];
-const SM = r => [[0, r, 6], [6, r + 7, 2], [8, r + 12, 4], [12, r + 7, 4]];
 // every preset fits the 8 bars exactly (C D E F G A B C); notes are [semitone, quarter-note beats(, short)], beat = seconds per quarter.
-// Pop & dance: brand-new songs written for the aviary in a funky, moonwalking '80s pop style, each with its own groove.
-// Famous tunes: old enough to belong to everyone; melodies cross-checked against published scores. "~" = the syllable before it keeps going
-// (the old nursery songs stay at the bottom, hidden, so birds that already learned one can still sing it)
+// Classical music: old enough to belong to everyone; every melody checked against two published scores, then moved to a key that fits the bars.
+// (retired songs stay at the bottom, hidden, so birds that already learned one can still sing it)
 const TUNES = {
-  moonwalk: {name: 'Moonwalk', icon: '🌙', group: 'pop', beat: 60 / 116, groove: {kind: 'strut', key: 2, bass: [[[0, 2, 2], [3, 2, 1], [6, 14, 1], [8, 12, 2], [10, 9, 2], [12, 7, 2], [14, 9, 2]]]},
-    notes: N('A.5! F1! A.5! F1! D.25 E.25 F.5 G.5 A1.5 c.5! c1.5! G.5 F.5 D1! F.5 G.5 A1! c.5 A.5 G.5 F.5 D2'), lyrics: syl('Slide back, slide back, on the moon-light branch, hee-hee! Feath-ers shine, feel the beat, now it’s time to dance!')},
-  disco: {name: 'Disco Wings', icon: '🪩', group: 'pop', beat: .5, groove: {kind: 'disco', key: 0, bass: [OCT(0), OCT(5), OCT(-3), OCT(5)]},
-    notes: N('E.5 E.5 G.5 A.5 G.5 E.5 D1 c.5 A.5 G.5 A.5 c.5! c.5! c1! E.5 G.5 A.5 c.5 A.5 G.5 A1 G.5! G.5! A.5 c.5 G.5 A.5 c1'), lyrics: syl('Flap your wings and hit the floor, dis-co birds want more, more, more! Spin a-round and touch the sky, tweet, tweet, oh my, watch us fly!')},
-  glove: {name: 'Glitter Glove', icon: '🧤', group: 'pop', beat: 60 / 112, groove: {kind: 'funk', key: 2, bass: [[[0, 2, 2], [3, 14, 1], [4, 2, 1], [6, 12, 2], [8, 9, 2], [11, 2, 1], [12, 5, 2], [14, 7, 2]], [[0, 7, 2], [3, 19, 1], [4, 7, 1], [6, 17, 2], [8, 14, 2], [11, 7, 1], [12, 11, 2], [14, 12, 2]]]},
-    notes: N('D.5 F.5 G.5 A.5 G.5 F1.5 D.5 F.5 G.5 A.5 c.5 A1.5 c.5! c.5! c1! B.5 A1.5 G.5 A.5 F.5 E.5 D2'), lyrics: syl('Put on your glit-ter glove, show them what you’re made of, shine, shine, shine so bright, dance with me to-night!')},
-  funky: {name: 'Funky Feathers', icon: '🦚', group: 'pop', beat: 60 / 132, groove: {kind: 'rock', key: -3, bass: [R8(-3, -1), R8(0, -5), R8(-7, -4), R8(-3, -3)]},
-    notes: N('A.5! A.5! c.5! A.5! G.5 E1.5 E.5 G.5 A.5 G.5 E2 A.5! A.5! c.5! A.5! B.5 c1.5 B.5 A.5 G.5 E.5 A2'), lyrics: syl('Fun-ky, fun-ky feath-ers, shake them left and right, fun-ky, fun-ky feath-ers, dance with all your might!')},
-  zombie: {name: 'Zombie Shuffle', icon: '🧟', group: 'pop', beat: 60 / 118, groove: {kind: 'spooky', key: -3, bass: [[[0, -3, 3], [4, 0, 3], [8, 4, 3], [12, 6, 3]], [[0, 5, 3], [4, 4, 3], [8, 0, 3], [12, -1, 3]]]},
-    notes: N('A.5 A.5 G.5 F.5 E.5 F1.5 E.5 F.5 G.5 F.5 E2 A.5 A.5 B.5 c.5 B.5 A1.5 c.5! A.5! G.5 F.5 E2'), lyrics: syl('Mid-night in the for-est, some-thing’s creep-ing near, zom-bie birds are danc-ing, hoo! hoo! Have no fear!')},
-  robot: {name: 'Robot Bird', icon: '🤖', group: 'pop', beat: 60 / 116, groove: {kind: 'robot', key: 0, bass: [[[0, 0, 1], [2, 0, 1], [3, 12, 1], [6, 0, 1], [8, 0, 1], [10, 12, 1], [11, 0, 1], [14, -2, 1]]]},
-    notes: N('c.5! C.5! c.5! C2! G.5 G.5 E.5 G.5 c2.5! E.5! E.5! G.5! G2! A.5 G.5 E.5 D.5 C2.5'), lyrics: syl('Beep, boop, beep, boop! I’m a ro-bot bird. Click, clack, click, clack, dance with-out a word!')},
-  sunshine: {name: 'Sunshine Groove', icon: '☀️', group: 'pop', beat: 60 / 124, groove: {kind: 'bounce', key: 0, bass: [BNC(0), BNC(5), BNC(0), BNC(-5)]},
-    notes: N('G.5 c1.5 A.5 G1.5 E.5 G.5 A.5 G.5 E2 G.5 c1.5 A.5 c1.5 c.5 B.5 A.5 G.5 c2'), lyrics: syl('Sun-shine, sun-shine, shin-ing on my wings, sun-shine, sun-shine, hap-py when I sing!')},
-  wish: {name: 'Make a Wish', icon: '🌠', group: 'pop', beat: .6, groove: {kind: 'smooth', key: 0, bass: [SM(0), SM(-3), SM(5), SM(-5)]},
-    notes: N('C.5 E.5 G1 A.5 G.5 E1 F.5 G.5 A.5 G.5 E2 C.5 D.5 E.5 F.5 G.5 A.5 c1 B.5 A.5 G.5 A.5 B.5 c1.5'), lyrics: syl('Look up high, make a wish on a shoot-ing star, spread your wings and you will see how a-maz-ing you are!')},
-  beethoven: {name: 'Beethoven’s 5th', icon: '🎻', group: 'classic', beat: .38, notes: N('A.5 A.5 A.5 F2.5 G.5 G.5 G.5 E3.5'), lyrics: ['Dun', 'dun', 'dun', 'DUNNN!', 'Dun', 'dun', 'dun', 'DUNNN!']},
-  // Grieg's sneaky opening, arranged for the eight white bars (the original's in-between sharps become the nearest bars)
-  mountain: {name: 'Mountain King', icon: '👑', group: 'classic', beat: .42, notes: N('D.5 E.5 F.5 G.5 A.5 F.5 A1 G.5 E.5 G1 F.5 D.5 F1 D.5 E.5 F.5 G.5 A.5 F.5 A.5 c.5 A.5 F.5 D.5 F.5 A2'), lyrics: syl('Tip-toe, tip-toe, sneak-ing in, hush, hush, hush! Shh, shh, shh! The Moun-tain King is fast a-sleep, don’t you wake him up!')},
+  beethoven: {name: 'Beethoven’s 5th', icon: '🎻', group: 'classic', beat: .38, notes: N('A.5 A.5 A.5 F2.5 G.5 G.5 G.5 E3.5')},
+  // Mozart, Symphony No. 40 in G minor: the opening phrase, up a step to A minor so it fits the bars
+  mozart40: {name: 'Mozart’s 40th', icon: '🎼', group: 'classic', beat: .3, dance: true, bob: .5, notes: N('F.5 E.5 E1 F.5 E.5 E1 F.5 E.5 E1 c2! c.5 B.5 A1 A.5 G.5 F1 F.5 E.5 D1 D2')},
+  // Mozart, Eine kleine Nachtmusik: the famous first two bars, moved to F
+  nachtmusik: {name: 'Night Music', by: 'Mozart', icon: '🌙', group: 'classic', beat: .4, notes: N('F1.5! C.5 F1.5! C.5 F.5 C.5 F.5 A.5 c2')},
+  // Mozart, The Magic Flute: Papageno's song "Der Vogelfänger bin ich ja" (I'm the bird catcher!), first phrase, in F
+  papageno: {name: 'The Bird Catcher', by: 'Mozart', icon: '🪶', group: 'classic', beat: .55, dance: true, notes: N('A.25 G.25 F.5 F.5 G.25 F.25 E.25 F.25 G.5 A.5 G.5 G.25 E.25 C.75 C.25 c.75 c.25 A.5 G.5 F1')},
+  ode: {name: 'Ode to Joy', by: 'Beethoven', icon: '😊', group: 'classic', beat: .36, notes: [[4, 1], [4, 1], [5, 1], [7, 1], [7, 1], [5, 1], [4, 1], [2, 1], [0, 1], [0, 1], [2, 1], [4, 1], [4, 1.5], [2, .5], [2, 2], [4, 1], [4, 1], [5, 1], [7, 1], [7, 1], [5, 1], [4, 1], [2, 1], [0, 1], [0, 1], [2, 1], [4, 1], [2, 1.5], [0, .5], [0, 2]]},
+  // Grieg, Peer Gynt: the flute's sunrise, moved from E to C
+  morning: {name: 'Morning Mood', by: 'Grieg', icon: '🌅', group: 'classic', beat: .6, notes: N('G.5 E.5 D.5 C.5 D.5 E.5 G.5 E.5 D.5 C.5 D.25 E.25 D.25 E.25 G.5 E.5 G.5 A.5 E.5 A.5 G.5 E.5 D.5 C1.5')},
+  // Vivaldi, The Four Seasons, Spring: the opening theme, moved from E to C
+  spring: {name: 'Spring', by: 'Vivaldi', icon: '🌸', group: 'classic', beat: .5, dance: true, notes: N('C.5 E.5 E.5 E.5 D.25 C.25 G1.5 G.25 F.25 E.5 E.5 E.5 D.25 C.25 G1.5 G.25 F.25 E2')},
+  // Dvořák, New World Symphony, Largo ("Going Home"): the English horn tune, moved from D-flat to C
+  largo: {name: 'Going Home', by: 'Dvořák', icon: '🏡', group: 'classic', beat: .7, notes: N('E.75 G.25 G1 E.75 D.25 C1 D.75 E.25 G.75 E.25 D2 E.75 G.25 G1 E.75 D.25 C1 D.5 E.5 D.75 C.25 C2')},
+  // Offenbach, Galop infernal: the Can-Can, moved from D to C
+  cancan: {name: 'Can-Can', by: 'Offenbach', icon: '💃', group: 'classic', beat: .36, dance: true, bob: .5, notes: N('C2 D.5 F.5 E.5 D.5 G1! G1! G.5 A.5 E.5 F.5 D1! D1! D.5 F.5 E.5 D.5 C.5 c.5 B.5 A.5 G.5 F.5 E.5 D.5 C2')},
+  // Rossini, William Tell Overture: the galloping finale, moved from E to F
+  tell: {name: 'William Tell', by: 'Rossini', icon: '🐎', group: 'classic', beat: .4, dance: true, bob: .5, notes: N('C.25! C.25! C.5! C.25! C.25! C.5! C.25! C.25! F.5 G.5 A.5 C.25! C.25! C.5! C.25! C.25! F.5 A.25 A.25 G.5 E.5 C.5! C.25! C.25! C.5! C.25! C.25! C.5! C.25! C.25! F.5 G.5 A.5 F.25 A.25 c2')},
+  // Handel, Messiah: "Hallelujah!", moved from D to C
+  hallelujah: {name: 'Hallelujah', by: 'Handel', icon: '🙌', group: 'classic', beat: .55, notes: N('c1.5 G.5 A.5 G1.5! c1.5 G.5 A.5 G1! c.25 c.25 c.5 c1! c.25 c.25 c.5 c1! c.5 B.5 c1 B.5 c2')},
   // Korobeiniki, the Russian folk song the block game made famous (first part, in D minor so it fits the bars)
-  tetris: {name: 'Tetris Song', icon: '🧱', group: 'classic', beat: .4, notes: N('A1 E.5 F.5 G1 F.5 E.5 D1 D.5 F.5 A1 G.5 F.5 E1.5 F.5 G1 A1 F1 D1 D2!'), lyrics: syl('Tet-ris blocks are fall-ing, spin them, drop them, stack them, line them up and clear the row!')},
-
-  ode: {name: 'Ode to Joy', icon: '🎶', group: 'classic', beat: .36, notes: [[4, 1], [4, 1], [5, 1], [7, 1], [7, 1], [5, 1], [4, 1], [2, 1], [0, 1], [0, 1], [2, 1], [4, 1], [4, 1.5], [2, .5], [2, 2], [4, 1], [4, 1], [5, 1], [7, 1], [7, 1], [5, 1], [4, 1], [2, 1], [0, 1], [0, 1], [2, 1], [4, 1], [2, 1.5], [0, .5], [0, 2]], lyrics: syl('Mi mi fa sol sol fa mi re do do re mi mi re re, mi mi fa sol sol fa mi re do do re mi re do do')},
-  birthday: {name: 'Happy Birthday', icon: '🎂', group: 'classic', notes: [[0, .75], [0, .25], [2, 1], [0, 1], [5, 1], [4, 2], [0, .75], [0, .25], [2, 1], [0, 1], [7, 1], [5, 2]], lyrics: syl('Hap-py birth-day to you, hap-py birth-day to you')},
+  tetris: {name: 'Tetris Song', icon: '🧱', by: 'Russian folk song', group: 'fun', beat: .4, dance: true, bob: .5, notes: N('A1 E.5 F.5 G1 F.5 E.5 D1 D.5 F.5 A1 G.5 F.5 E1.5 F.5 G1 A1 F1 D1 D2!')},
+  birthday: {name: 'Happy Birthday', icon: '🎂', group: 'fun', notes: [[0, .75], [0, .25], [2, 1], [0, 1], [5, 1], [4, 2], [0, .75], [0, .25], [2, 1], [0, 1], [7, 1], [5, 2]], lyrics: syl('Hap-py birth-day to you, hap-py birth-day to you')},
   wolf: {name: 'Wolf whistle', special: 'wolf', icon: '😗', group: 'bird'},
+  // Papageno's panpipe from The Magic Flute: five quick notes up, twice
+  pipe: {name: 'Papageno’s Pipe', by: 'Mozart', icon: '🎶', group: 'bird', beat: .45, notes: N('C.125 D.125 E.125 F.125 G1.5! C.125 D.125 E.125 F.125 G1!')},
   shave: {name: 'Shave & a Haircut', icon: '💈', group: 'bird', beat: .3, notes: N('c1 G.5 G.5 A1 G2! B1 c1!'), lyrics: syl('Shave and a hair-cut, two bits!')},
+  // retired: hidden from the list, kept so birds that already learned one can still sing it
+  // Grieg's sneaky opening, arranged for the eight white bars (the original's in-between sharps become the nearest bars)
+  mountain: {name: 'Mountain King', icon: '👑', group: 'old', beat: .42, notes: N('D.5 E.5 F.5 G.5 A.5 F.5 A1 G.5 E.5 G1 F.5 D.5 F1 D.5 E.5 F.5 G.5 A.5 F.5 A.5 c.5 A.5 F.5 D.5 F.5 A2')},
   twinkle: {name: 'Twinkle Twinkle', icon: '⭐', group: 'old', notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]], lyrics: syl('Twin-kle twin-kle lit-tle star, how I won-der what you are')},
   abc: {name: 'ABC Song', icon: '🔤', group: 'old', beat: .3, notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, .5], [2, .5], [2, .5], [2, .5], [0, 2], [7, 1], [7, 1], [5, 2], [4, 1], [4, 1], [2, 2], [7, .5], [7, .5], [7, 1], [5, 2], [4, 1], [4, 1], [2, 2], [0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]], lyrics: syl('A B C D E F G H I J K L M N O P Q R S T U V dou-ble-u X Y and Z. Now I know my A B C’s, next time won’t you sing with me?')},
   row: {name: 'Row Your Boat', icon: '🚣', group: 'old', beat: .42, notes: [[0, 1.5], [0, 1.5], [0, 1], [2, .5], [4, 1.5], [4, 1], [2, .5], [4, 1], [5, .5], [7, 3], [12, .5], [12, .5], [12, .5], [7, .5], [7, .5], [7, .5], [4, .5], [4, .5], [4, .5], [0, .5], [0, .5], [0, .5], [7, 1], [5, .5], [4, 1], [2, .5], [0, 3]], lyrics: syl('Row row row your boat, gent-ly down the stream, mer-ri-ly mer-ri-ly mer-ri-ly mer-ri-ly, life is but a dream')},
@@ -3629,14 +3598,30 @@ const TUNES = {
   hickory: {name: 'Hickory Dickory Dock', icon: '🕰️', group: 'old', beat: .4, notes: [[4, .5], [5, .5], [7, .5], [5, .5], [4, .5], [2, .5], [4, 2.5], [4, .5], [4, 1], [7, .5], [5, 1], [2, .5], [4, 2.5], [4, .5], [4, 1], [4, .5], [7, 1], [7, .5], [5, 1], [5, .5], [9, 1.5], [7, .5], [9, .5], [7, .5], [5, .5], [4, .5], [2, .5], [0, 3]], lyrics: syl('Hick-o-ry dick-o-ry dock, the mouse ran up the clock, the clock struck one, the mouse ran down, hick-o-ry dick-o-ry dock')},
   jingle: {name: 'Jingle Bells', icon: '🔔', group: 'old', beat: .34, notes: [[4, 1], [4, 1], [4, 2], [4, 1], [4, 1], [4, 2], [4, 1], [7, 1], [0, 1.5], [2, .5], [4, 4], [5, 1], [5, 1], [5, 1.5], [5, .5], [5, 1], [4, 1], [4, 1], [4, .5], [4, .5], [7, 1], [7, 1], [5, 1], [2, 1], [0, 4]], lyrics: syl('Jin-gle bells, jin-gle bells, jin-gle all the way! Oh what fun it is to ride in a one-horse o-pen sleigh')},
   hush: {name: 'Hush Little Baby', icon: '🍼', group: 'old', beat: .45, notes: [[2, 1], [11, .5], [11, .5], [11, 1], [12, 1], [11, 1], [9, .5], [9, .5], [9, 2], [2, .5], [2, .5], [9, .5], [9, .5], [9, 1], [9, .5], [11, .5], [9, 1], [7, 1], [7, 2]], lyrics: syl('Hush lit-tle ba-by, don’t say a word, Pa-pa’s gon-na buy you a mock-ing-bird')},
-  brahms: {name: 'Brahms’ Lullaby', icon: '😴', group: 'old', beat: .48, notes: [[4, .5], [4, .5], [7, 1.5], [4, .5], [4, 1], [7, 2], [4, .5], [7, .5], [12, 1], [11, 1.5], [9, .5], [9, 1], [7, 1], [2, .5], [4, .5], [5, 1], [2, 1], [2, .5], [4, .5], [5, 2], [2, .5], [5, .5], [11, .5], [9, .5], [7, 1], [11, 1], [12, 2]], lyrics: ['Lul-', 'la-', 'by', 'and', 'good', 'night,', 'with', '~', 'ro-', 'ses', 'be-', 'dight', '~', 'with', '~', 'lil-', 'ies', 'o’er-', '~', 'spread', 'is', '~', 'ba-', '~', 'by’s', 'wee', 'bed']}
+  brahms: {name: 'Brahms’ Lullaby', icon: '😴', group: 'old', beat: .48, notes: [[4, .5], [4, .5], [7, 1.5], [4, .5], [4, 1], [7, 2], [4, .5], [7, .5], [12, 1], [11, 1.5], [9, .5], [9, 1], [7, 1], [2, .5], [4, .5], [5, 1], [2, 1], [2, .5], [4, .5], [5, 2], [2, .5], [5, .5], [11, .5], [9, .5], [7, 1], [11, 1], [12, 2]], lyrics: ['Lul-', 'la-', 'by', 'and', 'good', 'night,', 'with', '~', 'ro-', 'ses', 'be-', 'dight', '~', 'with', '~', 'lil-', 'ies', 'o’er-', '~', 'spread', 'is', '~', 'ba-', '~', 'by’s', 'wee', 'bed']},
+  moonwalk: {name: 'Moonwalk', icon: '🌙', group: 'old', beat: 60 / 116,
+    notes: N('A.5! F1! A.5! F1! D.25 E.25 F.5 G.5 A1.5 c.5! c1.5! G.5 F.5 D1! F.5 G.5 A1! c.5 A.5 G.5 F.5 D2'), lyrics: syl('Slide back, slide back, on the moon-light branch, hee-hee! Feath-ers shine, feel the beat, now it’s time to dance!')},
+  disco: {name: 'Disco Wings', icon: '🪩', group: 'old', beat: .5,
+    notes: N('E.5 E.5 G.5 A.5 G.5 E.5 D1 c.5 A.5 G.5 A.5 c.5! c.5! c1! E.5 G.5 A.5 c.5 A.5 G.5 A1 G.5! G.5! A.5 c.5 G.5 A.5 c1'), lyrics: syl('Flap your wings and hit the floor, dis-co birds want more, more, more! Spin a-round and touch the sky, tweet, tweet, oh my, watch us fly!')},
+  glove: {name: 'Glitter Glove', icon: '🧤', group: 'old', beat: 60 / 112,
+    notes: N('D.5 F.5 G.5 A.5 G.5 F1.5 D.5 F.5 G.5 A.5 c.5 A1.5 c.5! c.5! c1! B.5 A1.5 G.5 A.5 F.5 E.5 D2'), lyrics: syl('Put on your glit-ter glove, show them what you’re made of, shine, shine, shine so bright, dance with me to-night!')},
+  funky: {name: 'Funky Feathers', icon: '🦚', group: 'old', beat: 60 / 132,
+    notes: N('A.5! A.5! c.5! A.5! G.5 E1.5 E.5 G.5 A.5 G.5 E2 A.5! A.5! c.5! A.5! B.5 c1.5 B.5 A.5 G.5 E.5 A2'), lyrics: syl('Fun-ky, fun-ky feath-ers, shake them left and right, fun-ky, fun-ky feath-ers, dance with all your might!')},
+  zombie: {name: 'Zombie Shuffle', icon: '🧟', group: 'old', beat: 60 / 118,
+    notes: N('A.5 A.5 G.5 F.5 E.5 F1.5 E.5 F.5 G.5 F.5 E2 A.5 A.5 B.5 c.5 B.5 A1.5 c.5! A.5! G.5 F.5 E2'), lyrics: syl('Mid-night in the for-est, some-thing’s creep-ing near, zom-bie birds are danc-ing, hoo! hoo! Have no fear!')},
+  robot: {name: 'Robot Bird', icon: '🤖', group: 'old', beat: 60 / 116,
+    notes: N('c.5! C.5! c.5! C2! G.5 G.5 E.5 G.5 c2.5! E.5! E.5! G.5! G2! A.5 G.5 E.5 D.5 C2.5'), lyrics: syl('Beep, boop, beep, boop! I’m a ro-bot bird. Click, clack, click, clack, dance with-out a word!')},
+  sunshine: {name: 'Sunshine Groove', icon: '☀️', group: 'old', beat: 60 / 124,
+    notes: N('G.5 c1.5 A.5 G1.5 E.5 G.5 A.5 G.5 E2 G.5 c1.5 A.5 c1.5 c.5 B.5 A.5 G.5 c2'), lyrics: syl('Sun-shine, sun-shine, shin-ing on my wings, sun-shine, sun-shine, hap-py when I sing!')},
+  wish: {name: 'Make a Wish', icon: '🌠', group: 'old', beat: .6,
+    notes: N('C.5 E.5 G1 A.5 G.5 E1 F.5 G.5 A.5 G.5 E2 C.5 D.5 E.5 F.5 G.5 A.5 c1 B.5 A.5 G.5 A.5 B.5 c1.5'), lyrics: syl('Look up high, make a wish on a shoot-ing star, spread your wings and you will see how a-maz-ing you are!')},
 };
 // a two-syllable name sung in "Rain Rain": Havi -> Ha- vi (other names -> Johnny)
 function nameSyl(name) {
   const w = String(name || '').trim(), m = /^([^aeiouy]*[aeiouy]+[^aeiouy]*?)([^aeiouy]?[aeiouy]+[^aeiouy]*)$/i.exec(w);
   return m && /^[a-z]+$/i.test(w) && (w.match(/[aeiouy]+/gi) || []).length === 2 ? [m[1] + '-', m[2]] : ['John-', 'ny'];
 }
-const TGROUPS = [['pop', '🕺 Pop & dance'], ['classic', '🎻 Famous tunes'], ['bird', '🐦 Bird tricks']];
+const TGROUPS = [['classic', '🎻 Classical music'], ['fun', '🎉 Fun tunes'], ['bird', '🐦 Bird tricks']];
 const UNDO_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5L4 10l5 5"/><path d="M4 10h9.5a5.5 5.5 0 0 1 0 11H10"/></svg>';
 
 /* pitch: pure helpers (unit-tested; keep them free of DOM and app state) */
@@ -3766,8 +3751,6 @@ function hummedNotes(frames) {
 const semiKey = s => { let k = 0, d = 99; SCALE.forEach((x, i) => { const dd = Math.abs(x - s); if (dd < d) { d = dd; k = i; } }); return k; };
 const semiColor = s => KEYC[semiKey(s)];
 const tuneBeat = tn => (tn && tn.preset && TUNES[tn.preset] && TUNES[tn.preset].beat) || BEAT;
-// the pop songs bring their band along (only when played whole, not while the bird is still learning)
-const tuneGroove = tn => (tn && !tn.special && tn.preset && TUNES[tn.preset] && TUNES[tn.preset].groove) || null;
 const hasNotes = tn => !!(tn && (tn.special || (tn.notes && tn.notes.length)));
 function tuneLyrics(tn) { const t = tn && tn.preset && TUNES[tn.preset]; let ly = t && t.lyrics; if (typeof ly === 'function') { try { ly = ly(); } catch (e) { ly = null; } } return ly && tn.notes && ly.length === tn.notes.length ? ly : null; }
 function tuneIcon(x) { if (!x) return '🎵'; if (x.special === 'wolf') return TUNES.wolf.icon; if (x.preset && TUNES[x.preset]) return TUNES[x.preset].icon; return x.hummed ? '🎤' : '🎹'; }
@@ -3838,7 +3821,7 @@ function melodyHTML() {
   if (tn.special) return `<span class="mspecial"><span aria-hidden="true">${tuneIcon(tn)}</span> ${esc(tn.name)}</span>`;
   const ly = tuneLyrics(tn), k = tuneBeat(tn) / BEAT;
   const cells = tn.notes.map(([s, bt], i) => `<span class="mc" data-i="${i}" data-s="${s}" data-b="${bt}"><i class="nd" style="--c:${semiColor(s)};--w:${f1(Math.min(4, bt * k))}"></i>${ly ? (ly[i] === '~' ? '<em class="hold">~</em>' : `<em>${esc(ly[i])}</em>`) : ''}</span>`).join('');
-  const title = tn.name ? `<span class="mtitle"><span aria-hidden="true">${tuneIcon(tn)}</span> ${esc(tn.name)}</span>` : '';
+  const by = tn.preset && TUNES[tn.preset] && TUNES[tn.preset].by, title = tn.name ? `<span class="mtitle"><span aria-hidden="true">${tuneIcon(tn)}</span> ${esc(tn.name)}${by ? ` <small class="by">· ${esc(by)}</small>` : ''}</span>` : '';
   const undo = tn.kind === 'draft' ? `<button class="mundo" id="tUndo" aria-label="Take back the last note">${UNDO_IC}</button>` : '';
   return `<div class="mbody">${title}<div class="mcells">${cells}</div></div>${undo}`;
 }
@@ -3910,7 +3893,7 @@ function pickPreset(k) {
 function presetsHTML(b) {
   return TGROUPS.map(([g, label]) => {
     const items = Object.entries(TUNES).filter(([, t]) => t.group === g); if (!items.length) return '';
-    return `<div class="tgroup"><span class="eyebrow">${label}</span><div class="tunes">${items.map(([k, t]) => { const r = findTune(b, {preset: k, special: t.special || null, notes: t.notes || null}); return `<button class="song${r && r.learned ? ' knows' : ''}" data-preset="${k}" aria-pressed="${!!(S.tune && S.tune.preset === k)}"><span class="em" aria-hidden="true">${t.icon}</span><span class="nm">${esc(t.name)}</span></button>`; }).join('')}</div></div>`;
+    return `<div class="tgroup"><span class="eyebrow">${label}</span><div class="tunes">${items.map(([k, t]) => { const r = findTune(b, {preset: k, special: t.special || null, notes: t.notes || null}); return `<button class="song${r && r.learned ? ' knows' : ''}" data-preset="${k}" aria-pressed="${!!(S.tune && S.tune.preset === k)}"><span class="em" aria-hidden="true">${t.icon}</span><span class="nm">${esc(t.name)}${t.by ? `<small>${esc(t.by)}</small>` : ''}</span></button>`; }).join('')}</div></div>`;
   }).join('');
 }
 function renderWhistle(p) {
@@ -3949,11 +3932,11 @@ function renderWhistle(p) {
 }
 function kidPlay(tn) {
   if (!hasNotes(tn)) { toast('Tap the colored bars to make a tune first.'); return 0; }
-  const ctx = audio(), beat = tuneBeat(tn), gr = tuneGroove(tn); let dur = 1.2;
+  const ctx = audio(), beat = tuneBeat(tn); let dur = 1.2;
   if (ctx) {
-    const t = ctx.currentTime + .05, bus = gr ? songBus() : null;
+    const t = ctx.currentTime + .05, bus = tn.special ? null : songBus();
     if (tn.special === 'wolf') dur = wolf(t, .12, .8);
-    else { let x = t; tn.notes.forEach(([s, bt]) => { mallet(x, XYLO * Math.pow(2, s / 12), .2, bus); x += bt * beat; }); dur = x - t; karaoke(tn.notes, t, beat, {bar: sameTune(tn, S.tune)}); if (gr) playGroove(t, gr, beat, tuneBeats(tn.notes), bus); }
+    else { let x = t; tn.notes.forEach(([s, bt]) => { mallet(x, XYLO * Math.pow(2, s / 12), .2, bus); x += bt * beat; }); dur = x - t; karaoke(tn.notes, t, beat, {bar: sameTune(tn, S.tune)}); }
   } else if (tn.notes) dur = tn.notes.reduce((a, n) => a + n[1] * beat, 0);
   bubble('kid', tn.preset && tn.name ? `♪ ${tn.name}` : '♪ ♪ ♪', dur * 1000 + 300); setBusy(dur * 1000 + 200);
   S.heard = tn; S.heardUntil = Date.now() + dur * 1000 + 400;
@@ -3967,10 +3950,9 @@ function birdWhistle(tn, p = 1) {
       dur = wolf(t, .2, sp.whistleBase / 1046.5);
       [[12, .3, 0], [7, .62, .42]].forEach(([s, d, at]) => setTimeout(() => { if (actor === a && typeof a.note === 'function') { try { a.note(s, d); } catch (e) {} } }, ((t - ctx.currentTime) + at) * 1000));
     } else {
-      let notes = tn.notes, beat = tuneBeat(tn); const gr = p >= 1 ? tuneGroove(tn) : null, bus = gr ? songBus() : null;
+      let notes = tn.notes, beat = tuneBeat(tn); const bus = p >= 1 ? songBus() : null;
       if (p < 1) { const k = Math.max(2, Math.ceil(notes.length * p)); notes = notes.slice(0, k).map(([s, bt, sh]) => { const n = [Math.random() < (1 - p) * .5 ? s + pick([-2, -1, 1, 2]) : s, bt]; if (sh) n.push(1); return n; }); }
       dur = whistle(t, notes, sp.whistleBase, beat, .2, bus);
-      if (gr) playGroove(t, gr, beat, tuneBeats(notes), bus);
       karaoke(notes, t, beat, {bar: sameTune(tn, S.tune), bird: a});
     }
   }
