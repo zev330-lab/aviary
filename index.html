@@ -576,6 +576,12 @@ const SWATCHES = [['#FAFAF6','White'],['#EDE5D2','Cream'],['#FBE36B','Lemon'],['
 const PATTERNS = [['plain','Plain'],['pearl','Pearls'],['pied','Patches'],['bars','Stripes'],['rainbow','Rainbow'],['sparkles','Sparkles']];
 const PATTERN_PC = {pearl: '#F2DC8A', pied: '#F6F0DA', bars: '#1F1F1F', sparkles: '#FFFFFF'};
 const ACCS = [['none','Nothing'],['bow','Bow'],['crown','Crown'],['party','Party hat'],['flower','Flower'],['tophat','Top hat'],['glasses','Sunglasses'],['headphones','Headphones'],['bowtie','Bow tie']];
+// eyes: shiny black with white sparkles (every bird starts like this), cartoon eyes, or a real bird's colored eyes
+const EYES = [['shiny', '⚫ Black & shiny'], ['cartoon', '👀 Cartoon'], ['color', '🌈 Colored']];
+const EYE_SIZES = [[1, 'Normal size'], [1.3, 'Big eyes']];
+const EYE_SWATCHES = [['#16161A','Black'],['#5A3A22','Brown'],['#A0703E','Hazel'],['#E4413B','Red'],['#F0873A','Orange'],['#F5C024','Gold'],['#F2E7A6','Pale yellow'],['#6CBD45','Green'],['#2BB3A8','Teal'],['#2E7FCE','Blue'],['#7FC6E6','Sky blue'],['#7A4FC9','Purple'],['#E27A9E','Pink'],['#A5A6A8','Silver']];
+const eyeStyle = b => EYES.some(e => e[0] === b.eyes) ? b.eyes : 'shiny';
+const eyeSize = b => b.eyeSize === 1.3 ? 1.3 : 1;
 const NAMES = ['Kiwi','Mango','Sunny','Pip','Coco','Peaches','Biscuit','Blueberry','Ziggy','Pickle','Nugget','Maple','Jellybean','Pepper','Sprinkles','Waffles','Luna','Rio','Buttercup','Noodle','Mochi','Tweety','Sky','Clementine','Pistachio','Banjo','Marshmallow','Twix'];
 
 function completeColors(c) {
@@ -651,7 +657,7 @@ function birdSVG(b, pfx, o = {}) {
   const rad = (name, col, cx = .62, cy = .3) => defs.push(`<radialGradient id="${I(name)}" cx="${cx}" cy="${cy}" r=".85"><stop offset="0" stop-color="${light(col, .16)}"/><stop offset=".55" stop-color="${col}"/><stop offset="1" stop-color="${dark(col, .2)}"/></radialGradient>`);
   const soft = (name, col, inner = .55) => defs.push(`<radialGradient id="${I(name)}" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="${col}"/><stop offset="${inner}" stop-color="${col}"/><stop offset="1" stop-color="${col}" stop-opacity="0"/></radialGradient>`);
   const lin = (name, a, z, x2 = 0, y2 = 1) => defs.push(`<linearGradient id="${I(name)}" x1="0" y1="0" x2="${x2}" y2="${y2}"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${z}"/></linearGradient>`);
-  rad('body', c.body); rad('head', c.head, .6, .28); soft('belly', c.belly, .5); soft('face', c.face, .62); soft('cheek', c.cheek, .42); rad('iris', c.iris, .4, .35); rad('patch', c.face, .5, .4);
+  rad('body', c.body); rad('head', c.head, .6, .28); soft('belly', c.belly, .5); soft('face', c.face, .62); soft('cheek', c.cheek, .42); rad('iris', eyeStyle(b) === 'shiny' ? '#1E1E23' : c.iris, .4, .35); rad('patch', c.face, .5, .4);
   lin('wing', light(c.wing, .1), dark(c.wing, .12)); lin('beak', light(c.beak, .2), dark(c.beak, .14)); lin('lbeak', c.lowerBeak, dark(c.lowerBeak, .28));
   defs.push(`<linearGradient id="${I('crest')}" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${c.crest}"/><stop offset="1" stop-color="${dark(c.crest, .14)}"/></linearGradient>`);
   defs.push(`<linearGradient id="${I('tail')}" gradientUnits="userSpaceOnUse" x1="${f1(R.x)}" y1="${f1(R.y)}" x2="${f1(T.x)}" y2="${f1(T.y)}"><stop offset="0" stop-color="${c.tail}"/><stop offset=".5" stop-color="${c.tail}"/><stop offset="1" stop-color="${c.tailTip}"/></linearGradient>`);
@@ -746,7 +752,7 @@ function birdSVG(b, pfx, o = {}) {
     for (let r = 0; r < 3; r++) { const yy = pc2.y - pry * .25 + r * pry * .3; for (let xx = pc2.x - prx * .45 + r * 2; xx < pc2.x + prx * .2; xx += 5.5) dashes += `M${f1(xx)},${f1(yy)} l2.6,1.1 `; }
     face += `<ellipse data-part="face" cx="${f1(pc2.x)}" cy="${f1(pc2.y)}" rx="${f1(prx)}" ry="${f1(pry)}" transform="rotate(12 ${f1(pc2.x)} ${f1(pc2.y)})" fill="${U('patch')}"/><path class="ov" d="${dashes}" stroke="${dark(c.head, .1)}" stroke-opacity=".75" stroke-width="1.2" stroke-linecap="round"/>`;
   }
-  if (patchStyle === 'ring') { face += `<circle data-part="face" cx="${f1(E.x)}" cy="${f1(E.y)}" r="${f1(re * 1.75)}" fill="${c.face}"/><ellipse data-part="face" cx="${f1(Bk.x + bs * .05)}" cy="${f1(Bk.y + bs * .55)}" rx="${f1(bs * .38)}" ry="${f1(bs * .17)}" fill="${c.face}"/>`; }
+  if (patchStyle === 'ring') { face += `<circle data-part="face" cx="${f1(E.x)}" cy="${f1(E.y)}" r="${f1(re * eyeSize(b) * 1.75)}" fill="${c.face}"/><ellipse data-part="face" cx="${f1(Bk.x + bs * .05)}" cy="${f1(Bk.y + bs * .55)}" rx="${f1(bs * .38)}" ry="${f1(bs * .17)}" fill="${c.face}"/>`; }
   let cheek = '';
   if (sp.cheek === 'tiel') cheek = `<ellipse data-part="cheek" cx="${f1(H.x + hr * .18)}" cy="${f1(H.y + hr * .38)}" rx="${f1(hr * .3)}" ry="${f1(hr * .27)}" fill="${U('cheek')}"/>`;
   if (sp.cheek === 'too') cheek = `<ellipse data-part="cheek" cx="${f1(H.x + hr * .1)}" cy="${f1(H.y + hr * .3)}" rx="${f1(hr * .32)}" ry="${f1(hr * .28)}" fill="${U('cheek')}" opacity=".7"/>`;
@@ -754,8 +760,13 @@ function birdSVG(b, pfx, o = {}) {
     cheek = `<ellipse data-part="cheek" cx="${f1(H.x + hr * .3)}" cy="${f1(H.y + hr * .62)}" rx="${f1(hr * .15)}" ry="${f1(hr * .11)}" transform="rotate(-20 ${f1(H.x + hr * .3)} ${f1(H.y + hr * .62)})" fill="${c.cheek}"/>`;
     cheek += [.08, .3, .52].map(k => `<circle class="ov" cx="${f1(H.x + hr * k)}" cy="${f1(H.y + hr * .8)}" r="${f1(hr * .07)}" fill="#1B1B1B" clip-path="${U('chead')}"/>`).join('');
   }
-  const ring = c.ring && c.ring !== 'none' && sp.parts.includes('ring') ? `<circle data-part="ring" cx="${f1(E.x)}" cy="${f1(E.y)}" r="${f1(re * 1.55)}" fill="${c.ring}"/>` : '';
-  const eye = `<g data-g="eye" data-part="iris" transform="translate(${f1(E.x)} ${f1(E.y)})"><circle r="${f1(re)}" fill="${U('iris')}"/><circle r="${f1(re * .55)}" fill="#0A0A0A"/><circle r="${f1(re)}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width=".8"/><circle cx="${f1(-re * .32)}" cy="${f1(-re * .36)}" r="${f1(re * .3)}" fill="#fff" opacity=".92"/><circle cx="${f1(re * .34)}" cy="${f1(re * .3)}" r="${f1(re * .12)}" fill="#fff" opacity=".55"/></g><path data-g="happy" class="ov" d="M${f1(E.x - re)},${f1(E.y + re * .2)} Q${f1(E.x)},${f1(E.y - re * 1.1)} ${f1(E.x + re)},${f1(E.y + re * .2)}" stroke="#1A1A1A" stroke-width="${f1(re * .45)}" fill="none" stroke-linecap="round" opacity="0"/>`;
+  const ring = c.ring && c.ring !== 'none' && sp.parts.includes('ring') ? `<circle data-part="ring" cx="${f1(E.x)}" cy="${f1(E.y)}" r="${f1(re * eyeSize(b) * 1.55)}" fill="${c.ring}"/>` : '';
+  // eyes: shiny black (default), cartoon (a white eyeball with a big pupil), or a real bird's colored ring; normal or big
+  const es = eyeStyle(b), rE = re * eyeSize(b);
+  const eyeIn = es === 'cartoon'
+    ? `<circle r="${f1(rE * 1.2)}" fill="#FCFCF8" stroke="rgba(0,0,0,.5)" stroke-width=".9"/><circle cx="${f1(rE * .14)}" r="${f1(rE * .74)}" fill="${U('iris')}"/><circle cx="${f1(rE * .18)}" r="${f1(rE * .44)}" fill="#0A0A0A"/>`
+    : `<circle r="${f1(rE)}" fill="${U('iris')}"/><circle r="${f1(rE * .55)}" fill="#0A0A0A"/><circle r="${f1(rE)}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width=".8"/>`;
+  const eye = `<g data-g="eye" data-part="iris" transform="translate(${f1(E.x)} ${f1(E.y)})">${eyeIn}<circle cx="${f1(-rE * .2)}" cy="${f1(-rE * .36)}" r="${f1(rE * .3)}" fill="#fff" opacity=".95"/><circle cx="${f1(rE * .4)}" cy="${f1(rE * .3)}" r="${f1(rE * .12)}" fill="#fff" opacity=".6"/></g><path data-g="happy" class="ov" d="M${f1(E.x - rE)},${f1(E.y + rE * .2)} Q${f1(E.x)},${f1(E.y - rE * 1.1)} ${f1(E.x + rE)},${f1(E.y + rE * .2)}" stroke="#1A1A1A" stroke-width="${f1(rE * .45)}" fill="none" stroke-linecap="round" opacity="0"/>`;
   const s = bs, k = Bk;
   let upper, lower, ridge = '', extra = '';
   if (sp.beak.type === 'cone') {
@@ -824,7 +835,7 @@ class Actor {
   flapWings(n = 4) { let i = 0; const step = () => { if (i >= n * 2) { this.s.flapT = 0; return; } this.s.flapT = i % 2 ? .15 : 1; i++; this.later(115, step); }; step(); }
   hop() { this.s.hopT = 16; this.later(260, () => this.s.hopT = 0); }
   preen() { const s = this.s; s.rotT = 30; this.later(300, () => this.talk(true)); this.later(1300, () => { this.talk(false); s.rotT = 0; }); }
-  startDance() { this.s.dance = true; this.danceStart = performance.now(); this.s.crestT = 1; }
+  startDance(bpm) { this.s.dance = true; this.danceBpm = bpm || BPM; this.danceStart = performance.now(); this.s.crestT = 1; }
   stopDance() { this.s.dance = false; this.s.crestT = this.rest; }
   tick(now) {
     if (!this.alive) return;
@@ -838,7 +849,7 @@ class Actor {
     const bp = (now - this.blinkStart) / 160, blink = bp >= 0 && bp < 1 ? Math.sin(bp * Math.PI) : 0;
     const calm = this.reduce ? 0 : 1, breath = Math.sin(t * 2.3) * .012 * calm, sway = Math.sin(t * .8) * 1.4 * calm;
     let db = 0, dr = 0;
-    if (s.dance) { const ph = (now - this.danceStart) / 1000 * BPM / 60; db = Math.abs(Math.sin(ph * Math.PI)) * 7 * (calm || .3); dr = Math.sin(ph * Math.PI) * 9 * (calm || .3); }
+    if (s.dance) { const ph = (now - this.danceStart) / 1000 * (this.danceBpm || BPM) / 60; db = Math.abs(Math.sin(ph * Math.PI)) * 7 * (calm || .3); dr = Math.sin(ph * Math.PI) * 9 * (calm || .3); }
     const at = `${this.base} translate(0 ${(-s.hop - db).toFixed(2)})`;
     for (const el of this.alls) el.setAttribute('transform', at);
     if (this.bodyEl) this.bodyEl.setAttribute('transform', `translate(${G.B.x} ${G.B.y}) scale(${(1 + s.fluff * .05).toFixed(3)} ${(1 + breath + s.fluff * .06).toFixed(3)}) translate(${-G.B.x} ${-G.B.y})`);
@@ -1195,28 +1206,47 @@ class Bird3D {
   headPoint(dir, k) { const F = this.F; const d = vnorm(dir); return [F.H[0] + d[0] * F.S.head * k, F.H[1] + d[1] * F.S.head * k, F.H[2] + d[2] * F.S.head * k]; }
   buildEyes() {
     const T = R3.T, F = this.F, r = F.S.head * .19 * (F.S.eyeScale || 1);
-    this.eyes = []; this.lids = [];
+    this.eyeR = r; this.eyes = []; this.lids = []; this.rings = []; this.irisCaps = [];
+    // an eyeball with the iris and pupil as thin caps on its front, so the black pupil always shows
+    this.scleraMat = new T.MeshPhysicalMaterial({color: '#141418', roughness: .12, clearcoat: 1, clearcoatRoughness: .05});
     this.irisMat = new T.MeshPhysicalMaterial({color: '#222', roughness: .1, clearcoat: 1, clearcoatRoughness: .05});
     const pupilMat = new T.MeshPhysicalMaterial({color: '#050505', roughness: .05, clearcoat: 1});
     const glint = new T.MeshBasicMaterial({color: '#ffffff'});
     this.lidMat = new T.MeshStandardMaterial({color: '#888', roughness: .85});
     this.ringMat = new T.MeshStandardMaterial({color: '#fff', roughness: .7});
-    this.mats.push(this.irisMat, pupilMat, glint, this.lidMat, this.ringMat);
-    const eyeG = new T.SphereGeometry(r, 24, 16), pupG = new T.SphereGeometry(r * .66, 20, 12), glG = new T.SphereGeometry(r * .2, 10, 8), glG2 = new T.SphereGeometry(r * .09, 8, 6);
+    this.mats.push(this.scleraMat, this.irisMat, pupilMat, glint, this.lidMat, this.ringMat);
+    const cap = (rr, ang) => { const g = new T.SphereGeometry(rr, 28, 8, 0, Math.PI * 2, 0, ang); g.rotateX(Math.PI / 2); return g; };
+    const eyeG = new T.SphereGeometry(r, 28, 18), irisG = cap(r * 1.008, .7), pupG = cap(r * 1.016, .42), glG = new T.SphereGeometry(r * .2, 10, 8), glG2 = new T.SphereGeometry(r * .09, 8, 6);
     const lidG = new T.SphereGeometry(r * 1.1, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), ringG = new T.TorusGeometry(r * 1.08, r * .2, 10, 28);
     [1, -1].forEach(side => {
-      const dir = [F.eye[0] * side, F.eye[1], F.eye[2]], p = this.headPoint(dir, F.S.eyeIn || .9);
-      const g = new T.Group(); g.position.copy(this.headAt(p));
+      const dir = [F.eye[0] * side, F.eye[1], F.eye[2]];
+      const g = new T.Group(); g.userData.dir = dir;
       g.quaternion.setFromUnitVectors(new T.Vector3(0, 0, 1), new T.Vector3(dir[0], dir[1], dir[2]));
-      const eye = new T.Mesh(eyeG, this.irisMat); eye.userData.part = 'iris';
-      const pup = new T.Mesh(pupG, pupilMat); pup.position.z = r * .45; pup.scale.set(1, 1, .55);
+      const eye = new T.Mesh(eyeG, this.scleraMat); eye.userData.part = 'iris';
+      const iris = new T.Mesh(irisG, this.irisMat); iris.userData.part = 'iris';
+      const pup = new T.Mesh(pupG, pupilMat); pup.userData.part = 'iris';
       const gl = new T.Mesh(glG, glint); gl.position.set(-r * .28 * side, r * .34, r * .9);
       const gl2 = new T.Mesh(glG2, glint); gl2.position.set(r * .3 * side, -r * .3, r * .93);
       const lid = new T.Mesh(lidG, this.lidMat); lid.rotation.x = -1.4; lid.userData.part = 'head';
       const ring = new T.Mesh(ringG, this.ringMat); ring.position.z = r * .25; ring.userData.part = 'ring';
-      g.add(eye, pup, gl, gl2, lid, ring); this.headBone.add(g);
-      this.eyes.push(g); this.lids.push(lid); (this.rings = this.rings || []).push(ring);
+      g.add(eye, iris, pup, gl, gl2, lid, ring); this.headBone.add(g);
+      this.eyes.push(g); this.lids.push(lid); this.rings.push(ring); this.irisCaps.push(iris);
     });
+    this.placeEyes(1);
+  }
+  // bigger eyes sit a little deeper so they don't pop out of the head
+  placeEyes(k) {
+    const F = this.F, r = this.eyeR;
+    this.eyes.forEach(g => { g.scale.setScalar(k); g.position.copy(this.headAt(this.headPoint(g.userData.dir, (F.S.eyeIn || .9) - (k - 1) * r / F.S.head * .5))); });
+  }
+  // Havi's pick: shiny black eyes with white sparkles, cartoon eyes (white with a big pupil), or a real bird's colored eyes
+  setEyes(b, c) {
+    const es = eyeStyle(b);
+    if (es === 'shiny') { this.scleraMat.color.set('#141418'); this.irisMat.color.set('#26262C'); }
+    else if (es === 'cartoon') { this.scleraMat.color.set('#FCFCF8'); this.irisMat.color.set(c.iris); }
+    else { this.scleraMat.color.set(c.iris); this.irisMat.color.set(c.iris); }
+    this.irisCaps.forEach(m => { m.visible = es !== 'color'; });
+    this.eyeK = eyeSize(b); this.placeEyes(this.eyeK);
   }
   buildBeak() {
     const T = R3.T, F = this.F, S = F.S, s = S.head * S.beak * .62;
@@ -1416,7 +1446,7 @@ class Bird3D {
     // hard parts
     this.beakMat.color.set(c.beak); this.lbeakMat.color.set(sp.parts.includes('lowerBeak') ? c.lowerBeak : c.beak);
     if (this.cereMat) this.cereMat.color.set(c.cere);
-    this.irisMat.color.set(c.iris);
+    this.setEyes(b, c);
     this.feetMat.color.set(dark(c.feet, .04));
     // eyelid matches the feathers around the eye
     if (body.eyeV === undefined) { const e = this.headPoint(F.eye, 1.02); let best = 1e9; for (let i = 0; i < body.n; i++) { const q = body.P(i), dd = (q[0] - e[0]) ** 2 + (q[1] - e[1]) ** 2 + (q[2] - e[2]) ** 2; if (dd < best) { best = dd; body.eyeV = i; } } }
@@ -1465,9 +1495,9 @@ class Bird3D {
     }
     else if (kind === 'glasses') {
       const lens = M('#1F2430', {roughness: .12, metalness: .3}), rim = M('#0E1118', {roughness: .4});
-      const r = F.S.head * .19 * (F.S.eyeScale || 1) * 1.7, pts = [];
+      const ek = this.eyeK || 1, r = F.S.head * .19 * (F.S.eyeScale || 1) * 1.7 * ek, pts = [];
       [1, -1].forEach(sd => {
-        const dir = [F.eye[0] * sd, F.eye[1], F.eye[2]], p = this.headAt(this.headPoint(dir, (F.S.eyeIn || .9) + .12));
+        const dir = [F.eye[0] * sd, F.eye[1], F.eye[2]], p = this.headAt(this.headPoint(dir, (F.S.eyeIn || .9) + .12 + (ek - 1) * .3));
         const l = new T.Mesh(new T.CylinderGeometry(r, r, r * .18, 28), lens); l.position.copy(p);
         l.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), new T.Vector3(dir[0], dir[1], dir[2])); g.add(l);
         const ring = new T.Mesh(new T.TorusGeometry(r, r * .12, 8, 28), rim); ring.position.copy(p); ring.quaternion.setFromUnitVectors(new T.Vector3(0, 0, 1), new T.Vector3(dir[0], dir[1], dir[2])); g.add(ring);
@@ -1552,7 +1582,7 @@ class Bird3D {
     const m = map[part]; if (!m) return;
     const t0 = performance.now();
     if (m.userData.u) { const u = m.userData.u; const tick = () => { const k = (performance.now() - t0) / 900; u.uFlash.value = k < 1 ? Math.abs(Math.sin(k * Math.PI * 2)) : 0; if (k < 1) requestAnimationFrame(tick); }; tick(); }
-    else if (m.emissive) { const tick = () => { const k = (performance.now() - t0) / 900; m.emissive.setScalar(k < 1 ? Math.abs(Math.sin(k * Math.PI * 2)) * .35 : 0); if (k < 1) requestAnimationFrame(tick); }; tick(); }
+    else if (m.emissive) { const list = part === 'iris' ? [this.scleraMat, this.irisMat] : [m]; const tick = () => { const k = (performance.now() - t0) / 900; list.forEach(x => x.emissive.setScalar(k < 1 ? Math.abs(Math.sin(k * Math.PI * 2)) * .35 : 0)); if (k < 1) requestAnimationFrame(tick); }; tick(); }
   }
   // which paintable part a ray hit
   partAt(hit) {
@@ -1621,7 +1651,7 @@ class Actor3D {
     const side = Math.random() < .5 ? 1 : -1;
     this.drive(1700, u => { const k = bump(u, 0, 1); this.x.headYaw = side * 1.9 * Math.min(1, k * 1.6); this.x.headPitch = .55 * k; this.x.wing = side > 0 ? [.18 * k, 0] : [0, .18 * k]; this.s.beakT = u > .3 && u < .8 ? .25 + .25 * Math.sin(u * 60) : 0; }, () => { this.x.headYaw = this.x.headPitch = 0; this.x.wing = null; this.s.beakT = 0; });
   }
-  startDance() { this.s.dance = true; this.danceStart = performance.now(); this.s.crestT = 1; }
+  startDance(bpm) { this.s.dance = true; this.danceBpm = bpm || BPM; this.danceStart = performance.now(); this.s.crestT = 1; }
   stopDance() { this.s.dance = false; this.s.crestT = this.rest; }
   faceCam(ms, side) { this.look.mode = side ? 2 : 1; this.look.until = performance.now() + ms; }
   // a sung note: open the beak and send a colored note floating up
@@ -1706,7 +1736,7 @@ class Actor3D {
     L.yaw += (ty - L.yaw) * e(5); L.pitch += (tp - L.pitch) * e(5); L.roll += (tr - L.roll) * e(5);
     // compose the pose
     let db = 0, dr = 0, dy = 0;
-    if (s.dance) { const ph = (now - this.danceStart) / 1000 * BPM / 60; db = Math.abs(Math.sin(ph * Math.PI)) * .06 * (calm || .3); dr = Math.sin(ph * Math.PI) * .22 * (calm || .3); dy = Math.sin(ph * Math.PI * .5) * .2 * (calm || .3); }
+    if (s.dance) { const ph = (now - this.danceStart) / 1000 * (this.danceBpm || BPM) / 60; db = Math.abs(Math.sin(ph * Math.PI)) * .06 * (calm || .3); dr = Math.sin(ph * Math.PI) * .22 * (calm || .3); dy = Math.sin(ph * Math.PI * .5) * .2 * (calm || .3); }
     const breath = Math.sin(t * 2.3) * .012 * calm;
     B.root.position.set(x.px || 0, PERCH_R + s.hop * .012 + (x.py || 0) + db, x.pz || 0);
     B.pivot.rotation.x = x.hang || 0;
@@ -2276,7 +2306,7 @@ function noteTexture(col) {
   return R3.noteTex[col];
 }
 /* still pictures of birds for the aviary cards and the species picker */
-function thumbKey(b, w, h) { return [b.species, JSON.stringify(b.colors || {}), b.pattern, b.pc, b.patch, b.crestScale, b.accessory, w, h].join('|'); }
+function thumbKey(b, w, h) { return [b.species, JSON.stringify(b.colors || {}), b.pattern, b.pc, b.patch, b.crestScale, b.accessory, eyeStyle(b), eyeSize(b), w, h].join('|'); }
 function thumb3D(b, w = 240, h = 300) {
   const key = thumbKey(b, w, h); if (R3.thumbs.has(key)) return R3.thumbs.get(key);
   const T = R3.T;
@@ -2345,7 +2375,7 @@ function tone(t0, dur, curve, o = {}) {
   let last = g;
   if (o.shape) { const ws = ctx.createWaveShaper(); ws.curve = distCurve(o.shape); last.connect(ws); last = ws; }
   if (o.filter) { const fl = ctx.createBiquadFilter(); fl.type = o.filter.type || 'bandpass'; fl.frequency.value = o.filter.f; fl.Q.value = o.filter.q || 1; last.connect(fl); last = fl; }
-  last.connect(AU.out);
+  last.connect(o.dest || AU.out);
   const top = Math.max(...curve.map(c => c[1]));
   (o.harm || [[1, 1]]).forEach(([m, hg]) => {
     if (m > 1 && top * m > Math.min(20000, ctx.sampleRate / 2 - 500)) return;
@@ -2357,9 +2387,9 @@ function tone(t0, dur, curve, o = {}) {
 }
 function noise(t0, dur, o = {}) {
   const ctx = AU.ctx; if (!ctx) return;
-  const src = ctx.createBufferSource(); src.buffer = noiseBuf(); const fl = ctx.createBiquadFilter(); fl.type = o.type || 'bandpass'; fl.frequency.value = o.f || 2000; fl.Q.value = o.q || 1;
+  const src = ctx.createBufferSource(); src.buffer = noiseBuf(); src.loop = true; const fl = ctx.createBiquadFilter(); fl.type = o.type || 'bandpass'; fl.frequency.value = o.f || 2000; fl.Q.value = o.q || 1;
   const g = ctx.createGain(); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(o.vol || .2, t0 + Math.min(.01, dur * .2)); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
-  src.connect(fl).connect(g).connect(AU.out); src.start(t0, Math.random() * .5); src.stop(t0 + dur + .02);
+  src.connect(fl).connect(g).connect(o.dest || AU.out); src.start(t0, Math.random() * .5); src.stop(t0 + dur + .02);
 }
 const CALLS = {
   tiel(t) { const v = 1 + (Math.random() - .5) * .08; tone(t, .34, [[0, 2300 * v], [.22, 3500 * v], [.5, 3250 * v], [1, 2050 * v]], {harm: [[1, 1], [2, .22], [3, .07]], fm: {rate: 95, depth: 80}, vol: .2}); if (Math.random() < .5) { tone(t + .44, .3, [[0, 2400 * v], [.25, 3400 * v], [1, 2200 * v]], {harm: [[1, 1], [2, .2]], fm: {rate: 90, depth: 70}, vol: .17}); return .8; } return .4; },
@@ -2420,21 +2450,74 @@ function realChatter(key, t, target) {
   return x - t;
 }
 function syllables(text) { const m = String(text).toLowerCase().match(/[aeiouy]+/g); return Math.max(1, m ? m.length : 1); }
-function mallet(t, f, vol = .2) { tone(t, .7, [[0, f], [1, f]], {harm: [[1, 1], [4, .12], [10, .03]], vol, env: [[0, 0], [.01, 1], [.2, .35], [1, 0]]}); }
-function pluck(t, f, d, vol) { tone(t, Math.max(.18, d), [[0, f], [1, f]], {type: 'triangle', harm: [[1, 1], [2, .25], [3, .1]], vol, env: [[0, 0], [.03, 1], [.3, .45], [1, 0]]}); }
+function mallet(t, f, vol = .2, dest) { tone(t, .7, [[0, f], [1, f]], {harm: [[1, 1], [4, .12], [10, .03]], vol, env: [[0, 0], [.01, 1], [.2, .35], [1, 0]], dest}); }
+function pluck(t, f, d, vol, dest) { tone(t, Math.max(.18, d), [[0, f], [1, f]], {type: 'triangle', harm: [[1, 1], [2, .25], [3, .1]], vol, env: [[0, 0], [.03, 1], [.3, .45], [1, 0]], dest}); }
 function wolf(t0, vol = .2, m = 1) { tone(t0, .3, [[0, 1350 * m], [1, 2900 * m]], {vol, env: [[0, 0], [.1, 1], [.8, .9], [1, 0]], fm: {rate: 6, depth: 15}}); tone(t0 + .42, .62, [[0, 1300 * m], [.35, 2700 * m], [1, 1150 * m]], {vol, env: [[0, 0], [.08, 1], [.8, .8], [1, 0]], fm: {rate: 6, depth: 15}}); return 1.1; }
-function whistle(t0, notes, base, beat = .32, vol = .2) {
+// notes are [semitone, beats] or [semitone, beats, 1] for a short, punchy note with a little gap after it
+function whistle(t0, notes, base, beat = .32, vol = .2, dest) {
   const ctx = AU.ctx; if (!ctx) return 0;
   const osc = ctx.createOscillator(), osc2 = ctx.createOscillator(), g = ctx.createGain(), g2 = ctx.createGain(); g2.gain.value = .07;
   const lfo = ctx.createOscillator(); lfo.frequency.value = 5.6; const lg = ctx.createGain(); lg.gain.value = base * .012; const lg2 = ctx.createGain(); lg2.gain.value = base * .024;
   lfo.connect(lg).connect(osc.frequency); lfo.connect(lg2).connect(osc2.frequency);
   g.gain.setValueAtTime(0, t0);
   let t = t0;
-  notes.forEach(([semi, beats], i) => { const f = base * Math.pow(2, semi / 12), d = beats * beat; if (i === 0) { osc.frequency.setValueAtTime(f, t); osc2.frequency.setValueAtTime(f * 2, t); } else { osc.frequency.setTargetAtTime(f, t, .018); osc2.frequency.setTargetAtTime(f * 2, t, .018); } g.gain.setTargetAtTime(vol, t, .012); g.gain.setTargetAtTime(vol * .22, t + d - .06, .015); t += d; });
+  notes.forEach(([semi, beats, short], i) => {
+    const f = base * Math.pow(2, semi / 12), d = beats * beat;
+    if (i === 0) { osc.frequency.setValueAtTime(f, t); osc2.frequency.setValueAtTime(f * 2, t); } else { osc.frequency.setTargetAtTime(f, t, .018); osc2.frequency.setTargetAtTime(f * 2, t, .018); }
+    g.gain.setTargetAtTime(vol, t, .012);
+    if (short) g.gain.setTargetAtTime(0, t + Math.min(d * .6, .17), .02); else g.gain.setTargetAtTime(vol * .22, t + d - .06, .015);
+    t += d;
+  });
   g.gain.setTargetAtTime(0, t, .03);
-  osc.connect(g); osc2.connect(g2).connect(g); g.connect(AU.out);
+  osc.connect(g); osc2.connect(g2).connect(g); g.connect(dest || AU.out);
   [osc, osc2, lfo].forEach(x => { x.start(t0); x.stop(t + .4); });
   return t - t0;
+}
+/* the pop songs' backing band: a little drum machine and a bass line, made up on the spot */
+// 16 steps a bar: kick (k), snare or clap (s), hi-hat (h: x closed, o open)
+const GROOVES = {
+  strut: {k: 'x.....x.x.......', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.'},
+  disco: {k: 'x...x...x...x...', s: '....x.......x...', h: '..o...o...o...o.', clap: 1},
+  funk: {k: 'x.....x...x.....', s: '....x..x....x...', h: 'xxxxxxxxxxxxxxxx'},
+  rock: {k: 'x.......x.x.....', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.'},
+  spooky: {k: 'x.......x.......', s: '....x.......x...', h: '..x...x...x...x.', clap: 1},
+  smooth: {k: 'x......x..x.....', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.', soft: 1},
+  robot: {k: 'x..x..x.x.......', s: '....x.......x...', h: 'xxxxxxxxxxxxxxxx', clap: 1},
+  bounce: {k: 'x...x...x...x...', s: '....x.......x...', h: 'x.xxx.xxx.xxx.xx', clap: 1}
+};
+// the band sits under the bird's whistle: the whistle is the star
+// (a punchy kick that phone speakers can play: not much deep rumble, plus a little click)
+function kick(t, v, dest) { tone(t, .16, [[0, 190], [.35, 95], [1, 70]], {vol: .3 * v, env: [[0, 0], [.02, 1], [.4, .45], [1, 0]], dest}); tone(t, .03, [[0, 1500], [1, 600]], {vol: .05 * v, env: [[0, 0], [.1, 1], [1, 0]], dest}); }
+function snare(t, v, dest) { noise(t, .17, {f: 2000, q: .6, vol: .14 * v, dest}); tone(t, .08, [[0, 240], [1, 180]], {vol: .09 * v, env: [[0, 0], [.05, 1], [1, 0]], dest}); }
+function clap(t, v, dest) { [0, .011, .023].forEach(d => noise(t + d, .045, {f: 1400, q: 1.1, vol: .1 * v, dest})); noise(t + .03, .15, {f: 1250, q: .9, vol: .06 * v, dest}); }
+function hat(t, open, v, dest) { noise(t, open ? .18 : .035, {type: 'highpass', f: 7200, q: .7, vol: (open ? .05 : .035) * v, dest}); }
+function bassNote(t, semi, d, v, dest) { const f = 130.81 * Math.pow(2, semi / 12); tone(t, Math.max(.06, d), [[0, f], [1, f]], {type: 'sawtooth', harm: [[1, 1], [2, .3]], vol: .075 * v, filter: {type: 'lowpass', f: 1100, q: 2}, env: [[0, 0], [.03, 1], [.45, .6], [1, 0]], dest}); }
+// g = a song's groove: {kind, key, bass: bars of [step, semitone from C3, steps long]}
+function playGroove(t0, g, beat, beats, dest) {
+  const G = g && GROOVES[g.kind]; if (!G || !AU.ctx) return;
+  const step = beat / 4, n = Math.round(beats * 4), v = G.soft ? .7 : 1;
+  for (let i = 0; i < n; i++) {
+    const t = t0 + i * step, j = i % 16;
+    if (G.k[j] === 'x') kick(t, v, dest);
+    if (G.s[j] === 'x') (G.clap ? clap : snare)(t, v, dest);
+    if (G.h[j] !== '.') hat(t, G.h[j] === 'o', v * (j % 4 ? .75 : 1), dest);
+  }
+  const bars = g.bass || [];
+  for (let b = 0; b * 16 < n && bars.length; b++) bars[b % bars.length].forEach(([st, semi, len]) => { const i = b * 16 + st; if (i < n) bassNote(t0 + i * step, semi, Math.min(len, n - i) * step * .9, v, dest); });
+  // the big finish: a kick, a cymbal and the home note
+  const te = t0 + n * step; kick(te, v, dest); noise(te, .6, {type: 'highpass', f: 5200, q: .5, vol: .045 * v, dest}); bassNote(te, g.key || 0, beat * 2, v, dest);
+}
+// each song plays through its own volume knob, so leaving the room can hush it right away
+function songBus() { stopSong(); const ctx = AU.ctx; if (!ctx) return null; const g = ctx.createGain(); g.connect(AU.out); AU.song = g; return g; }
+function stopSong() { const g = AU.song, ctx = AU.ctx; AU.song = null; if (!g || !ctx) return; try { g.gain.setTargetAtTime(0, ctx.currentTime, .04); } catch (e) {} setTimeout(() => { try { g.disconnect(); } catch (e) {} }, 500); }
+const tuneBeats = notes => notes.reduce((a, n) => a + n[1], 0);
+// a pop song with its band and a synth playing the tune (the dance party, when the bird doesn't know one yet)
+function playSong(k) {
+  const t = TUNES[k], beats = tuneBeats(t.notes), ctx = audio(); if (!ctx) return beats * t.beat;
+  const bus = songBus(), t0 = ctx.currentTime + .08; let x = t0;
+  t.notes.forEach(([s, bt, sh]) => { pluck(x, 523.25 * Math.pow(2, s / 12), sh ? Math.min(bt * t.beat, .16) : bt * t.beat * .9, .13, bus); x += bt * t.beat; });
+  playGroove(t0, t.groove, t.beat, beats, bus);
+  return x - t0;
 }
 function sfx(kind) {
   const ctx = audio(); if (!ctx) return; const t = ctx.currentTime + .01;
@@ -2443,16 +2526,6 @@ function sfx(kind) {
   if (kind === 'purr') { for (let i = 0; i < 28; i++) noise(t + i * .03, .012, {f: 4200, q: 3, vol: .05}); tone(t, .7, [[0, 1800], [1, 1700]], {fm: {rate: 45, depth: 250}, vol: .045}); }
   if (kind === 'flap') for (let i = 0; i < 5; i++) noise(t + i * .23, .1, {type: 'lowpass', f: 800, q: .5, vol: .22});
   if (kind === 'win') [0, 4, 7, 12, 16].forEach((s, i) => mallet(t + i * .09, 1046.5 * Math.pow(2, s / 12), .14));
-}
-function playDance() {
-  const ctx = audio(); const beat = 60 / BPM;
-  const mel = [[12, .5], [16, .5], [19, .5], [16, .5], [17, .5], [21, .5], [24, 1], [23, .5], [21, .5], [19, .5], [17, .5], [16, 1], [14, 1], [12, .5], [16, .5], [19, .5], [21, .5], [19, .5], [16, .5], [14, .5], [16, .5], [12, 2]];
-  const total = mel.reduce((a, m) => a + m[1], 0) * beat;
-  if (!ctx) return total;
-  const t = ctx.currentTime + .05; let x = t;
-  mel.forEach(([s, b]) => { pluck(x, 261.63 * Math.pow(2, s / 12), b * beat * .9, .15); x += b * beat; });
-  [0, 0, 5, 5, 7, 7, 0, 0, 0, 0, 5, 7, 0, 0].forEach((s, i) => pluck(t + i * beat, 130.81 * Math.pow(2, s / 12), beat * .8, .11));
-  return total;
 }
 function unlock() {
   if (AU.unlocked) return; AU.unlocked = true; audio();
@@ -2610,7 +2683,7 @@ function stopListening() {
   try { if (Hum.on) humCancel(); } catch (e) {}
 }
 function go(screen, arg) {
-  stopListening(); try { if (S.game) endGame(S.game, true); } catch (e) {}
+  stopListening(); stopSong(); try { if (S.game) endGame(S.game, true); } catch (e) {}
   stopActor(); closeSheet(); clearInterval(S.idle); S.busyUntil = 0;
   if ('speechSynthesis' in window) { try { speechSynthesis.cancel(); } catch (e) {} }
   S.screen = screen;
@@ -2909,7 +2982,7 @@ function visitFriend(i) {
 function flyGame() {
   const v = R3.view, b = cur(); if (isBusy() || !v || !v.actor || !b) return;
   const mine = (b.tunes || []).filter(t => t.learned && t.notes && t.notes.length >= 4);
-  const tn = mine.length ? pick(mine) : {name: TUNES.twinkle.name, notes: TUNES.twinkle.notes};
+  const tn = mine.length ? pick(mine) : {name: TUNES.moonwalk.name, notes: TUNES.moonwalk.notes};
   showStage();
   const st = $('#stage');
   const ok = v.startFlight(tn, (won, got) => {
@@ -2940,11 +3013,15 @@ function giveTreat() {
   };
   a.later(850, peck);
 }
+// dance party: a pop song with its band; if the bird knows one, it sings it while it dances
 function dance() {
   if (isBusy() || !actor) return;
-  const a = actor; const dur = playDance(); a.startDance(); setBusy(dur * 1000 + 600);
-  const b = cur(); const tunes = b.tunes.filter(t => t.learned && t.special === 'wolf');
-  a.later(dur * 1000, () => { a.stopDance(); a.flapWings(2); if (tunes.length) birdWhistle(tunes[0], 1); else doCall(); hearts(2); addLove(2); });
+  const a = actor, b = cur(), pops = Object.keys(TUNES).filter(k => TUNES[k].group === 'pop');
+  const mine = b.tunes.filter(t => t.learned && tuneGroove(t)), tn = mine.length ? pick(mine) : null, song = TUNES[tn ? tn.preset : pick(pops)];
+  const dur = tn ? birdWhistle(tn, 1) : playSong(Object.keys(TUNES).find(k => TUNES[k] === song));
+  a.startDance(60 / song.beat); setBusy(dur * 1000 + 700);
+  if (!tn) bubble('kid', `♪ ${song.name}`, dur * 1000 + 300);
+  a.later(dur * 1000 + 250, () => { a.stopDance(); a.flapWings(2); if (!tn) doCall(); hearts(2); addLove(2); });
 }
 
 /* talk */
@@ -3122,34 +3199,68 @@ const KEYC = ['#E4413B', '#F0873A', '#F5C024', '#6CBD45', '#2BB3A8', '#2E7FCE', 
 const BEAT = .32, XYLO = 523.25;
 // lyrics: one syllable per note; words split on spaces, syllables on "-"
 const syl = s => s.split(/\s+/).flatMap(w => w.split('-').map((x, i, a) => i < a.length - 1 ? x + '-' : x));
-// every preset fits the 8 bars exactly (C D E F G A B C); notes are [semitone, quarter-note beats], beat = seconds per quarter.
-// melodies cross-checked against at least two published scores; "~" = the syllable before it keeps going
+// songs written as notes: a letter (C D E F G A B, and c for the high C), how many beats it lasts,
+// and "!" for a short, punchy note with a little gap after it (that's what makes the pop songs groove)
+const NL = {C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11, c: 12};
+const N = s => s.trim().split(/\s+/).map(w => { const m = /^([A-Gc])(\d*\.?\d+)(!?)$/.exec(w); return m[3] ? [NL[m[1]], +m[2], 1] : [NL[m[1]], +m[2]]; });
+// bass lines: one bar (16 steps) per chord, as [step, semitone from C3, steps long]
+const OCT = r => [0, 2, 4, 6, 8, 10, 12, 14].map((s, i) => [s, r + (i % 2 ? 12 : 0), 1]);
+const R8 = (r, ap) => [0, 2, 4, 6, 8, 10, 12, 14].map(s => [s, s === 14 ? ap : r, 2]);
+const BNC = r => [[0, r, 2], [2, r + 12, 1], [4, r + 7, 2], [6, r + 12, 1], [8, r, 2], [10, r + 12, 1], [12, r + 7, 2], [14, r + 4, 2]];
+const SM = r => [[0, r, 6], [6, r + 7, 2], [8, r + 12, 4], [12, r + 7, 4]];
+// every preset fits the 8 bars exactly (C D E F G A B C); notes are [semitone, quarter-note beats(, short)], beat = seconds per quarter.
+// Pop & dance: brand-new songs written for the aviary in a funky, moonwalking '80s pop style, each with its own groove.
+// Famous tunes: old enough to belong to everyone; melodies cross-checked against published scores. "~" = the syllable before it keeps going
+// (the old nursery songs stay at the bottom, hidden, so birds that already learned one can still sing it)
 const TUNES = {
+  moonwalk: {name: 'Moonwalk', icon: '🌙', group: 'pop', beat: 60 / 116, groove: {kind: 'strut', key: 2, bass: [[[0, 2, 2], [3, 2, 1], [6, 14, 1], [8, 12, 2], [10, 9, 2], [12, 7, 2], [14, 9, 2]]]},
+    notes: N('A.5! F1! A.5! F1! D.25 E.25 F.5 G.5 A1.5 c.5! c1.5! G.5 F.5 D1! F.5 G.5 A1! c.5 A.5 G.5 F.5 D2'), lyrics: syl('Slide back, slide back, on the moon-light branch, hee-hee! Feath-ers shine, feel the beat, now it’s time to dance!')},
+  disco: {name: 'Disco Wings', icon: '🪩', group: 'pop', beat: .5, groove: {kind: 'disco', key: 0, bass: [OCT(0), OCT(5), OCT(-3), OCT(5)]},
+    notes: N('E.5 E.5 G.5 A.5 G.5 E.5 D1 c.5 A.5 G.5 A.5 c.5! c.5! c1! E.5 G.5 A.5 c.5 A.5 G.5 A1 G.5! G.5! A.5 c.5 G.5 A.5 c1'), lyrics: syl('Flap your wings and hit the floor, dis-co birds want more, more, more! Spin a-round and touch the sky, tweet, tweet, oh my, watch us fly!')},
+  glove: {name: 'Glitter Glove', icon: '🧤', group: 'pop', beat: 60 / 112, groove: {kind: 'funk', key: 2, bass: [[[0, 2, 2], [3, 14, 1], [4, 2, 1], [6, 12, 2], [8, 9, 2], [11, 2, 1], [12, 5, 2], [14, 7, 2]], [[0, 7, 2], [3, 19, 1], [4, 7, 1], [6, 17, 2], [8, 14, 2], [11, 7, 1], [12, 11, 2], [14, 12, 2]]]},
+    notes: N('D.5 F.5 G.5 A.5 G.5 F1.5 D.5 F.5 G.5 A.5 c.5 A1.5 c.5! c.5! c1! B.5 A1.5 G.5 A.5 F.5 E.5 D2'), lyrics: syl('Put on your glit-ter glove, show them what you’re made of, shine, shine, shine so bright, dance with me to-night!')},
+  funky: {name: 'Funky Feathers', icon: '🦚', group: 'pop', beat: 60 / 132, groove: {kind: 'rock', key: -3, bass: [R8(-3, -1), R8(0, -5), R8(-7, -4), R8(-3, -3)]},
+    notes: N('A.5! A.5! c.5! A.5! G.5 E1.5 E.5 G.5 A.5 G.5 E2 A.5! A.5! c.5! A.5! B.5 c1.5 B.5 A.5 G.5 E.5 A2'), lyrics: syl('Fun-ky, fun-ky feath-ers, shake them left and right, fun-ky, fun-ky feath-ers, dance with all your might!')},
+  zombie: {name: 'Zombie Shuffle', icon: '🧟', group: 'pop', beat: 60 / 118, groove: {kind: 'spooky', key: -3, bass: [[[0, -3, 3], [4, 0, 3], [8, 4, 3], [12, 6, 3]], [[0, 5, 3], [4, 4, 3], [8, 0, 3], [12, -1, 3]]]},
+    notes: N('A.5 A.5 G.5 F.5 E.5 F1.5 E.5 F.5 G.5 F.5 E2 A.5 A.5 B.5 c.5 B.5 A1.5 c.5! A.5! G.5 F.5 E2'), lyrics: syl('Mid-night in the for-est, some-thing’s creep-ing near, zom-bie birds are danc-ing, hoo! hoo! Have no fear!')},
+  robot: {name: 'Robot Bird', icon: '🤖', group: 'pop', beat: 60 / 116, groove: {kind: 'robot', key: 0, bass: [[[0, 0, 1], [2, 0, 1], [3, 12, 1], [6, 0, 1], [8, 0, 1], [10, 12, 1], [11, 0, 1], [14, -2, 1]]]},
+    notes: N('c.5! C.5! c.5! C2! G.5 G.5 E.5 G.5 c2.5! E.5! E.5! G.5! G2! A.5 G.5 E.5 D.5 C2.5'), lyrics: syl('Beep, boop, beep, boop! I’m a ro-bot bird. Click, clack, click, clack, dance with-out a word!')},
+  sunshine: {name: 'Sunshine Groove', icon: '☀️', group: 'pop', beat: 60 / 124, groove: {kind: 'bounce', key: 0, bass: [BNC(0), BNC(5), BNC(0), BNC(-5)]},
+    notes: N('G.5 c1.5 A.5 G1.5 E.5 G.5 A.5 G.5 E2 G.5 c1.5 A.5 c1.5 c.5 B.5 A.5 G.5 c2'), lyrics: syl('Sun-shine, sun-shine, shin-ing on my wings, sun-shine, sun-shine, hap-py when I sing!')},
+  wish: {name: 'Make a Wish', icon: '🌠', group: 'pop', beat: .6, groove: {kind: 'smooth', key: 0, bass: [SM(0), SM(-3), SM(5), SM(-5)]},
+    notes: N('C.5 E.5 G1 A.5 G.5 E1 F.5 G.5 A.5 G.5 E2 C.5 D.5 E.5 F.5 G.5 A.5 c1 B.5 A.5 G.5 A.5 B.5 c1.5'), lyrics: syl('Look up high, make a wish on a shoot-ing star, spread your wings and you will see how a-maz-ing you are!')},
+  beethoven: {name: 'Beethoven’s 5th', icon: '🎻', group: 'classic', beat: .38, notes: N('A.5 A.5 A.5 F2.5 G.5 G.5 G.5 E3.5'), lyrics: ['Dun', 'dun', 'dun', 'DUNNN!', 'Dun', 'dun', 'dun', 'DUNNN!']},
+  // Grieg's sneaky opening, arranged for the eight white bars (the original's in-between sharps become the nearest bars)
+  mountain: {name: 'Mountain King', icon: '👑', group: 'classic', beat: .42, notes: N('D.5 E.5 F.5 G.5 A.5 F.5 A1 G.5 E.5 G1 F.5 D.5 F1 D.5 E.5 F.5 G.5 A.5 F.5 A.5 c.5 A.5 F.5 D.5 F.5 A2'), lyrics: syl('Tip-toe, tip-toe, sneak-ing in, hush, hush, hush! Shh, shh, shh! The Moun-tain King is fast a-sleep, don’t you wake him up!')},
+  // Korobeiniki, the Russian folk song the block game made famous (first part, in D minor so it fits the bars)
+  tetris: {name: 'Tetris Song', icon: '🧱', group: 'classic', beat: .4, notes: N('A1 E.5 F.5 G1 F.5 E.5 D1 D.5 F.5 A1 G.5 F.5 E1.5 F.5 G1 A1 F1 D1 D2!'), lyrics: syl('Tet-ris blocks are fall-ing, spin them, drop them, stack them, line them up and clear the row!')},
+
+  ode: {name: 'Ode to Joy', icon: '🎶', group: 'classic', beat: .36, notes: [[4, 1], [4, 1], [5, 1], [7, 1], [7, 1], [5, 1], [4, 1], [2, 1], [0, 1], [0, 1], [2, 1], [4, 1], [4, 1.5], [2, .5], [2, 2], [4, 1], [4, 1], [5, 1], [7, 1], [7, 1], [5, 1], [4, 1], [2, 1], [0, 1], [0, 1], [2, 1], [4, 1], [2, 1.5], [0, .5], [0, 2]], lyrics: syl('Mi mi fa sol sol fa mi re do do re mi mi re re, mi mi fa sol sol fa mi re do do re mi re do do')},
+  birthday: {name: 'Happy Birthday', icon: '🎂', group: 'classic', notes: [[0, .75], [0, .25], [2, 1], [0, 1], [5, 1], [4, 2], [0, .75], [0, .25], [2, 1], [0, 1], [7, 1], [5, 2]], lyrics: syl('Hap-py birth-day to you, hap-py birth-day to you')},
   wolf: {name: 'Wolf whistle', special: 'wolf', icon: '😗', group: 'bird'},
-  twinkle: {name: 'Twinkle Twinkle', icon: '⭐', group: 'sing', notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]], lyrics: syl('Twin-kle twin-kle lit-tle star, how I won-der what you are')},
-  abc: {name: 'ABC Song', icon: '🔤', group: 'sing', beat: .3, notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, .5], [2, .5], [2, .5], [2, .5], [0, 2], [7, 1], [7, 1], [5, 2], [4, 1], [4, 1], [2, 2], [7, .5], [7, .5], [7, 1], [5, 2], [4, 1], [4, 1], [2, 2], [0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]], lyrics: syl('A B C D E F G H I J K L M N O P Q R S T U V dou-ble-u X Y and Z. Now I know my A B C’s, next time won’t you sing with me?')},
-  row: {name: 'Row Your Boat', icon: '🚣', group: 'sing', beat: .42, notes: [[0, 1.5], [0, 1.5], [0, 1], [2, .5], [4, 1.5], [4, 1], [2, .5], [4, 1], [5, .5], [7, 3], [12, .5], [12, .5], [12, .5], [7, .5], [7, .5], [7, .5], [4, .5], [4, .5], [4, .5], [0, .5], [0, .5], [0, .5], [7, 1], [5, .5], [4, 1], [2, .5], [0, 3]], lyrics: syl('Row row row your boat, gent-ly down the stream, mer-ri-ly mer-ri-ly mer-ri-ly mer-ri-ly, life is but a dream')},
-  london: {name: 'London Bridge', icon: '🌉', group: 'sing', beat: .5, notes: [[7, .75], [9, .25], [7, .5], [5, .5], [4, .5], [5, .5], [7, 1], [2, .5], [4, .5], [5, 1], [4, .5], [5, .5], [7, 1], [7, .75], [9, .25], [7, .5], [5, .5], [4, .5], [5, .5], [7, 1], [2, 1], [7, 1], [4, .5], [0, 1.5]], lyrics: syl('Lon-don Bridge is fall-ing down, fall-ing down, fall-ing down, Lon-don Bridge is fall-ing down, my fair la-dy')},
-  hotbuns: {name: 'Hot Cross Buns', icon: '🍞', group: 'sing', beat: .4, notes: [[4, 1], [2, 1], [0, 2], [4, 1], [2, 1], [0, 2], [0, .5], [0, .5], [0, .5], [0, .5], [2, .5], [2, .5], [2, .5], [2, .5], [4, 1], [2, 1], [0, 2]], lyrics: syl('Hot cross buns, hot cross buns, one a pen-ny, two a pen-ny, hot cross buns')},
-  oldman: {name: 'This Old Man', icon: '🦴', group: 'sing', beat: .38, notes: [[7, 1], [4, 1], [7, 2], [7, 1], [4, 1], [7, 2], [9, 1], [7, 1], [5, 1], [4, 1], [2, 1], [4, 1], [5, 1], [4, .5], [5, .5], [7, 1], [0, 1], [0, .5], [0, .5], [0, 1], [0, .5], [2, .5], [4, .5], [5, .5], [7, 2], [7, 1], [2, 1], [2, 1], [5, 1], [4, 1], [2, 1], [0, 2]], lyrics: syl('This old man, he played one, he played knick-knack on my thumb, with a knick-knack pad-dy-whack, give a dog a bone, this old man came roll-ing home')},
-  rain: {name: 'Rain Rain Go Away', icon: '☔', group: 'sing', beat: .42, notes: [[7, 1], [4, 1], [7, .5], [7, .5], [4, 1], [7, .5], [7, .5], [4, .5], [9, .5], [7, .5], [7, .5], [4, 1], [5, .5], [5, .5], [2, .5], [2, .5], [5, .5], [5, .5], [2, 1], [7, .5], [5, .5], [4, .5], [2, .5], [4, .5], [0, .5], [0, 1]], lyrics: () => [...syl('Rain rain go a-way, come a-gain an-oth-er day, Lit-tle'), ...nameSyl(kid()), ...syl('wants to play, Rain ~ rain ~ go a-way')]},
-  mac: {name: 'Old MacDonald', icon: '🐄', group: 'animal', notes: [[5, 1], [5, 1], [5, 1], [0, 1], [2, 1], [2, 1], [0, 2], [9, 1], [9, 1], [7, 1], [7, 1], [5, 2]], lyrics: syl('Old Mac-Don-ald had a farm, E-I-E-I-O')},
-  mary: {name: 'Mary’s Lamb', icon: '🐑', group: 'animal', notes: [[4, 1], [2, 1], [0, 1], [2, 1], [4, 1], [4, 1], [4, 2], [2, 1], [2, 1], [2, 2], [4, 1], [7, 1], [7, 2], [4, 1], [2, 1], [0, 1], [2, 1], [4, 1], [4, 1], [4, 1], [4, 1], [2, 1], [2, 1], [4, 1], [2, 1], [0, 4]], lyrics: syl('Ma-ry had a lit-tle lamb, lit-tle lamb, lit-tle lamb, Ma-ry had a lit-tle lamb, its fleece was white as snow')},
-  baa: {name: 'Baa Baa Black Sheep', icon: '🧶', group: 'animal', beat: .38, notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, .5], [9, .5], [9, .5], [9, .5], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]], lyrics: syl('Baa baa black sheep, have you an-y wool? Yes sir, yes sir, three bags full')},
-  mice: {name: 'Three Blind Mice', icon: '🐭', group: 'animal', beat: .38, notes: [[4, 1.5], [2, 1.5], [0, 3], [4, 1.5], [2, 1.5], [0, 3], [7, 1.5], [5, 1], [5, .5], [4, 3], [7, 1.5], [5, 1], [5, .5], [4, 3]], lyrics: syl('Three blind mice, three blind mice, see how they run, see how they run')},
-  hickory: {name: 'Hickory Dickory Dock', icon: '🕰️', group: 'animal', beat: .4, notes: [[4, .5], [5, .5], [7, .5], [5, .5], [4, .5], [2, .5], [4, 2.5], [4, .5], [4, 1], [7, .5], [5, 1], [2, .5], [4, 2.5], [4, .5], [4, 1], [4, .5], [7, 1], [7, .5], [5, 1], [5, .5], [9, 1.5], [7, .5], [9, .5], [7, .5], [5, .5], [4, .5], [2, .5], [0, 3]], lyrics: syl('Hick-o-ry dick-o-ry dock, the mouse ran up the clock, the clock struck one, the mouse ran down, hick-o-ry dick-o-ry dock')},
-  birthday: {name: 'Happy Birthday', icon: '🎂', group: 'party', notes: [[0, .75], [0, .25], [2, 1], [0, 1], [5, 1], [4, 2], [0, .75], [0, .25], [2, 1], [0, 1], [7, 1], [5, 2]], lyrics: syl('Hap-py birth-day to you, hap-py birth-day to you')},
-  jingle: {name: 'Jingle Bells', icon: '🔔', group: 'party', beat: .34, notes: [[4, 1], [4, 1], [4, 2], [4, 1], [4, 1], [4, 2], [4, 1], [7, 1], [0, 1.5], [2, .5], [4, 4], [5, 1], [5, 1], [5, 1.5], [5, .5], [5, 1], [4, 1], [4, 1], [4, .5], [4, .5], [7, 1], [7, 1], [5, 1], [2, 1], [0, 4]], lyrics: syl('Jin-gle bells, jin-gle bells, jin-gle all the way! Oh what fun it is to ride in a one-horse o-pen sleigh')},
-  hush: {name: 'Hush Little Baby', icon: '🍼', group: 'calm', beat: .45, notes: [[2, 1], [11, .5], [11, .5], [11, 1], [12, 1], [11, 1], [9, .5], [9, .5], [9, 2], [2, .5], [2, .5], [9, .5], [9, .5], [9, 1], [9, .5], [11, .5], [9, 1], [7, 1], [7, 2]], lyrics: syl('Hush lit-tle ba-by, don’t say a word, Pa-pa’s gon-na buy you a mock-ing-bird')},
-  brahms: {name: 'Brahms’ Lullaby', icon: '😴', group: 'calm', beat: .48, notes: [[4, .5], [4, .5], [7, 1.5], [4, .5], [4, 1], [7, 2], [4, .5], [7, .5], [12, 1], [11, 1.5], [9, .5], [9, 1], [7, 1], [2, .5], [4, .5], [5, 1], [2, 1], [2, .5], [4, .5], [5, 2], [2, .5], [5, .5], [11, .5], [9, .5], [7, 1], [11, 1], [12, 2]], lyrics: ['Lul-', 'la-', 'by', 'and', 'good', 'night,', 'with', '~', 'ro-', 'ses', 'be-', 'dight', '~', 'with', '~', 'lil-', 'ies', 'o’er-', '~', 'spread', 'is', '~', 'ba-', '~', 'by’s', 'wee', 'bed']},
-  ode: {name: 'Ode to Joy', icon: '🎻', group: 'calm', beat: .36, notes: [[4, 1], [4, 1], [5, 1], [7, 1], [7, 1], [5, 1], [4, 1], [2, 1], [0, 1], [0, 1], [2, 1], [4, 1], [4, 1.5], [2, .5], [2, 2], [4, 1], [4, 1], [5, 1], [7, 1], [7, 1], [5, 1], [4, 1], [2, 1], [0, 1], [0, 1], [2, 1], [4, 1], [2, 1.5], [0, .5], [0, 2]], lyrics: syl('Mi mi fa sol sol fa mi re do do re mi mi re re, mi mi fa sol sol fa mi re do do re mi re do do')}
+  shave: {name: 'Shave & a Haircut', icon: '💈', group: 'bird', beat: .3, notes: N('c1 G.5 G.5 A1 G2! B1 c1!'), lyrics: syl('Shave and a hair-cut, two bits!')},
+  twinkle: {name: 'Twinkle Twinkle', icon: '⭐', group: 'old', notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]], lyrics: syl('Twin-kle twin-kle lit-tle star, how I won-der what you are')},
+  abc: {name: 'ABC Song', icon: '🔤', group: 'old', beat: .3, notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, .5], [2, .5], [2, .5], [2, .5], [0, 2], [7, 1], [7, 1], [5, 2], [4, 1], [4, 1], [2, 2], [7, .5], [7, .5], [7, 1], [5, 2], [4, 1], [4, 1], [2, 2], [0, 1], [0, 1], [7, 1], [7, 1], [9, 1], [9, 1], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]], lyrics: syl('A B C D E F G H I J K L M N O P Q R S T U V dou-ble-u X Y and Z. Now I know my A B C’s, next time won’t you sing with me?')},
+  row: {name: 'Row Your Boat', icon: '🚣', group: 'old', beat: .42, notes: [[0, 1.5], [0, 1.5], [0, 1], [2, .5], [4, 1.5], [4, 1], [2, .5], [4, 1], [5, .5], [7, 3], [12, .5], [12, .5], [12, .5], [7, .5], [7, .5], [7, .5], [4, .5], [4, .5], [4, .5], [0, .5], [0, .5], [0, .5], [7, 1], [5, .5], [4, 1], [2, .5], [0, 3]], lyrics: syl('Row row row your boat, gent-ly down the stream, mer-ri-ly mer-ri-ly mer-ri-ly mer-ri-ly, life is but a dream')},
+  london: {name: 'London Bridge', icon: '🌉', group: 'old', beat: .5, notes: [[7, .75], [9, .25], [7, .5], [5, .5], [4, .5], [5, .5], [7, 1], [2, .5], [4, .5], [5, 1], [4, .5], [5, .5], [7, 1], [7, .75], [9, .25], [7, .5], [5, .5], [4, .5], [5, .5], [7, 1], [2, 1], [7, 1], [4, .5], [0, 1.5]], lyrics: syl('Lon-don Bridge is fall-ing down, fall-ing down, fall-ing down, Lon-don Bridge is fall-ing down, my fair la-dy')},
+  hotbuns: {name: 'Hot Cross Buns', icon: '🍞', group: 'old', beat: .4, notes: [[4, 1], [2, 1], [0, 2], [4, 1], [2, 1], [0, 2], [0, .5], [0, .5], [0, .5], [0, .5], [2, .5], [2, .5], [2, .5], [2, .5], [4, 1], [2, 1], [0, 2]], lyrics: syl('Hot cross buns, hot cross buns, one a pen-ny, two a pen-ny, hot cross buns')},
+  oldman: {name: 'This Old Man', icon: '🦴', group: 'old', beat: .38, notes: [[7, 1], [4, 1], [7, 2], [7, 1], [4, 1], [7, 2], [9, 1], [7, 1], [5, 1], [4, 1], [2, 1], [4, 1], [5, 1], [4, .5], [5, .5], [7, 1], [0, 1], [0, .5], [0, .5], [0, 1], [0, .5], [2, .5], [4, .5], [5, .5], [7, 2], [7, 1], [2, 1], [2, 1], [5, 1], [4, 1], [2, 1], [0, 2]], lyrics: syl('This old man, he played one, he played knick-knack on my thumb, with a knick-knack pad-dy-whack, give a dog a bone, this old man came roll-ing home')},
+  rain: {name: 'Rain Rain Go Away', icon: '☔', group: 'old', beat: .42, notes: [[7, 1], [4, 1], [7, .5], [7, .5], [4, 1], [7, .5], [7, .5], [4, .5], [9, .5], [7, .5], [7, .5], [4, 1], [5, .5], [5, .5], [2, .5], [2, .5], [5, .5], [5, .5], [2, 1], [7, .5], [5, .5], [4, .5], [2, .5], [4, .5], [0, .5], [0, 1]], lyrics: () => [...syl('Rain rain go a-way, come a-gain an-oth-er day, Lit-tle'), ...nameSyl(kid()), ...syl('wants to play, Rain ~ rain ~ go a-way')]},
+  mac: {name: 'Old MacDonald', icon: '🐄', group: 'old', notes: [[5, 1], [5, 1], [5, 1], [0, 1], [2, 1], [2, 1], [0, 2], [9, 1], [9, 1], [7, 1], [7, 1], [5, 2]], lyrics: syl('Old Mac-Don-ald had a farm, E-I-E-I-O')},
+  mary: {name: 'Mary’s Lamb', icon: '🐑', group: 'old', notes: [[4, 1], [2, 1], [0, 1], [2, 1], [4, 1], [4, 1], [4, 2], [2, 1], [2, 1], [2, 2], [4, 1], [7, 1], [7, 2], [4, 1], [2, 1], [0, 1], [2, 1], [4, 1], [4, 1], [4, 1], [4, 1], [2, 1], [2, 1], [4, 1], [2, 1], [0, 4]], lyrics: syl('Ma-ry had a lit-tle lamb, lit-tle lamb, lit-tle lamb, Ma-ry had a lit-tle lamb, its fleece was white as snow')},
+  baa: {name: 'Baa Baa Black Sheep', icon: '🧶', group: 'old', beat: .38, notes: [[0, 1], [0, 1], [7, 1], [7, 1], [9, .5], [9, .5], [9, .5], [9, .5], [7, 2], [5, 1], [5, 1], [4, 1], [4, 1], [2, 1], [2, 1], [0, 2]], lyrics: syl('Baa baa black sheep, have you an-y wool? Yes sir, yes sir, three bags full')},
+  mice: {name: 'Three Blind Mice', icon: '🐭', group: 'old', beat: .38, notes: [[4, 1.5], [2, 1.5], [0, 3], [4, 1.5], [2, 1.5], [0, 3], [7, 1.5], [5, 1], [5, .5], [4, 3], [7, 1.5], [5, 1], [5, .5], [4, 3]], lyrics: syl('Three blind mice, three blind mice, see how they run, see how they run')},
+  hickory: {name: 'Hickory Dickory Dock', icon: '🕰️', group: 'old', beat: .4, notes: [[4, .5], [5, .5], [7, .5], [5, .5], [4, .5], [2, .5], [4, 2.5], [4, .5], [4, 1], [7, .5], [5, 1], [2, .5], [4, 2.5], [4, .5], [4, 1], [4, .5], [7, 1], [7, .5], [5, 1], [5, .5], [9, 1.5], [7, .5], [9, .5], [7, .5], [5, .5], [4, .5], [2, .5], [0, 3]], lyrics: syl('Hick-o-ry dick-o-ry dock, the mouse ran up the clock, the clock struck one, the mouse ran down, hick-o-ry dick-o-ry dock')},
+  jingle: {name: 'Jingle Bells', icon: '🔔', group: 'old', beat: .34, notes: [[4, 1], [4, 1], [4, 2], [4, 1], [4, 1], [4, 2], [4, 1], [7, 1], [0, 1.5], [2, .5], [4, 4], [5, 1], [5, 1], [5, 1.5], [5, .5], [5, 1], [4, 1], [4, 1], [4, .5], [4, .5], [7, 1], [7, 1], [5, 1], [2, 1], [0, 4]], lyrics: syl('Jin-gle bells, jin-gle bells, jin-gle all the way! Oh what fun it is to ride in a one-horse o-pen sleigh')},
+  hush: {name: 'Hush Little Baby', icon: '🍼', group: 'old', beat: .45, notes: [[2, 1], [11, .5], [11, .5], [11, 1], [12, 1], [11, 1], [9, .5], [9, .5], [9, 2], [2, .5], [2, .5], [9, .5], [9, .5], [9, 1], [9, .5], [11, .5], [9, 1], [7, 1], [7, 2]], lyrics: syl('Hush lit-tle ba-by, don’t say a word, Pa-pa’s gon-na buy you a mock-ing-bird')},
+  brahms: {name: 'Brahms’ Lullaby', icon: '😴', group: 'old', beat: .48, notes: [[4, .5], [4, .5], [7, 1.5], [4, .5], [4, 1], [7, 2], [4, .5], [7, .5], [12, 1], [11, 1.5], [9, .5], [9, 1], [7, 1], [2, .5], [4, .5], [5, 1], [2, 1], [2, .5], [4, .5], [5, 2], [2, .5], [5, .5], [11, .5], [9, .5], [7, 1], [11, 1], [12, 2]], lyrics: ['Lul-', 'la-', 'by', 'and', 'good', 'night,', 'with', '~', 'ro-', 'ses', 'be-', 'dight', '~', 'with', '~', 'lil-', 'ies', 'o’er-', '~', 'spread', 'is', '~', 'ba-', '~', 'by’s', 'wee', 'bed']}
 };
 // a two-syllable name sung in "Rain Rain": Havi -> Ha- vi (other names -> Johnny)
 function nameSyl(name) {
   const w = String(name || '').trim(), m = /^([^aeiouy]*[aeiouy]+[^aeiouy]*?)([^aeiouy]?[aeiouy]+[^aeiouy]*)$/i.exec(w);
   return m && /^[a-z]+$/i.test(w) && (w.match(/[aeiouy]+/gi) || []).length === 2 ? [m[1] + '-', m[2]] : ['John-', 'ny'];
 }
-const TGROUPS = [['sing', '🎵 Sing-along'], ['animal', '🐮 Animal songs'], ['party', '🎉 Party time'], ['calm', '🌙 Calm & sleepy'], ['bird', '🐦 Bird tricks']];
+const TGROUPS = [['pop', '🕺 Pop & dance'], ['classic', '🎻 Famous tunes'], ['bird', '🐦 Bird tricks']];
 const UNDO_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5L4 10l5 5"/><path d="M4 10h9.5a5.5 5.5 0 0 1 0 11H10"/></svg>';
 
 /* pitch: pure helpers (unit-tested; keep them free of DOM and app state) */
@@ -3279,6 +3390,8 @@ function hummedNotes(frames) {
 const semiKey = s => { let k = 0, d = 99; SCALE.forEach((x, i) => { const dd = Math.abs(x - s); if (dd < d) { d = dd; k = i; } }); return k; };
 const semiColor = s => KEYC[semiKey(s)];
 const tuneBeat = tn => (tn && tn.preset && TUNES[tn.preset] && TUNES[tn.preset].beat) || BEAT;
+// the pop songs bring their band along (only when played whole, not while the bird is still learning)
+const tuneGroove = tn => (tn && !tn.special && tn.preset && TUNES[tn.preset] && TUNES[tn.preset].groove) || null;
 const hasNotes = tn => !!(tn && (tn.special || (tn.notes && tn.notes.length)));
 function tuneLyrics(tn) { const t = tn && tn.preset && TUNES[tn.preset]; let ly = t && t.lyrics; if (typeof ly === 'function') { try { ly = ly(); } catch (e) { ly = null; } } return ly && tn.notes && ly.length === tn.notes.length ? ly : null; }
 function tuneIcon(x) { if (!x) return '🎵'; if (x.special === 'wolf') return TUNES.wolf.icon; if (x.preset && TUNES[x.preset]) return TUNES[x.preset].icon; return x.hummed ? '🎤' : '🎹'; }
@@ -3439,7 +3552,7 @@ function renderWhistle(p) {
   <div class="row3"><button class="btn" id="tPlay">${IC.play} Play</button><button class="btn" id="tClear">Clear</button><button class="btn go" id="tTeach">Teach ${esc(b.name)}</button></div>
   <div class="dots" id="tDots">${lesson ? dotsHTML(lesson.reps, need, lesson.learned) : ''}</div>
   <div class="songplay${MIC ? '' : ' one'}">${MIC ? '<button class="sgame sing" id="tSing"></button>' : ''}<button class="sgame copy" id="tCopy"><span class="em" aria-hidden="true">🎯</span><span>Copy me!<small>${b.copyBest ? `🏆 Best: ${b.copyBest} notes` : 'Play it back'}</small></span></button></div>
-  <h3>Famous tunes</h3>
+  <h3>Pick a song</h3>
   ${presetsHTML(b)}
   <h3>Songs ${esc(b.name)} can whistle</h3>
   <div class="known">${known.length ? known.map((x, i) => `<span class="word ${x.learned ? '' : 'learning'}"><button data-wt="${i}">${x.learned ? IC.play : ''}<span aria-hidden="true">${tuneIcon(x)}</span> ${esc(x.name)}${x.learned ? '' : ` <small>(${Math.min(x.reps, need)}/${need})</small>`}</button><button class="x" data-ft="${i}" aria-label="Forget ${esc(x.name)}">×</button></span>`).join('') : `<p class="empty">No songs yet — make one up!</p>`}</div>`;
@@ -3447,7 +3560,7 @@ function renderWhistle(p) {
   const u = $('#tUndo'); if (u) u.onclick = undoNote;
   $('#tPlay').onclick = () => { if (!isBusy() && !Hum.on) kidPlay(S.tune); };
   $('#tClear').onclick = () => { if (Hum.on) return; S.tune = null; renderMelody(); sfx('pop'); };
-  $('#tTeach').onclick = teachTune;
+  $('#tTeach').onclick = () => teachTune();
   $('#tCopy').onclick = startGame;
   if (MIC) { $('#tSing').onclick = humStart; humLabel(); }
   $$('[data-preset]', p).forEach(el => el.onclick = () => pickPreset(el.dataset.preset));
@@ -3460,13 +3573,14 @@ function renderWhistle(p) {
 }
 function kidPlay(tn) {
   if (!hasNotes(tn)) { toast('Tap the colored bars to make a tune first.'); return 0; }
-  const ctx = audio(), beat = tuneBeat(tn); let dur = 1.2;
+  const ctx = audio(), beat = tuneBeat(tn), gr = tuneGroove(tn); let dur = 1.2;
   if (ctx) {
-    const t = ctx.currentTime + .05;
+    const t = ctx.currentTime + .05, bus = gr ? songBus() : null;
     if (tn.special === 'wolf') dur = wolf(t, .12, .8);
-    else { let x = t; tn.notes.forEach(([s, bt]) => { mallet(x, XYLO * Math.pow(2, s / 12), .2); x += bt * beat; }); dur = x - t; karaoke(tn.notes, t, beat, {bar: sameTune(tn, S.tune)}); }
+    else { let x = t; tn.notes.forEach(([s, bt]) => { mallet(x, XYLO * Math.pow(2, s / 12), .2, bus); x += bt * beat; }); dur = x - t; karaoke(tn.notes, t, beat, {bar: sameTune(tn, S.tune)}); if (gr) playGroove(t, gr, beat, tuneBeats(tn.notes), bus); }
   } else if (tn.notes) dur = tn.notes.reduce((a, n) => a + n[1] * beat, 0);
   bubble('kid', tn.preset && tn.name ? `♪ ${tn.name}` : '♪ ♪ ♪', dur * 1000 + 300); setBusy(dur * 1000 + 200);
+  S.heard = tn; S.heardUntil = Date.now() + dur * 1000 + 400;
   return dur;
 }
 function birdWhistle(tn, p = 1) {
@@ -3477,19 +3591,24 @@ function birdWhistle(tn, p = 1) {
       dur = wolf(t, .2, sp.whistleBase / 1046.5);
       [[12, .3, 0], [7, .62, .42]].forEach(([s, d, at]) => setTimeout(() => { if (actor === a && typeof a.note === 'function') { try { a.note(s, d); } catch (e) {} } }, ((t - ctx.currentTime) + at) * 1000));
     } else {
-      let notes = tn.notes, beat = tuneBeat(tn);
-      if (p < 1) { const k = Math.max(2, Math.ceil(notes.length * p)); notes = notes.slice(0, k).map(([s, bt]) => [Math.random() < (1 - p) * .5 ? s + pick([-2, -1, 1, 2]) : s, bt]); }
-      dur = whistle(t, notes, sp.whistleBase, beat);
+      let notes = tn.notes, beat = tuneBeat(tn); const gr = p >= 1 ? tuneGroove(tn) : null, bus = gr ? songBus() : null;
+      if (p < 1) { const k = Math.max(2, Math.ceil(notes.length * p)); notes = notes.slice(0, k).map(([s, bt, sh]) => { const n = [Math.random() < (1 - p) * .5 ? s + pick([-2, -1, 1, 2]) : s, bt]; if (sh) n.push(1); return n; }); }
+      dur = whistle(t, notes, sp.whistleBase, beat, .2, bus);
+      if (gr) playGroove(t, gr, beat, tuneBeats(notes), bus);
       karaoke(notes, t, beat, {bar: sameTune(tn, S.tune), bird: a});
     }
   }
   a.whistleMove(dur); bubble('bird', '♪ ♫ ♪', dur * 1000 + 400); setBusy(dur * 1000 + 300);
   return dur;
 }
-function teachTune() {
+function teachTune(heard) {
   const b = cur(), tn = S.tune; if (!b || S.game || Hum.on || !actor) return;
-  // tapped while a tune is still playing: start the lesson as soon as it ends
-  if (isBusy()) { const w = S.busyUntil - Date.now(); if (w < 7000 && !S.teachQ) S.teachQ = setTimeout(() => { S.teachQ = 0; if (S.screen === 'room' && S.tab === 'whistle' && cur() === b) teachTune(); }, w + 60); return; }
+  // tapped while a tune is still playing: start the lesson as soon as it ends (if it was this very tune, the bird already heard it)
+  if (isBusy()) {
+    const w = S.busyUntil - Date.now(), just = !!(S.heard && S.heard === tn && S.heardUntil > Date.now());
+    if (w < 16000 && !S.teachQ) S.teachQ = setTimeout(() => { S.teachQ = 0; if (S.screen === 'room' && S.tab === 'whistle' && cur() === b) teachTune(just && S.tune === tn); }, w + 60);
+    return;
+  }
   const sp = SPECIES[b.species];
   if (!hasNotes(tn)) { toast('Tap the colored bars to make a tune first.'); return; }
   if (!tn.special && tn.notes.length < 2) { toast('Add at least two notes.'); return; }
@@ -3505,7 +3624,7 @@ function teachTune() {
   const dots = () => { const el = $('#tDots'); if (el) el.innerHTML = dotsHTML(rec.reps, need, rec.learned); };
   const refresh = () => { if (S.tab === 'whistle' && S.screen === 'room' && !S.game) renderWhistle($('#panel')); };
   showStage();
-  const kd = kidPlay(tn); a.listen(); setBusy(60000); addLove(1);
+  const kd = heard ? 0 : kidPlay(tn); a.listen(); setBusy(60000); addLove(1);
   if (rec.learned) { a.later(kd * 1000 + 600, () => { S.busyUntil = 0; birdWhistle(rec, 1); }); return; }
   // one tap = a whole lesson: the bird has a go (a bit wrong at first), then gets it
   let tries = 0;
@@ -3752,6 +3871,7 @@ function renderDesign(id) {
   <section class="sec"><h2>Pick a bird</h2><div class="scroller" id="spList">${Object.keys(SPECIES).map(k => `<button class="sp" data-sp="${k}" aria-pressed="${k === D.species}">${birdSVG(newBird(k), 's' + k, {vb: '70 44 200 250'})}<span>${SPECIES[k].label}</span></button>`).join('')}</div><p class="fine" id="spBlurb"></p></section>
   <section class="sec"><h2>Real-life colors</h2><div class="chips" id="looks"></div></section>
   <section class="sec"><h2>Paint it</h2><div class="chips" id="parts"></div><div class="swatches" id="swatches"></div></section>
+  <section class="sec" id="eyesSec"><h2>Eyes</h2><div class="chips" id="eyeStyles"></div><div class="chips" id="eyeSizes"></div><div class="swatches" id="eyeColors"></div></section>
   <section class="sec"><h2>Pattern</h2><div class="chips" id="patterns"></div><div class="swatches" id="pcolors"></div></section>
   <section class="sec"><h2>Dress up</h2><div class="chips" id="accs"></div></section>
   <section class="sec"><h2>Name</h2><div class="namerow"><input id="birdName" maxlength="16" placeholder="Name your bird" value="${esc(D.name)}" autocomplete="off" enterkeyhint="done"><button class="btn" id="dice" aria-label="Pick a random name">${IC.dice}</button></div></section>
@@ -3772,6 +3892,7 @@ function renderDesign(id) {
 }
 function dirty() { DZ.dirty = true; }
 function selectPart(part) {
+  if (part === 'iris') { focusEyes(); return; }
   const parts = SPECIES[D.species].parts;
   const fallback = {lowerBeak: 'beak', cere: 'beak', belly: 'body', wingPatch: 'wing', wingTip: 'wing', tailTip: 'tail', face: 'head', ring: 'head', cheek: 'head', crest: 'head', feet: 'body', iris: 'head', acc: 'head'};
   while (!parts.includes(part) && fallback[part]) part = fallback[part];
@@ -3794,7 +3915,7 @@ function drawD(call) {
   if (call) { const ctx = audio(); if (ctx) { const t = ctx.currentTime + .02; const d = realCall(D.species, t) || CALLS[sp.call](t); actor.chirpMove(d); } }
 }
 function flashPart(part) { if (DZ.view && DZ.view.bird) { DZ.view.bird.flash(part); return; } $$(`#dbird [data-part="${part}"]`).forEach(el => { el.classList.remove('flash'); void el.getBoundingClientRect(); el.classList.add('flash'); }); }
-function renderDesignControls() { renderLooks(); renderParts(); renderSwatches(); renderPatterns(); renderAccs(); }
+function renderDesignControls() { renderLooks(); renderParts(); renderSwatches(); renderEyes(); renderPatterns(); renderAccs(); }
 function renderLooks() {
   const sp = SPECIES[D.species];
   $('#looks').innerHTML = Object.entries(sp.looks).map(([k, l]) => `<button class="chip" data-look="${k}" aria-pressed="${D.look === k}"><i style="background:${l.colors.body}"></i><i style="background:${l.colors.face || l.colors.head || l.colors.belly}"></i><i style="background:${l.colors.wingTip || l.colors.tail}"></i>${esc(l.label)}</button>`).join('');
@@ -3802,7 +3923,7 @@ function renderLooks() {
 }
 function renderParts() {
   const sp = SPECIES[D.species];
-  $('#parts').innerHTML = sp.parts.map(p => `<button class="chip" data-pp="${p}" aria-pressed="${S.part === p}"><i style="background:${D.colors[p] === 'none' ? '#fff' : D.colors[p]}"></i>${PART_LABEL[p]}</button>`).join('');
+  $('#parts').innerHTML = sp.parts.filter(p => p !== 'iris').map(p => `<button class="chip" data-pp="${p}" aria-pressed="${S.part === p}"><i style="background:${D.colors[p] === 'none' ? '#fff' : D.colors[p]}"></i>${PART_LABEL[p]}</button>`).join('');
   $$('#parts [data-pp]').forEach(el => el.onclick = () => { S.part = el.dataset.pp; sfx('pop'); renderParts(); renderSwatches(); flashPart(S.part); });
 }
 function renderSwatches() {
@@ -3815,6 +3936,21 @@ function paint(color) {
   const sp = SPECIES[D.species]; D.colors[S.part] = color;
   (LINKS[S.part] || []).forEach(([child, fn]) => { if (!sp.parts.includes(child)) D.colors[child] = fn(color); });
   D.look = null; dirty(); sfx('pop'); drawD(); renderLooks(); renderParts(); renderSwatches();
+}
+// eyes have their own section: a style, a size, and (for cartoon or colored eyes) a color
+function renderEyes() {
+  const es = eyeStyle(D), ez = eyeSize(D);
+  $('#eyeStyles').innerHTML = EYES.map(([k, n]) => `<button class="chip" data-eye="${k}" aria-pressed="${es === k}">${n}</button>`).join('');
+  $('#eyeSizes').innerHTML = EYE_SIZES.map(([k, n]) => `<button class="chip" data-esz="${k}" aria-pressed="${ez === k}">${n}</button>`).join('');
+  const box = $('#eyeColors'), curC = (D.colors.iris || '').toUpperCase(); box.hidden = es === 'shiny';
+  box.innerHTML = es === 'shiny' ? '' : EYE_SWATCHES.map(([c, n]) => `<button class="sw" data-ec="${c}" aria-label="${n} eyes" aria-pressed="${curC === c.toUpperCase()}" style="background:${c}"></button>`).join('');
+  $$('#eyeStyles [data-eye]').forEach(el => el.onclick = () => { D.eyes = el.dataset.eye; dirty(); sfx('pop'); drawD(); renderEyes(); flashPart('iris'); });
+  $$('#eyeSizes [data-esz]').forEach(el => el.onclick = () => { D.eyeSize = +el.dataset.esz; dirty(); sfx('pop'); drawD(); renderEyes(); });
+  $$('#eyeColors [data-ec]').forEach(el => el.onclick = () => { D.colors.iris = el.dataset.ec; D.look = null; dirty(); sfx('pop'); drawD(); renderEyes(); renderLooks(); });
+}
+function focusEyes() {
+  sfx('pop'); flashPart('iris');
+  const sec = $('#eyesSec'); if (sec) sec.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center'});
 }
 function renderPatterns() {
   $('#patterns').innerHTML = PATTERNS.map(([k, n]) => `<button class="chip" data-pat="${k}" aria-pressed="${D.pattern === k}">${n}</button>`).join('');
@@ -3833,6 +3969,7 @@ function surprise() {
   sp.parts.forEach(p => (LINKS[p] || []).forEach(([child, fn]) => { if (!sp.parts.includes(child)) cols[child] = fn(cols[p]); }));
   D.colors = completeColors(cols); D.look = null;
   D.pattern = Math.random() < .45 ? pick(['pearl', 'pied', 'bars', 'rainbow', 'sparkles']) : 'plain'; D.pc = pick(pal.slice(3, 9));
+  D.eyes = Math.random() < .3 ? 'cartoon' : 'shiny'; D.eyeSize = Math.random() < .3 ? 1.3 : 1; if (D.eyes === 'cartoon') D.colors.iris = pick(EYE_SWATCHES)[0];
   if (Math.random() < .35) D.accessory = pick(ACCS.slice(1))[0];
   dirty(); drawD(true); renderDesignControls();
 }
